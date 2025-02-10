@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { appConfigValidationSchema } from '@/common/config';
+import { AppConfigModule, validationSchema } from '@/common/config';
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      validationSchema: appConfigValidationSchema,
+    AppConfigModule.register({
+      config: { validationSchema },
     }),
   ],
   controllers: [],
