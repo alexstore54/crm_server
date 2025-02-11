@@ -6,24 +6,44 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${APP_PORT}:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mydb?schema=public
+      DATABASE_URL: "${DATABASE_URL}"
+      APP_PORT: "${APP_PORT}"
     depends_on:
-      - db
-    restart: always
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: >
+      /bin/sh -c "
+      until pg_isready -h db -p 5432 -U ${POSTGRES_USER}; do
+        echo 'Waiting for database...';
+        sleep 2;
+      done;
+      echo 'Database is ready';
+      yarn start:dev
+      "
 
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydb
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
 
 volumes:
   pgdata:

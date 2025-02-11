@@ -1,38 +1,49 @@
 # Stage 1: Build image
 FROM node:20-alpine3.19 AS BUILD_IMAGE
 
-# Set working directory for build stage
+# Устанавливаем PostgreSQL client и создаем пользователя
+RUN apk add --no-cache postgresql-client && adduser -D appuser
+
+# Смена пользователя
+USER appuser
+
+# Рабочая директория
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json for dependency installation
-COPY package.json package-lock.json ./
+# Копируем package.json и yarn.lock для кэширования зависимостей
+COPY --chown=appuser package.json yarn.lock ./
 
-# Install all dependencies including dev dependencies
-RUN npm install
+# Устанавливаем зависимости
+RUN yarn install
 
-# Copy the rest of the app files
-COPY . .
+# Копируем код
+COPY --chown=appuser . .
 
-# Build the application
-RUN npm run build
+# Сборка проекта
+RUN yarn build
 
 # Stage 2: Production image
 FROM node:20-alpine3.19 AS PRODUCTION_IMAGE
 
-# Set working directory for production image
+# Устанавливаем PostgreSQL client
+RUN apk add --no-cache postgresql-client
+
+# Создаем пользователя
+RUN adduser -D appuser
+
+# Рабочая директория
 WORKDIR /usr/src/app
 
-# Copy only package.json and package-lock.json from build stage to production stage
-COPY --from=BUILD_IMAGE /usr/src/app/package.json /usr/src/app/package-lock.json ./
-
-# Copy only production dependencies from build stage
+# Копируем только нужные файлы из стадии сборки
+COPY --from=BUILD_IMAGE /usr/src/app/package.json /usr/src/app/yarn.lock ./
 COPY --from=BUILD_IMAGE /usr/src/app/node_modules ./node_modules
-
-# Copy the rest of the application code
 COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
 
-# Expose the app's port
+# Смена пользователя
+USER appuser
+
+# Открываем порт
 EXPOSE 3000
 
-# Run the application in production mode
-CMD ["npm", "run", "start:prod"]
+# Запуск в production-режиме
+CMD ["yarn", "start:prod"]

@@ -8,8 +8,7 @@ import { APP_LOGGER_SERVICE, AppLoggerService } from '@/common/config/logger';
 export class AppExceptionFilter implements ExceptionFilter {
   constructor(
     @Inject(APP_LOGGER_SERVICE) private readonly logger: AppLoggerService,
-  ) {
-  }
+  ) {}
 
 
   catch(exception: any, host: ArgumentsHost) {
