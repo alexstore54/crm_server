@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppConfigModule, validationSchema } from '@/common/config';
 import { PrismaModule } from '@/shared/db';
 import { HealthModule } from '@/modules/health/health.module';
+import { AuthModule } from '@/modules/auth/auth.module';
 
 
 @Module({
@@ -10,9 +11,8 @@ import { HealthModule } from '@/modules/health/health.module';
       config: { validationSchema },
     }),
     PrismaModule,
-    HealthModule
+    HealthModule,
+    AuthModule
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
