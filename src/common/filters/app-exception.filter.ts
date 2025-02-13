@@ -1,15 +1,14 @@
-import { ArgumentsHost, ExceptionFilter, Inject } from '@nestjs/common';
+import { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { FiltersUtil } from '@/shared/utils';
 import { AppError } from '@/shared/types/errors';
 import { Request, Response } from 'express';
-import { APP_LOGGER_SERVICE } from '@/modules/logger/logger.module';
 import { AppLoggerService } from '@/modules/logger/services';
 import { LogLevel } from '@prisma/client';
 
 
 export class AppExceptionFilter implements ExceptionFilter {
   constructor(
-    @Inject(APP_LOGGER_SERVICE) private readonly logger: AppLoggerService,
+    private logger: AppLoggerService,
   ) {}
 
 

@@ -7,12 +7,17 @@ export class PrismaTransport extends Transport {
     super(opts);
   }
 
-  async log(info: CreateLog, next: () => void): Promise<void> {
+  async log(info: CreateLog, callback: () => void): Promise<void> {
+    if (!info) {
+      return callback();
+    }
+
     setImmediate(() => {
       this.emit('logged', info);
     });
-    await this.logsRepository.createLog(info);
 
-    next();
+    await this.logsRepository.createLog(info);
+    callback();
   }
+
 }
