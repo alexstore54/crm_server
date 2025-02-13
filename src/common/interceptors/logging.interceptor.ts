@@ -1,7 +1,9 @@
 import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { APP_LOGGER_SERVICE } from '@/modules/logger/logger.module';
 import { AppLoggerService } from '@/modules/logger/services';
+import { CreateLog } from '@/modules/logger/dto';
+import { LogLevel } from '@prisma/client';
 
 @Injectable()
 export class AppLoggingInterceptor implements NestInterceptor {
@@ -14,9 +16,22 @@ export class AppLoggingInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
+    const request = context.switchToHttp().getRequest();
+    const { method, url } = request;
 
-    //#TODO implement logger
 
-    return next.handle();
+    const now = Date.now();
+    return next
+      .handle()
+      .pipe(
+        tap(() => {
+          const logEntry: CreateLog = {
+            message: `Request to ${method} ${url} took ${Date.now() - now}ms`,
+            context: { path: url},
+            level: LogLevel.INFO,
+          };
+          this.logger.log(logEntry.message, logEntry);
+        }),
+      );
   }
 }

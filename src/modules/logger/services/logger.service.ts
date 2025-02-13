@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { CreateLog } from '@/modules/logger/dto';
 
 @Injectable()
 export class AppLoggerService {
@@ -10,23 +11,15 @@ export class AppLoggerService {
   ) {
   }
 
-  log(message: string): void {
-    console.log(message);
+  log(message: string, data?: CreateLog): void {
+    this.logger.info(message, { ...data });
   }
 
-  error(message: string, trace: string): void {
-    console.error(message, trace);
+  error(message: string, data?: CreateLog): void {
+    this.logger.error(message, { ...data });
   }
 
-  warn(message: string): void {
-    console.warn(message);
-  }
-
-  debug(message: string): void {
-    console.debug(message);
-  }
-
-  verbose(message: string): void {
-    console.log(message);
+  warn(message: string, data?: CreateLog): void {
+    this.logger.warn(message, { ...data });
   }
 }

@@ -8,6 +8,7 @@ import { LogLevel } from '@prisma/client';
 import { LogsRepository } from '@/modules/logger/repositories';
 import { LogsController } from '@/modules/logger/controllers/logs.controller';
 import { LogsService } from '@/modules/logger/services';
+import { PrismaTransport } from '@/modules/logger/transports';
 
 export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
 
@@ -17,8 +18,8 @@ export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
     ConfigModule,
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
+      inject: [ConfigService, LogsRepository],
+      useFactory: (configService: ConfigService, logsRepository: LogsRepository) => {
         const logLevel = configService.get<string>(
           configKeys.LOG_LEVEL, LogLevel.INFO,
         );
@@ -29,6 +30,7 @@ export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
               level: logLevel,
               format: winston.format.combine(winston.format.json()),
             }),
+            new PrismaTransport(logsRepository, { level: logLevel }),
           ],
         };
       },
@@ -42,13 +44,11 @@ export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
       useClass: AppLoggerService,
     },
     {
-      provide: 'CONTEXT', // Register the context as a provider
-      useValue: 'DefaultContext', // Provide a default value
+      provide: 'CONTEXT',
+      useValue: 'DefaultContext',
     },
   ],
   controllers: [LogsController],
-  exports: [APP_LOGGER_SERVICE, 'CONTEXT'],
+  exports: [APP_LOGGER_SERVICE, 'CONTEXT', LogsRepository],
 })
-export class AppLoggerModule {
-
-}
+export class AppLoggerModule {}
