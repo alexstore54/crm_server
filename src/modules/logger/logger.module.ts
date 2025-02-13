@@ -3,9 +3,11 @@ import { WinstonModule } from 'nest-winston';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configKeys } from '@/common/config';
 import winston from 'winston';
-import { AppLoggerService } from '@/common/config/logger/logger.service';
-import { LogLevel } from '@/common/config/enums';
-
+import { AppLoggerService } from '@/modules/logger/services/logger.service';
+import { LogLevel } from '@prisma/client';
+import { LogsRepository } from '@/modules/logger/repositories';
+import { LogsController } from '@/modules/logger/controllers/logs.controller';
+import { LogsService } from '@/modules/logger/services';
 
 export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
 
@@ -33,6 +35,8 @@ export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
     }),
   ],
   providers: [
+    LogsRepository,
+    LogsService,
     {
       provide: APP_LOGGER_SERVICE,
       useClass: AppLoggerService,
@@ -42,6 +46,7 @@ export const APP_LOGGER_SERVICE = 'APP_LOGGER_SERVICE';
       useValue: 'DefaultContext', // Provide a default value
     },
   ],
+  controllers: [LogsController],
   exports: [APP_LOGGER_SERVICE, 'CONTEXT'],
 })
 export class AppLoggerModule {

@@ -2,7 +2,8 @@ import { ArgumentsHost, ExceptionFilter, Inject } from '@nestjs/common';
 import { FiltersUtil } from '@/shared/utils';
 import { AppError } from '@/shared/types/errors';
 import { Request, Response } from 'express';
-import { APP_LOGGER_SERVICE, AppLoggerService } from '@/common/config/logger';
+import { APP_LOGGER_SERVICE } from '@/modules/logger/logger.module';
+import { AppLoggerService } from '@/modules/logger/services';
 
 
 export class AppExceptionFilter implements ExceptionFilter {

@@ -2,10 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AppExceptionFilter } from '@/common/filters';
 import { AppLoggingInterceptor } from '@/common/interceptors';
-import { APP_LOGGER_SERVICE } from '@/common/config/logger';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/common/config';
+import { APP_LOGGER_SERVICE } from '@/modules/logger/logger.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

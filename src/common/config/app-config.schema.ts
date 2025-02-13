@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import { NodeEnv } from '@/common/config/enums';
+import { NodeEnv } from 'common/config/types';
 import { AppConfigUtil } from '@/common/config/utils';
-import { LogLevel } from '@/common/config/enums/log-level.enum';
+import { LogLevel } from '@prisma/client';
 
 export const appConfigValidationSchema = {
   NODE_ENV: Joi.string()
