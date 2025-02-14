@@ -8,23 +8,28 @@ datasource db {
 }
 
 model Log {
-  id        String   @id @default(uuid())
-  level     LogLevel @default(INFO)
-  message   String
-  context   Json?
-  created_at DateTime @default(now())
+  id          String   @id @default(uuid())
+  level       LogLevel @default(INFO)
+  message     String
+  context     Json?
+  created_at  DateTime @default(now())
 }
 
 
 model Leads {
   id           Int       @id @default(autoincrement())
+  status_id    Int       @unique
+  
   phone        String    @db.VarChar(20)
   first_name   String
   second_name  String
   created_at   DateTime  @db.Timestamptz @default(now())
   
-  // Изменено: указываем тип Customer (единственное число)
+
+  status       LeadStatus? @relation(fields: [status_id], references: [id])
+  // Указываем тип Customer (единственное число)
   customer     Customer?
+
 }
 
 model Customer {
@@ -32,7 +37,7 @@ model Customer {
   lead_id Int    @unique
   user_id Int    @unique
 
-  // Зарегестрированный пользователь - это бывший лид имеет связь 1 к 1. Связь с User 1 к 1 
+  // Зарегистрированный пользователь - это бывший лид имеет связь 1 к 1. Связь с User 1 к 1 
   leads   Leads  @relation(fields: [lead_id], references: [id])
   user    User   @relation("CustomerUser", fields: [user_id], references: [id])
 }
@@ -67,9 +72,8 @@ model Agent {
   user    User   @relation(fields: [user_id], references: [id])
   role    Role?  @relation(fields: [role_id], references: [id])
   
-  // Агент может состять в нескольких desks и teams или не состоять вовсе 
+  // Агент может состоять в нескольких desks и teams или не состоять вовсе 
   desks   Desk[] @relation("AgentDesks")
-  teams   Team[] @relation("AgentTeams")
 }
 
 model Role {
@@ -88,14 +92,15 @@ model Desk {
   agents Agent[] @relation("AgentDesks")
 }
 
-model Team {
-  id     Int     @id @default(autoincrement())
-  name   String
 
-  // У одной Team может быть много агентов
-  agents Agent[] @relation("AgentTeams")
+model LeadStatus {
+    id       Int      @id @default(autoincrement())
+    name     String
+    
+
+    leads    Leads?
+
 }
-
 
 enum LogLevel {
     INFO
