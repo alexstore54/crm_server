@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppConfigModule, validationSchema } from '@/common/config';
-import { PrismaModule } from '@/shared/db';
+import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
-import { AuthModule } from '@/modules/auth/auth.module';
+import { AppRedisModule } from '@/shared/db/redis/redis.module';
 
 
 @Module({
@@ -11,8 +11,10 @@ import { AuthModule } from '@/modules/auth/auth.module';
       config: { validationSchema },
     }),
     PrismaModule,
-    HealthModule,
-    AuthModule
+    AppRedisModule,
+    HealthModule
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

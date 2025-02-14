@@ -8,11 +8,12 @@ datasource db {
 }
 
 model Log {
-  id        String   @id @default(uuid())
-  level     LogLevel @default(INFO)
+  id        Int       @id @default(autoincrement())
+  level     LogLevel? @default(INFO)
   message   String
+  userId    String?
   context   Json?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 enum LogLevel {
