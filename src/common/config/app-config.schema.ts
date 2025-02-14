@@ -12,7 +12,9 @@ export const appConfigValidationSchema = {
   LOG_LEVEL: Joi.string()
     .equal(...Object.values(LogLevel))
     .default(LogLevel.INFO),
-  DATABASE_URL: Joi.string().uri().required()
+  DATABASE_URL: Joi.string().uri().required(),
+  REDIS_HOST: Joi.string().required(),
+  REDIS_PORT: Joi.number().required(),
 };
 
 export const validationSchema = Joi.object(appConfigValidationSchema);

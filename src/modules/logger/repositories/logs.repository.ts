@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PrismaService } from '@/shared/db';
+import { PrismaService } from '@/shared/db/prisma';
 import { Log, LogLevel } from '@prisma/client';
 import { CreateLog, UpdateLog } from '@/modules/logger/dto';
 import { object } from 'joi';
