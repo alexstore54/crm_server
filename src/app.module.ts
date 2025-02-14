@@ -12,7 +12,7 @@ import { AppRedisModule } from '@/shared/db/redis/redis.module';
     }),
     PrismaModule,
     AppRedisModule,
-    HealthModule
+    HealthModule,
   ],
   controllers: [],
   providers: [],

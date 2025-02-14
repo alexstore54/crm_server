@@ -28,6 +28,10 @@ export class AccessTokenJWTStrategy extends PassportStrategy(
     if (!payload) {
       throw new UnauthorizedException('Invalid token');
     }
-    return { userId: payload.sub, email: payload.email, role: payload.role };
+    return {
+      userId: payload.sub,
+      fingerprint: payload.fingerprint,
+      role: payload.role,
+    };
   }
 }
