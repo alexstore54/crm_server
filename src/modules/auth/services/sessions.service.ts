@@ -57,6 +57,14 @@ export class SessionsService {
     await this.redis.del(...keys);
   }
 
+  public async deleteAllUserSessionsExcept(userId: string, sessionId: string): Promise<void> {
+    const keys = await this.redis.keys(`${userId}:*`);
+    const keysToDelete = keys.filter(key => !key.endsWith(sessionId));
+    if (keysToDelete.length > 0) {
+      await this.redis.del(...keysToDelete);
+    }
+  }
+
   private mapSessionKey(userId: string, sessionId: string) {
     return `${userId}:${sessionId}`;
   }

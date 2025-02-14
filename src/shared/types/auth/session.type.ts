@@ -1,6 +1,8 @@
+export type SessionId = string;
+
 export type Session = {
   userId: string;
-  refreshToken: string;
+  hashRefreshToken: string;
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
