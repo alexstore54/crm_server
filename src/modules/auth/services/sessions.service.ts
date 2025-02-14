@@ -1,6 +1,7 @@
+import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { RedisService } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
+import { RedisService } from '@liaoliaots/nestjs-redis';
 import { Session, UpdateSessionInput } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
@@ -12,8 +13,16 @@ export class SessionsService {
     this.redis = redisService.getOrThrow();
   }
 
-  public async getUserSession(userId: string, fingerprint: string): Promise<Session | null> {
-    const key = this.mapSessionKey(userId, fingerprint);
+  public async saveUserSession(session: Session): Promise<string> {
+    const { userId } = session;
+    const sessionId = uuidv4();
+    const key = this.mapSessionKey(userId, sessionId);
+    await this.redis.set(key, JSON.stringify({ ...session, sessionId }));
+    return sessionId;
+  }
+
+  public async getUserSession(userId: string, sessionId: string): Promise<Session | null> {
+    const key = this.mapSessionKey(userId, sessionId);
     const session = await this.redis.get(key);
     return session ? JSON.parse(session) as Session : null;
   }
@@ -28,15 +37,9 @@ export class SessionsService {
       .map(session => JSON.parse(session) as Session);
   }
 
-  public async setUserSession(session: Session): Promise<void> {
-    const { userId, fingerprint } = session;
-    const key = this.mapSessionKey(userId, fingerprint);
-    await this.redis.set(key, JSON.stringify(session));
-  }
-
-  public async updateUserSession(userId: string, fingerprint: string, input: UpdateSessionInput): Promise<void> {
-    const key = this.mapSessionKey(userId, fingerprint);
-    const session = await this.getUserSession(userId, fingerprint);
+  public async updateUserSession(userId: string, sessionId: string, input: UpdateSessionInput): Promise<void> {
+    const key = this.mapSessionKey(userId, sessionId);
+    const session = await this.getUserSession(userId, sessionId);
     if (!session) {
       throw new BadRequestException(ERROR_MESSAGES.SESSION_NOT_FOUND);
     }
@@ -44,8 +47,8 @@ export class SessionsService {
     await this.redis.set(key, JSON.stringify(updatedSession));
   }
 
-  public async deleteUserSession(userId: string, fingerprint: string): Promise<void> {
-    const key = this.mapSessionKey(userId, fingerprint);
+  public async deleteUserSession(userId: string, sessionId: string): Promise<void> {
+    const key = this.mapSessionKey(userId, sessionId);
     await this.redis.del(key);
   }
 
@@ -54,7 +57,7 @@ export class SessionsService {
     await this.redis.del(...keys);
   }
 
-  private mapSessionKey(userId: string, fingerprint: string) {
-    return `${userId}:${fingerprint}`;
+  private mapSessionKey(userId: string, sessionId: string) {
+    return `${userId}:${sessionId}`;
   }
 }

@@ -30,7 +30,6 @@ export class AccessTokenJWTStrategy extends PassportStrategy(
     }
     return {
       userId: payload.sub,
-      fingerprint: payload.fingerprint,
       role: payload.role,
     };
   }

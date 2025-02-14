@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppConfigModule, validationSchema } from '@/common/config';
 import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
 import { AppRedisModule } from '@/shared/db/redis/redis.module';
+import { CsrfMiddleware } from '@/common/middleware';
 
 
 @Module({
@@ -17,4 +18,8 @@ import { AppRedisModule } from '@/shared/db/redis/redis.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CsrfMiddleware).forRoutes('/*');
+  }
+}

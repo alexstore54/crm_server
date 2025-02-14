@@ -6,6 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/common/config';
 import { AppLoggerService } from '@/modules/logger/services';
+import cookieParser from 'cookie-parser';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +15,10 @@ async function bootstrap() {
   const logger = app.get(AppLoggerService);
   const config = app.get(ConfigService);
 
-
+  app.enableCors({
+    origin: config.get<string>(configKeys.CORS_ORIGIN),
+  });
+  app.use(cookieParser());
   app.useGlobalFilters(new AppExceptionFilter(logger));
   app.useGlobalInterceptors(new AppLoggingInterceptor(logger));
   app.useGlobalPipes(new ValidationPipe({
