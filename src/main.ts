@@ -2,16 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AppExceptionFilter } from '@/common/filters';
 import { AppLoggingInterceptor } from '@/common/interceptors';
-import { APP_LOGGER_SERVICE } from '@/common/config/logger';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/common/config';
+import { AppLoggerService } from '@/modules/logger/services';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const logger = app.get(APP_LOGGER_SERVICE);
+  const logger = app.get(AppLoggerService);
   const config = app.get(ConfigService);
+
 
   app.useGlobalFilters(new AppExceptionFilter(logger));
   app.useGlobalInterceptors(new AppLoggingInterceptor(logger));
@@ -22,6 +23,7 @@ async function bootstrap() {
   }));
 
   await app.listen(config.get(configKeys.APP_PORT) || 3000);
+  logger.log(`Application is running on: ${await app.getUrl()}`);
 }
 
 bootstrap();

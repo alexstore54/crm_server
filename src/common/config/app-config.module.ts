@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigModuleOptions } from '@nestjs/config';
-import { AppLoggerModule, AppLoggerService } from '@/common/config/logger';
+import { AppLoggerModule } from '@/modules/logger/logger.module';
+import { AppLoggerService } from '@/modules/logger/services/logger.service';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -20,7 +21,7 @@ export class AppConfigModule {
         }),
       ],
       providers: [AppLoggerService],
-      exports: [ConfigModule, AppLoggerModule],
+      exports: [ConfigModule],
     };
   }
 }
