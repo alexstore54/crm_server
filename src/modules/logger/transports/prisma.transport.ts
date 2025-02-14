@@ -8,7 +8,7 @@ export class PrismaTransport extends Transport {
   }
 
   async log(info: CreateLog, callback: () => void): Promise<void> {
-    if (!info) {
+    if (!info || !info.context) {
       return callback();
     }
 

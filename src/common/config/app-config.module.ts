@@ -21,7 +21,7 @@ export class AppConfigModule {
         }),
       ],
       providers: [AppLoggerService],
-      exports: [ConfigModule, AppLoggerModule],
+      exports: [ConfigModule],
     };
   }
 }

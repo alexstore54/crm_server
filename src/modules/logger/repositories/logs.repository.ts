@@ -1,7 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db';
-import { Log } from '@prisma/client';
+import { Log, LogLevel } from '@prisma/client';
 import { CreateLog, UpdateLog } from '@/modules/logger/dto';
+import { object } from 'joi';
 
 @Injectable()
 export class LogsRepository {
@@ -23,10 +24,12 @@ export class LogsRepository {
   }
 
   public async createLog(data: CreateLog): Promise<Log> {
+    const level: LogLevel = (data.level || 'INFO').toUpperCase() as LogLevel;
     try {
       return await this.prisma.log.create({
         data: {
           ...data,
+          level,
           context: data.context ? JSON.stringify(data.context) : undefined,
         },
       });

@@ -10,14 +10,34 @@ export class AppLoggerService {
   ) {}
 
   log(message: string, data?: CreateLog): void {
-    this.logger.info(message, { ...data });
-  }
+    const logEntry = {
+      message,
+      level: data?.level || 'info',
+      userId: data?.userId || null,
+      context: data?.context ? JSON.stringify(data.context) : null,
+    };
+
+    this.logger.info(logEntry.message, logEntry);  }
 
   error(message: string, data?: CreateLog): void {
-    this.logger.error(message, { ...data });
+    const logEntry = {
+      message,
+      level: data?.level || 'info',
+      userId: data?.userId || null,
+      context: data?.context ? JSON.stringify(data.context) : null,
+    };
+
+    this.logger.error(message, logEntry);
   }
 
   warn(message: string, data?: CreateLog): void {
-    this.logger.warn(message, { ...data });
+    const logEntry = {
+      message,
+      level: data?.level || 'info',
+      userId: data?.userId || null,
+      context: data?.context ? JSON.stringify(data.context) : null,
+    };
+
+    this.logger.warn(message, logEntry);
   }
 }

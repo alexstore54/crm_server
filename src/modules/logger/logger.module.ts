@@ -21,7 +21,7 @@ import { PrismaTransport } from '@/modules/logger/transports';
       useFactory: (configService: ConfigService, logsRepository: LogsRepository) => ({
         transports: [
           new PrismaTransport(logsRepository, {
-            level: configService.get<LogLevel>(configKeys.LOG_LEVEL),
+            level: (configService.get<LogLevel>(configKeys.LOG_LEVEL) ?? 'info').toLowerCase(),
           }),
           new winston.transports.Console({
             format: winston.format.combine(
@@ -35,7 +35,6 @@ import { PrismaTransport } from '@/modules/logger/transports';
   ],
   providers: [
     AppLoggerService,
-    PrismaTransport,
     LogsRepository,
     LogsService,
   ],
