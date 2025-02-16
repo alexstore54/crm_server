@@ -1,37 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { SessionId } from '@/shared/types/auth';
-import { SocketRooms } from '@/shared/types/socket';
+import { GatewayClientsService } from './gateway-clients.service';
+import { SocketNamespaces, SocketRooms } from '@/shared/types/socket';
 
 @Injectable()
 export class GatewayService {
-  private connectedClients = new Map<string, Socket>(); // Храним клиентов по sessionId
-  private rooms = new Map<string, Set<string>>(); // Храним комнаты и пользователей в них
-
-  public addClient(sessionId: SessionId, client: Socket) {
-    this.connectedClients.set(sessionId, client);
+  constructor(protected readonly clientsService: GatewayClientsService) {
   }
 
-  public removeClient(sessionId: SessionId) {
-    this.connectedClients.delete(sessionId);
-  }
+  handleConnection(client: Socket, namespace: SocketNamespaces) {
+    const sessionId = client.handshake.auth?.access_token || client.handshake.headers['session-id'];
 
-  public getConnectedClients() {
-    return this.connectedClients;
-  }
-
-  public joinRoom(sessionId: SessionId, room: string) {
-    if (!this.rooms.has(room)) {
-      this.rooms.set(room, new Set());
+    if (!sessionId) {
+      client.disconnect();
+      return;
     }
-    this.rooms.get(room)?.add(sessionId);
+
+    this.clientsService.addClient(sessionId, client);
   }
 
-  public leaveRoom(sessionId: SessionId, room: string) {
-    this.rooms.get(room)?.delete(sessionId);
+  handleDisconnect(client: Socket, namespace: SocketNamespaces) {
+    const sessionId = client.handshake.auth?.sessionId || client.handshake.headers['session-id'];
+    if (sessionId) {
+      this.clientsService.removeClient(sessionId);
+    }
   }
 
-  public sendMessageToRoom(server: any, room: SocketRooms, event: string, message: any) {
-    server.to(room).emit(event, message);
+  joinRoom(client: Socket, room: string) {
+    const sessionId = client.handshake.auth?.sessionId;
+    if (sessionId) {
+      this.clientsService.joinRoom(sessionId, room);
+      client.join(room);
+      console.log(`➕ Клиент ${sessionId} вошел в комнату ${room}`);
+    }
+  }
+
+  leaveRoom(client: Socket, room: string) {
+    const sessionId = client.handshake.auth?.sessionId;
+    if (sessionId) {
+      this.clientsService.leaveRoom(sessionId, room);
+      client.leave(room);
+    }
+  }
+
+  sendMessageToRoom(server: any, room: SocketRooms, event: string, message: any) {
+    this.clientsService.sendMessageToRoom(server, room, event, message);
   }
 }
