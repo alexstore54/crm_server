@@ -4,6 +4,7 @@ import { SessionsService } from '@/shared/services/sessions/sessions.service';
 import { GatewayService } from '@/shared/gateway';
 import { Server } from 'socket.io';
 import { SessionId } from '@/shared/types/auth';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({ namespace: SocketNamespaces.auth })
 export class AuthGateway {
@@ -13,7 +14,12 @@ export class AuthGateway {
   constructor(
     private readonly sessionsService: SessionsService,
     private readonly gatewayService: GatewayService,
+    private readonly configService: ConfigService,
   ) {
+  }
+
+  public connect(sessionId: SessionId) {
+
   }
 
   public async logoutUser(sessionId: SessionId) {

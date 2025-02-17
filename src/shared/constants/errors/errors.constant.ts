@@ -3,4 +3,5 @@ export const ERROR_MESSAGES = {
   SESSION_NOT_FOUND: 'Session not found',
   COOKIES_NOT_FOUND: 'Cookies not found',
   ACCESS_TOKEN_NOT_FOUND: 'Access token not found',
+  INVALID_CREDS: 'Invalid credentials',
 };

@@ -37,7 +37,10 @@ export const appConfigValidationSchema = {
     .uri()
     .required(),
   CSRF_SECRET: Joi.string()
-    .required()
+    .required(),
+  SOCKET_URL: Joi.string()
+    .uri()
+    .required(),
 };
 
 export const validationSchema = Joi.object(appConfigValidationSchema);

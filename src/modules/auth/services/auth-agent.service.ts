@@ -13,10 +13,10 @@ export class AuthAgentService {
     return 'Agent Profile';
   }
 
-  // public async signIn(data: SignInAgent): Promise<AuthTokens | null> {
-  //     const { email, password } = data;
-  //
-  // }
+  public async signIn(data: SignInAgent): Promise<AuthTokens | null> {
+      const { email, password } = data;
+
+  }
 
   public async signUp() {
     return 'Agent Profile';
