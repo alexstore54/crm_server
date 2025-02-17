@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
+import { AuthTokens } from '@/shared/types/auth';
 
 @Injectable()
 export class AuthAgentService {
@@ -11,10 +13,10 @@ export class AuthAgentService {
     return 'Agent Profile';
   }
 
-  public async signIn() {
-    return 'Agent Profile';
-
-  }
+  // public async signIn(data: SignInAgent): Promise<AuthTokens | null> {
+  //     const { email, password } = data;
+  //
+  // }
 
   public async signUp() {
     return 'Agent Profile';
