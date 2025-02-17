@@ -16,8 +16,95 @@ model Log {
   createdAt DateTime  @default(now())
 }
 
+
+model Leads {
+  id           Int       @id @default(autoincrement())
+  status_id    Int       @unique
+
+  phone        String    @db.VarChar(20)
+  first_name   String
+  second_name  String
+  created_at   DateTime  @db.Timestamptz @default(now())
+
+
+  status       LeadStatus? @relation(fields: [status_id], references: [id])
+  // Указываем тип Customer (единственное число)
+  customer     Customer?
+
+}
+
+model Customer {
+  id      Int    @id @default(autoincrement())
+  lead_id Int    @unique
+  user_id Int    @unique
+
+  // Зарегистрированный пользователь - это бывший лид имеет связь 1 к 1. Связь с User 1 к 1
+  leads   Leads  @relation(fields: [lead_id], references: [id])
+  user    User   @relation("CustomerUser", fields: [user_id], references: [id])
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  password String
+
+
+  emails   Email[]
+  customer Customer? @relation("CustomerUser")
+  agent    Agent?
+}
+
+model Email {
+
+  id          Int       @id @default(autoincrement())
+  email       String
+  isMain      Boolean   @default(false)
+  user_id     Int
+  createdAt   DateTime  @default(now())
+
+  user       User       @relation(fields: [user_id], references: [id])
+
+}
+
+model Agent {
+  id        Int    @id @default(autoincrement())
+  user_id   Int    @unique
+  role_id   Int?   // 1 к 1
+
+  user    User   @relation(fields: [user_id], references: [id])
+  role    Role?  @relation(fields: [role_id], references: [id])
+
+  // Агент может состоять в нескольких desks и teams или не состоять вовсе
+  desks   Desk[] @relation("AgentDesks")
+}
+
+model Role {
+  id     Int     @id @default(autoincrement())
+  name   String  @default("Admin")
+
+  // Многие Agent могут иметь одну и ту же роль
+  agents Agent[]
+}
+
+model Desk {
+  id     Int     @id @default(autoincrement())
+  name   String
+
+  // У одного Desk может быть много агентов
+  agents Agent[] @relation("AgentDesks")
+}
+
+
+model LeadStatus {
+    id       Int      @id @default(autoincrement())
+    name     String
+
+
+    leads    Leads?
+
+}
+
 enum LogLevel {
-  INFO
-  WARN
-  ERROR
+    INFO
+    WARN
+    ERROR
 }
