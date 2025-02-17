@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppConfigModule, validationSchema } from '@/common/config';
-import { PrismaModule } from '@/shared/db';
+import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
-import { AuthModule } from '@/modules/auth/auth.module';
+import { CsrfMiddleware } from '@/common/middleware';
+import { GatewayModule } from '@/shared/gateway';
 
 
 @Module({
@@ -12,7 +13,12 @@ import { AuthModule } from '@/modules/auth/auth.module';
     }),
     PrismaModule,
     HealthModule,
-    AuthModule
   ],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CsrfMiddleware).forRoutes('/*');
+  }
+}

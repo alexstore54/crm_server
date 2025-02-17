@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
-import { PrismaService } from '@/shared/db';
+import { PrismaService } from '@/shared/db/prisma';
 
 @Injectable()
 export class HealthService {
