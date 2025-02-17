@@ -35,6 +35,13 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
     await this.updateUserOnlineStatus(sub, sessionId, true);
   }
 
+  public async connect(userId: string, sessionId: SessionId, client: Socket) {
+    client.data.sessionId = sessionId;
+    client.data.userId = userId;
+
+    this.gatewayService.addClient(sessionId, client);
+  }
+
 
   async handleDisconnect(client: Socket) {
     const { sessionId, userId } = client.data;

@@ -1,8 +1,8 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { SocketNamespaces } from '@/shared/types/socket';
 import { SessionsService } from '@/shared/services/sessions/sessions.service';
-import { GatewayService } from '@/shared/gateway';
-import { Server } from 'socket.io';
+import { ClientsGateway, GatewayService } from '@/shared/gateway';
+import { Server, Socket } from 'socket.io';
 import { SessionId } from '@/shared/types/auth';
 import { ConfigService } from '@nestjs/config';
 
@@ -15,12 +15,10 @@ export class AuthGateway {
     private readonly sessionsService: SessionsService,
     private readonly gatewayService: GatewayService,
     private readonly configService: ConfigService,
+
   ) {
   }
 
-  public connect(sessionId: SessionId) {
-
-  }
 
   public async logoutUser(sessionId: SessionId) {
     this.server.to(sessionId).emit('logout');
