@@ -1,33 +1,45 @@
-import { BadRequestException, Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Headers, Post, Res } from '@nestjs/common';
 import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
-import { AuthTokens } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CookiesUtil } from '@/shared/utils';
 import { Response } from 'express';
-import { SessionsService } from '@/shared/services/sessions/sessions.service';
+import { AuthService } from '@/modules/auth/services';
+import { MakeSessionArgs } from '@/modules/auth/types/auth-args.type';
 
 @Controller('auth/agents')
 export class AuthAgentController {
   constructor(
     private readonly authAgentService: AuthAgentService,
-    private readonly sessionService: SessionsService,
+    private readonly authService: AuthService,
   ) {
   }
 
   @Post('sign-in')
-  async signIn(@Body() body: SignInAgent, @Res() res: Response) {
-    const result = await this.authAgentService.signIn(body);
-    if (!tokens) {
+  async signIn(
+    @Body() body: SignInAgent,
+    @Headers('user-agent') userAgent: string,
+    @Headers('fingerprint') fingerprint: string,
+    @Res() res: Response,
+  ) {
+    const user = await this.authAgentService.signIn(body);
+    if (!user) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
-    CookiesUtil.setAuthTokens(res, tokens.accessToken, tokens.refreshToken);
 
+    // Implement session logic
+    const sessionArgs: MakeSessionArgs = {
+      user: user,
+      fingerprint,
+      userAgent,
+    };
 
-    //#TODO: implement session logic
+    const sessionId = await this.authService.makeSession(sessionArgs);
 
+    CookiesUtil.setAuthTokens(res, result.accessToken, result.refreshToken);
     return res.status(200).send('success');
   }
+
 
   @Post('sign-up')
   async signUp() {

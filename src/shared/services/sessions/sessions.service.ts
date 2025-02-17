@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import { RedisService } from '@liaoliaots/nestjs-redis';
-import { Session, SessionId, SessionUUID, UpdateSessionInput } from '@/shared/types/auth';
+import { CreateSessionInput, Session, SessionId, SessionUUID, UpdateSessionInput } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
@@ -13,11 +13,10 @@ export class SessionsService {
     this.redis = redisService.getOrThrow();
   }
 
-  public async saveUserSession(session: Session): Promise<string> {
-    const { userId } = session;
-    const sessionUUID: SessionUUID = uuidv4();
+  public async saveUserSession(input: CreateSessionInput): Promise<string> {
+    const { userId, sessionUUID } = input;
     const sessionId: SessionId = this.mapSessionKey(userId, sessionUUID);
-    await this.redis.set(sessionId, JSON.stringify({ ...session, sessionId: sessionUUID }));
+    await this.redis.set(sessionId, JSON.stringify({ ...input, sessionId: sessionUUID }));
     return sessionId;
   }
 

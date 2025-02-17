@@ -5,10 +5,19 @@ export type Session = {
   userId: string;
   // role: string;
   sessionUUID: SessionUUID;
-  hashRefreshToken: string;
+  hashedRefreshToken: string;
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
+}
+
+export interface CreateSessionInput {
+  userId: string;
+  fingerprint: string;
+  userAgent: string;
+  isOnline: boolean;
+  sessionUUID: SessionUUID,
+  hashedRefreshToken?: string;
 }
 
 export interface UpdateSessionInput {
