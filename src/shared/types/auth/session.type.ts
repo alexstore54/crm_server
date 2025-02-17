@@ -1,12 +1,13 @@
 export type SessionId = string;
+export type SessionUUID = string;
 
 export type Session = {
   userId: string;
+  sessionUUID: SessionUUID;
   hashRefreshToken: string;
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
-  lastOnline: Date;
 }
 
 export interface UpdateSessionInput {
@@ -14,5 +15,4 @@ export interface UpdateSessionInput {
   fingerprint?: string;
   userAgent?: string;
   isOnline?: boolean;
-  lastOnline?: Date;
 }

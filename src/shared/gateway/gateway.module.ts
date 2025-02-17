@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { GatewayClientsService } from '@/shared/gateway/gateway-clients.service';
 import { GatewayService } from '@/shared/gateway/gateway.service';
+import { ClientsGateway } from '@/shared/gateway/clients.gateway';
+import { SessionsModule } from '@/shared/services';
 
 @Module({
-  providers: [GatewayService, GatewayClientsService],
-  exports: [GatewayService],
+  imports: [SessionsModule],
+  providers: [ClientsGateway, GatewayService],
+  exports: [ClientsGateway, GatewayService],
 })
 export class GatewayModule {
 }

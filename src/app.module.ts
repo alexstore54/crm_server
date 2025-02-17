@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppConfigModule, validationSchema } from '@/common/config';
 import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
-import { AppRedisModule } from '@/shared/db/redis/redis.module';
 import { CsrfMiddleware } from '@/common/middleware';
 import { GatewayModule } from '@/shared/gateway';
 
@@ -13,8 +12,6 @@ import { GatewayModule } from '@/shared/gateway';
       config: { validationSchema },
     }),
     PrismaModule,
-    AppRedisModule,
-    GatewayModule,
     HealthModule,
   ],
   controllers: [],

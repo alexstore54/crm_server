@@ -10,7 +10,6 @@ import { LogsController } from '@/modules/logger/controllers/logs.controller';
 import { LogsService } from '@/modules/logger/services';
 import { PrismaTransport } from '@/modules/logger/transports';
 
-
 @Global()
 @Module({
   imports: [

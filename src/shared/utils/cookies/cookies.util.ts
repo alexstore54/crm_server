@@ -37,4 +37,13 @@ export class CookiesUtil {
   public static clearCookies(res: Response, name: string, options?: any): void {
     res.clearCookie(name, options);
   }
+
+  public static getAccessTokenFromCookiesString(cookies: string): string | null {
+    const accessToken = cookies
+      .split('; ')
+      .find((row) => row.startsWith('access_token='))
+      ?.split('=')[1];
+
+    return accessToken || null;
+  }
 }

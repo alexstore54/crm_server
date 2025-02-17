@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, Param } from '@nestjs/common';
-import { SessionsService } from '@/modules/auth/services';
+import { SessionsService } from '@/shared/services/sessions/sessions.service';
 
 
 //TODO: add guards

@@ -1,3 +1,3 @@
-export * from './gateway.service';
+export * from './clients.gateway';
 export * from './gateway.module';
-export * from './gateway-clients.service';
+export * from './gateway.service';
