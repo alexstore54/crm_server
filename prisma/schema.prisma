@@ -8,12 +8,11 @@ datasource db {
 }
 
 model Log {
-  id        Int       @id @default(autoincrement())
-  level     LogLevel? @default(INFO)
-  message   String
-  userId    String?
-  context   Json?
-  createdAt DateTime  @default(now())
+  id          String   @id @default(uuid())
+  level       LogLevel @default(INFO)
+  message     String
+  context     Json?
+  created_at  DateTime @default(now())  @db.Timestamptz(0)
 }
 
 
@@ -103,8 +102,13 @@ model LeadStatus {
 
 }
 
+
+
+
 enum LogLevel {
     INFO
     WARN
     ERROR
 }
+
+
