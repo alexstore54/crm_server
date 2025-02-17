@@ -1,9 +1,9 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { SocketNamespaces } from '@/shared/types/socket';
 import { SessionsService } from '@/shared/services/sessions/sessions.service';
-import { ClientsGateway, GatewayService } from '@/shared/gateway';
-import { Server, Socket } from 'socket.io';
-import { SessionId } from '@/shared/types/auth';
+import { GatewayService } from '@/shared/gateway';
+import { Server } from 'socket.io';
+import { SessionUUID } from '@/shared/types/auth';
 import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({ namespace: SocketNamespaces.auth })
@@ -14,47 +14,24 @@ export class AuthGateway {
   constructor(
     private readonly sessionsService: SessionsService,
     private readonly gatewayService: GatewayService,
-    private readonly configService: ConfigService,
+  ) {}
 
-  ) {
+  public async logoutUser(userPublicId: string, sessionUUID: SessionUUID) {
+    this.server.to(sessionUUID).emit('logout');
+    await this.sessionsService.deleteUserSession(userPublicId, sessionUUID);
+    this.gatewayService.removeClient(sessionUUID);
   }
 
-
-  public async logoutUser(sessionId: SessionId) {
-    this.server.to(sessionId).emit('logout');
-    const session = await this.sessionsService.getUserSessionBySessionId(sessionId);
-    if (!session) {
-      return;
-    }
-    await this.sessionsService.deleteUserSession(session.userId, session.sessionUUID);
-    this.gatewayService.removeClient(sessionId);
-  }
-
-  public async logoutFromAllDevices(userId: string) {
-    const sessions = await this.sessionsService.getAllUserSessions(userId);
+  public async logoutFromAllDevices(userPublicId: string) {
+    const sessions = await this.sessionsService.getAllUserSessions(userPublicId);
     sessions.forEach((session) => {
       this.server.to(session.sessionUUID).emit('logout');
       this.gatewayService.removeClient(session.sessionUUID);
     });
-    await this.sessionsService.deleteAllUserSessions(userId);
+    await this.sessionsService.deleteAllUserSessions(userPublicId);
   }
 
-  public async logoutFromAllDevicesExceptCurrent(userId: string, sessionId: SessionId) {
-    const currentSession = await this.sessionsService.getUserSessionBySessionId(sessionId);
-    if (!currentSession) {
-      return;
-    }
-
-    const sessions = await this.sessionsService.getAllUserSessions(userId);
-
-    //logout from all devices except current by socket
-    sessions.forEach((session) => {
-      if (currentSession.sessionUUID !== session.sessionUUID) {
-        this.server.to(session.sessionUUID).emit('logout');
-        this.gatewayService.removeClient(session.sessionUUID);
-      }
-    });
-
-    await this.sessionsService.deleteAllUserSessionsExceptCurrent(userId, currentSession.sessionUUID);
+  public async logoutFromAllDevicesExceptCurrent(userPublicId: string, sessionUUID: SessionUUID) {
+    await this.sessionsService.deleteAllUserSessionsExceptCurrent(userPublicId, sessionUUID);
   }
 }

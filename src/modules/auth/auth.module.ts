@@ -11,10 +11,18 @@ import { GatewayModule } from '@/shared/gateway';
 import { SessionsModule } from '@/shared/services';
 import { SessionsService } from '@/shared/services/sessions/sessions.service';
 import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
+import { TokensService } from '@/modules/auth/services/tokens.service';
 
 @Module({
   imports: [GatewayModule, SessionsModule],
   controllers: [AuthUserController, AuthAgentController, AuthGoogleController, SessionsController],
-  providers: [AuthService, AuthAgentService ,AuthGoogleService, SessionsService, AuthGateway],
+  providers: [
+    AuthService,
+    AuthAgentService,
+    TokensService,
+    AuthGoogleService,
+    SessionsService,
+    AuthGateway,
+  ],
 })
 export class AuthModule {}

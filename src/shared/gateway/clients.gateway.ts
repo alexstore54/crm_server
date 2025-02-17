@@ -5,9 +5,8 @@ import { SessionsService } from '@/shared/services/sessions/sessions.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CookiesUtil } from '@/shared/utils';
 import { JwtService } from '@nestjs/jwt';
-import { AuthPayload, Session, SessionId } from '@/shared/types/auth';
+import { AgentAuthPayload, Session, SessionId } from '@/shared/types/auth';
 import { UnauthorizedException } from '@nestjs/common';
-
 
 @WebSocketGateway({ cors: true })
 export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -15,8 +14,7 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
     private readonly gatewayService: GatewayService,
     private readonly sessionsService: SessionsService,
     private readonly jwtService: JwtService,
-  ) {
-  }
+  ) {}
 
   async handleConnection(client: Socket) {
     const cookies = client.handshake.headers.cookie;
@@ -24,15 +22,15 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     const accessToken = CookiesUtil.getAccessTokenFromCookiesString(cookies);
     if (!accessToken) throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND);
-    const payload = this.jwtService.verify<AuthPayload>(accessToken);
+    const payload = this.jwtService.verify<AgentAuthPayload>(accessToken);
     if (!payload) throw new UnauthorizedException(ERROR_MESSAGES.SESSION_NOT_FOUND);
-    const { sub, sessionId } = payload;
+    const { sub, sessionUUID } = payload;
 
-    client.data.sessionId = sessionId;
+    client.data.sessionId = sessionUUID;
     client.data.userId = sub;
 
-    this.gatewayService.addClient(sessionId, client);
-    await this.updateUserOnlineStatus(sub, sessionId, true);
+    this.gatewayService.addClient(sessionUUID, client);
+    await this.updateUserOnlineStatus(sub, sessionUUID, true);
   }
 
   public async connect(userId: string, sessionId: SessionId, client: Socket) {
@@ -41,7 +39,6 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     this.gatewayService.addClient(sessionId, client);
   }
-
 
   async handleDisconnect(client: Socket) {
     const { sessionId, userId } = client.data;

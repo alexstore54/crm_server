@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { AuthTokens } from '@/shared/types/auth';
+import { SignUpAgent } from '@/modules/auth/dto/agent/sign-up.dto';
 
 @Injectable()
 export class AuthAgentService {
@@ -18,9 +19,8 @@ export class AuthAgentService {
 
   }
 
-  public async signUp() {
+  public async signUp(data: SignUpAgent): Promise<any> {
     return 'Agent Profile';
-
   }
 
   public async logout() {
