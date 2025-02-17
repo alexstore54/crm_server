@@ -3,6 +3,7 @@ export type SessionUUID = string;
 
 export type Session = {
   userId: string;
+  // role: string;
   sessionUUID: SessionUUID;
   hashRefreshToken: string;
   fingerprint: string;
