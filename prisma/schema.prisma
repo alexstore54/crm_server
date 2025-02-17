@@ -8,15 +8,111 @@ datasource db {
 }
 
 model Log {
-  id        String   @id @default(uuid())
-  level     LogLevel @default(INFO)
-  message   String
-  context   Json?
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  level       LogLevel @default(INFO)
+  message     String
+  context     Json?
+  created_at  DateTime @default(now())  @db.Timestamptz(0)
 }
 
-enum LogLevel {
-  INFO
-  WARN
-  ERROR
+
+model Leads {
+  id           Int         @id @default(autoincrement())
+  status_id    Int         @unique
+  
+  first_name   String
+  second_name  String
+  country      String?
+
+
+  
+  created_at   DateTime    @db.Timestamptz(0) @default(now())
+   
+  status       LeadStatus? @relation(fields: [status_id], references: [id])
+  // Указываем тип Customer (единственное число)
+  customer     Customer?
+  phone        Phone[]
 }
+
+model Customer {
+  public_id        String   @default(uuid()) @unique @db.Uuid
+  id               Int      @id @default(autoincrement())
+  lead_id          Int      @unique
+  
+  password         String
+  last_time_online DateTime @db.Timestamptz(0)
+
+  emails       Email[]
+  // Зарегистрированный пользователь - это бывший лид имеет связь 1 к 1. Связь с User 1 к 1 
+  leads        Leads       @relation(fields: [lead_id], references: [id])
+}
+
+model Email {
+
+  id              Int            @id @default(autoincrement())
+  email           String
+  isMain          Boolean        @default(false)
+  user_id         Int
+  created_at      DateTime       @default(now())
+
+  customer        Customer       @relation(fields: [user_id], references: [id])
+
+}
+
+model Phone {
+  id              Int       @id @default(autoincrement())
+  phone           String
+  isMain          Boolean   @default(false)
+  user_id         Int
+  created_at      DateTime  @default(now())
+
+  leads           Leads     @relation(fields: [user_id], references: [id])
+}
+
+model Agent {
+  public_id        String   @default(uuid()) @unique @db.Uuid
+  id               Int      @id @default(autoincrement())
+  user_id          Int      @unique
+  role_id          Int?     // 1 к 1
+  password         String
+  last_time_online DateTime @db.Timestamptz(0)
+  
+  role             Role?  @relation(fields: [role_id], references: [id])
+  
+  // Агент может состоять в нескольких desks и teams или не состоять вовсе 
+  desks            Desk[] @relation("AgentDesks")
+}
+
+model Role {
+  id     Int     @id @default(autoincrement())
+  name   String?
+  
+  // Многие Agent могут иметь одну и ту же роль
+  agents Agent[]
+}
+
+model Desk {
+  id     Int     @id @default(autoincrement())
+  name   String
+
+  // У одного Desk может быть много агентов
+  agents Agent[] @relation("AgentDesks")
+}
+
+
+model LeadStatus {
+    id       Int      @id @default(autoincrement())
+    name     String
+
+    leads    Leads?
+}
+
+
+
+enum LogLevel {
+    INFO
+    WARN
+    ERROR
+}
+
+
