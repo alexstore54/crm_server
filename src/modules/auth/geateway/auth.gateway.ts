@@ -32,6 +32,7 @@ export class AuthGateway {
   }
 
   public async logoutFromAllDevicesExceptCurrent(userPublicId: string, sessionUUID: SessionUUID) {
+
     await this.sessionsService.deleteAllUserSessionsExceptCurrent(userPublicId, sessionUUID);
   }
 }

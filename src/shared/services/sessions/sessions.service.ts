@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import { RedisService } from '@liaoliaots/nestjs-redis';
@@ -69,7 +68,7 @@ export class SessionsService {
     }
   }
 
-  private mapSessionKey(userId: string, sessionUUID: SessionUUID) {
+  private mapSessionKey(userId: string, sessionUUID: SessionUUID): SessionId {
     return `${userId}:${sessionUUID}`;
   }
 }

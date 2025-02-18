@@ -1,4 +1,4 @@
 import { Controller } from '@nestjs/common';
 
-@Controller('agent')
+@Controller('agents')
 export class AgentController {}

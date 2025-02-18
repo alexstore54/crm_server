@@ -4,8 +4,8 @@ import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
 import { CsrfMiddleware } from '@/common/middleware';
 import { GatewayModule } from '@/shared/gateway';
-import { UserModule } from './modules/user/user.module';
-import { CustomerModule } from './modules/user/customer/customer.module';
+import { UserModule } from '@/modules/users/user.module';
+import { CustomerModule } from '@/modules/customers/customer.module';
 
 
 @Module({

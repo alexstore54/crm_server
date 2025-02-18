@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Headers, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Headers, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { Response } from 'express';
 import { AuthService } from '@/modules/auth/services';
 import { CookiesUtil } from '@/shared/utils';
 import { AuthTokens } from '@/shared/types/auth';
+import { Agent } from '@prisma/client';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Controller('auth/agents')
 export class AuthAgentController {
@@ -20,10 +22,14 @@ export class AuthAgentController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const user = await this.authAgentService.signIn(body);
+    const agent: Agent | null = await this.authAgentService.signIn(body);
+
+    if (!agent) {
+      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDS);
+    }
 
     const tokens: AuthTokens = await this.authService.authenticate('agent', {
-      user,
+      user: agent,
       userAgent,
       fingerprint,
     });
@@ -33,24 +39,8 @@ export class AuthAgentController {
     return res.status(200).send('success');
   }
 
-  @Post('sign-up')
-  async signUp(
-    @Body() body: SignInAgent,
-    @Headers('user-agent') userAgent: string,
-    @Headers('fingerprint') fingerprint: string,
-    @Res() res: Response,
-  ) {
-    const user = await this.authAgentService.signUp(body);
-    const tokens: AuthTokens = await this.authService.authenticate('agent', {
-      user,
-      userAgent,
-      fingerprint,
-    });
-  }
-
   @Post('logout')
-  async logout(
-  ) {
+  async logout() {
     // this.authService.logout()
   }
 

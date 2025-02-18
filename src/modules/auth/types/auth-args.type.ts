@@ -1,17 +1,18 @@
 import { Socket } from 'socket.io';
-import { SessionId, SessionUUID } from '@/shared/types/auth';
-
+import { SessionUUID } from '@/shared/types/auth';
+import { Agent } from '@prisma/client';
+import { Customer } from '@/shared/types/user';
 
 export interface ConnectSocketArgs {
   client: Socket;
-  sessionId: SessionId;
+  sessionUUID: SessionUUID;
 }
 
 export type UserType = 'agent' | 'customer';
 
 export interface AuthenticateArgs {
   // socketClient: Socket;
-  user: any;
+  user: Agent | Customer;
   fingerprint: string;
   userAgent: string;
 }
@@ -21,6 +22,6 @@ export interface MakeSessionArgs {
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
-  sessionUUID: SessionUUID,
+  sessionUUID: SessionUUID;
   refreshToken: string;
 }

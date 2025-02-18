@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
-import { AuthTokens } from '@/shared/types/auth';
-import { SignUpAgent } from '@/modules/auth/dto/agent/sign-up.dto';
+import { Agent } from '@prisma/client';
+import { AgentRepository } from '@/modules/agents/repositories/agent.repository';
 
 @Injectable()
 export class AuthAgentService {
+  constructor(private readonly agentRepository: AgentRepository) {}
 
   public async getProfile() {
     return 'Agent Profile';
@@ -14,13 +15,11 @@ export class AuthAgentService {
     return 'Agent Profile';
   }
 
-  public async signIn(data: SignInAgent): Promise<any> {
-      const { email, password } = data;
+  public async signIn(data: SignInAgent): Promise<Agent | null> {
+    const { email, password } = data;
 
+    const agent = {};
+    if (!agent) {
+    }
   }
-
-  public async signUp(data: SignUpAgent): Promise<any> {
-    return 'Agent Profile';
-  }
-
 }

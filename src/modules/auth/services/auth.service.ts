@@ -39,7 +39,7 @@ export class AuthService {
       userAgent,
       isOnline: false,
       refreshToken: tokens.refreshToken,
-      userId: user.publicId,
+      userId: user.public_id,
     });
 
     const session = await this.sessionService.saveUserSession(createSessionInput);

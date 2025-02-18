@@ -5,14 +5,15 @@ import { AuthTokens } from '@/shared/types/auth';
 import { CookiesUtil } from '@/shared/utils';
 import { SignInUser } from '@/modules/auth/dto/user/sign-in.dto';
 import { AuthService } from '@/modules/auth/services';
+import { AuthCustomerService } from '@/modules/auth/services/auth-customer.service';
 
 @Controller('auth/users')
 export class AuthCustomerController {
   constructor(
-    private readonly authUserService: AuthUserService,
+    private readonly authCustomerService: AuthCustomerService,
     private readonly authService: AuthService,
-  ) {
-  }
+  ) {}
+
 
   @Post('sign-in')
   async signIn(
@@ -21,7 +22,7 @@ export class AuthCustomerController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const user = await this.authUserService.signIn(body);
+    const user = await this.authCustomerService.signIn(body);
 
     const tokens: AuthTokens = await this.authService.authenticate('customer', {
       user,
@@ -41,7 +42,7 @@ export class AuthCustomerController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const user = await this.authAgentService.signUp(body);
+    const user = await this.authCustomerService.signUp(body);
     const tokens: AuthTokens = await this.authService.authenticate('agent', {
       user,
       userAgent,
@@ -50,8 +51,7 @@ export class AuthCustomerController {
   }
 
   @Post('logout')
-  async logout(
-  ) {
+  async logout() {
     // this.authService.logout()
   }
 

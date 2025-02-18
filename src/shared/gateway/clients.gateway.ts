@@ -22,6 +22,7 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     const accessToken = CookiesUtil.getAccessTokenFromCookiesString(cookies);
     if (!accessToken) throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND);
+
     const payload = this.jwtService.verify<AgentAuthPayload>(accessToken);
     if (!payload) throw new UnauthorizedException(ERROR_MESSAGES.SESSION_NOT_FOUND);
     const { sub, sessionUUID } = payload;
