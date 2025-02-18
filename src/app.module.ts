@@ -4,6 +4,8 @@ import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
 import { CsrfMiddleware } from '@/common/middleware';
 import { GatewayModule } from '@/shared/gateway';
+import { UserModule } from './modules/user/user.module';
+import { CustomerModule } from './modules/user/customer/customer.module';
 
 
 @Module({
@@ -13,6 +15,8 @@ import { GatewayModule } from '@/shared/gateway';
     }),
     PrismaModule,
     HealthModule,
+    UserModule,
+    CustomerModule,
   ],
   controllers: [],
   providers: [],
