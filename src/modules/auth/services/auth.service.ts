@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { SessionsService } from '@/shared/services/sessions/sessions.service';
 import { ClientsGateway } from '@/shared/gateway';
 import {
@@ -12,6 +12,7 @@ import { AuthenticateArgs, MakeSessionArgs, UserType } from '@/modules/auth/type
 import { BcryptHelper } from '@/shared/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from '@/modules/auth/services/tokens.service';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
 export class AuthService {
@@ -44,6 +45,39 @@ export class AuthService {
     const session = await this.sessionService.saveUserSession(createSessionInput);
 
     // await this.clientService.connect(user.publicId, sessionUUID, socketClient);
+
+    return tokens;
+  }
+
+  public async logout(userPublicId: string, sessionUUID: SessionUUID) {
+    // this.server.to(sessionUUID).emit('logout');
+    await this.sessionService.deleteUserSession(userPublicId, sessionUUID);
+    // this.gatewayService.removeClient(sessionUUID);
+  }
+
+  public async refreshTokens(
+    userPublicId: string,
+    sessionUUID: SessionUUID,
+    refreshToken: string,
+    payload: CustomerAuthPayload | AgentAuthPayload,
+  ): Promise<AuthTokens> {
+    const session = await this.sessionService.getUserSession(userPublicId, sessionUUID);
+    if (!session) {
+      throw new ForbiddenException(ERROR_MESSAGES.ACCESS_DENIED);
+    }
+
+    const hashedRefreshToken = await BcryptHelper.hash(refreshToken);
+    if (session.hashedRefreshToken !== hashedRefreshToken) {
+      throw new ForbiddenException(ERROR_MESSAGES.ACCESS_DENIED);
+    }
+
+    const tokens = await this.tokensService.getTokens(payload);
+    const newHashedRefreshToken = await BcryptHelper.hash(tokens.refreshToken);
+    await this.sessionService.updateUserSession(userPublicId, sessionUUID, {
+      ...session,
+      isOnline: true,
+      refreshToken: newHashedRefreshToken,
+    });
 
     return tokens;
   }

@@ -4,4 +4,5 @@ export const ERROR_MESSAGES = {
   COOKIES_NOT_FOUND: 'Cookies not found',
   ACCESS_TOKEN_NOT_FOUND: 'Access token not found',
   INVALID_CREDS: 'Invalid credentials',
+  ACCESS_DENIED: 'Access Denied',
 };

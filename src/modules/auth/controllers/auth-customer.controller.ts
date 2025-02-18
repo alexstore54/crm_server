@@ -1,28 +1,29 @@
-import { Body, Controller, Get, Headers, Post, Req, Res } from '@nestjs/common';
-import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
+import { Body, Controller, Headers, Post, Req, Res } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { Response } from 'express';
-import { AuthService } from '@/modules/auth/services';
-import { CookiesUtil } from '@/shared/utils';
 import { AuthTokens } from '@/shared/types/auth';
+import { CookiesUtil } from '@/shared/utils';
+import { SignInUser } from '@/modules/auth/dto/user/sign-in.dto';
+import { AuthService } from '@/modules/auth/services';
 
-@Controller('auth/agents')
-export class AuthAgentController {
+@Controller('auth/users')
+export class AuthCustomerController {
   constructor(
-    private readonly authAgentService: AuthAgentService,
+    private readonly authUserService: AuthUserService,
     private readonly authService: AuthService,
-  ) {}
+  ) {
+  }
 
   @Post('sign-in')
   async signIn(
-    @Body() body: SignInAgent,
+    @Body() body: SignInUser,
     @Headers('user-agent') userAgent: string,
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const user = await this.authAgentService.signIn(body);
+    const user = await this.authUserService.signIn(body);
 
-    const tokens: AuthTokens = await this.authService.authenticate('agent', {
+    const tokens: AuthTokens = await this.authService.authenticate('customer', {
       user,
       userAgent,
       fingerprint,

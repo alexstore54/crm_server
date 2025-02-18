@@ -3,7 +3,7 @@ import { AuthGoogleService, AuthService } from '@/modules/auth/services';
 import {
   AuthAgentController,
   AuthGoogleController,
-  AuthUserController,
+  AuthCustomerController,
   SessionsController,
 } from '@/modules/auth/controllers';
 import { AuthGateway } from '@/modules/auth/geateway';
@@ -15,7 +15,7 @@ import { TokensService } from '@/modules/auth/services/tokens.service';
 
 @Module({
   imports: [GatewayModule, SessionsModule],
-  controllers: [AuthUserController, AuthAgentController, AuthGoogleController, SessionsController],
+  controllers: [AuthCustomerController, AuthAgentController, AuthGoogleController, SessionsController],
   providers: [
     AuthService,
     AuthAgentService,

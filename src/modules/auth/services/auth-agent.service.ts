@@ -23,23 +23,4 @@ export class AuthAgentService {
     return 'Agent Profile';
   }
 
-  public async logout() {
-    return 'Agent Profile';
-
-  }
-
-  public async forgotPassword() {
-    return 'Agent Profile';
-
-  }
-
-  public async updateProfile() {
-    return 'Agent Profile';
-
-  }
-
-  public async deleteProfile() {
-    return 'Agent Profile';
-
-  }
 }
