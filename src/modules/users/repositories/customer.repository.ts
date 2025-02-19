@@ -1,6 +1,6 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable } from '@nestjs/common';
-import { Customer } from '@prisma/client';
+import { Customer, Prisma } from '@prisma/client';
 import { UpdateCustomer } from '@/modules/users/dto/customer';
 import { CreateCustomer } from '@/modules/users/types';
 
@@ -18,6 +18,21 @@ export class CustomerRepository {
 
   async getByUUID(public_id: string): Promise<Customer | null> {
     return this.prisma.customer.findFirst({ where: { public_id } });
+  }
+
+  async getByEmail(
+    email: string
+  ): Promise<Prisma.CustomerGetPayload<{ include: { emails: true } }> | null> {
+    return this.prisma.customer.findFirst({
+      where: {
+        emails: {
+          some: { email }
+        }
+      },
+      include: {
+        emails: true
+      }
+    });
   }
 
   async createCustomer(data: CreateCustomer): Promise<Customer> {
