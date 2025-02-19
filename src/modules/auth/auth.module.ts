@@ -13,10 +13,12 @@ import { SessionsService } from '@/shared/services/sessions/sessions.service';
 import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
 import { TokensService } from '@/modules/auth/services/tokens.service';
 import { AgentModule } from '@/modules/agents/agent.module';
-import { CustomerModule } from '@/modules/customers/customer.module';
+import { UserModule } from '@/modules/users/user.module';
+import { CustomersRepository } from '@/modules/users/repositories';
+import { AgentRepository } from '@/modules/agents/repositories/agent.repository';
 
 @Module({
-  imports: [GatewayModule, SessionsModule, AgentModule, CustomerModule],
+  imports: [GatewayModule, SessionsModule, AgentModule, UserModule],
   controllers: [
     AuthCustomerController,
     AuthAgentController,
@@ -30,6 +32,8 @@ import { CustomerModule } from '@/modules/customers/customer.module';
     AuthGoogleService,
     SessionsService,
     AuthGateway,
+    CustomersRepository,
+    AgentRepository,
   ],
 })
 export class AuthModule {}
