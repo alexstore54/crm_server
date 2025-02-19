@@ -63,6 +63,9 @@ model Agent {
   email            String    @db.VarChar(100)
   password         String
   last_time_online DateTime  @db.Timestamptz(0)
+  testRoles        TestRoleNames
+  testPermissions  PermsList
+  
   role             Role?     @relation(fields: [role_id], references: [id])
 
   desks            Desk[]    @relation("AgentDesks")
@@ -101,4 +104,17 @@ enum LogLevel {
   INFO
   WARN
   ERROR
+}
+
+
+enum TestRoleNames {
+  ADMIN
+  MODERATOR
+}
+
+enum PermsList {
+  action1
+  action2
+  action3
+  action4
 }
