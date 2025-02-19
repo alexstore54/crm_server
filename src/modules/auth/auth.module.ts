@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GatewayModule } from '@/shared/gateway';
+import { ClientsGateway, GatewayModule, GatewayService } from '@/shared/gateway';
 import { SessionsModule, SessionsService } from '@/shared/services';
 import { AgentModule } from '@/modules/agents/agent.module';
 import { UserModule } from '@/modules/users/user.module';
@@ -37,7 +37,9 @@ import { AgentRepository } from '@/modules/agents/repositories/agent.repository'
     SessionsService,
     AuthGateway,
     CustomersRepository,
+    ClientsGateway,
     AgentRepository,
+    GatewayService,
   ],
 })
 export class AuthModule {}

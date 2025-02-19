@@ -8,5 +8,4 @@ import { SessionsModule } from '@/shared/services';
   providers: [ClientsGateway, GatewayService],
   exports: [ClientsGateway, GatewayService],
 })
-export class GatewayModule {
-}
+export class GatewayModule {}
