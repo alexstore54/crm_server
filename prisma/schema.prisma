@@ -7,228 +7,119 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Log {
-  id         String   @id @default(uuid())
-  level      LogLevel @default(INFO)
-  message    String
-  context    Json?
-<<<<<<< HEAD
-  createdAt  DateTime    @default(now())   @db.Timestamptz(0)
-}
-
-model Lead {
-  id                  Int        @id @default(autoincrement())
-  statusId            Int?       
-  firstname           String
-  secondname          String
-  country             String?
-  createdAt           DateTime   @default(now()) @db.Timestamptz(0)
-  defaultEmail        String?
-  agentId             Int?   
-
-
-  isVerified          Boolean           @db.Boolean @default(false)
-
-  customer            Customer?
-  status              LeadStatus?        @relation(fields: [statusId], references: [id])
-  Phone               Phone[]
-  agent               Agent?            @relation(fields: [agentId], references: [id])
-}
-
-model Customer {
-  publicId            String         @unique @db.Uuid @default(uuid())
-  id                  Int            @id @default(autoincrement())
-  leadId              Int            @unique   
-  
-  emails              Email[]
-  password            String
-  
-  lastOnline          DateTime       @db.Timestamptz(0)
-
-  leads               Lead           @relation(fields: [leadId], references: [id])
-}
-
-model Email {
-  id               Int               @id @default(autoincrement())
-  email            String
-  isMain           Boolean           @default(false)
-  customerId       Int
-  createdAt        DateTime          @default(now()) @db.Timestamptz(0)
-  
-  customer         Customer          @relation(fields: [customerId], references: [id])
-=======
-  created_at DateTime @default(now()) @db.Timestamptz(0)
-}
-
-model Leads {
-  id            Int      @id @default(autoincrement())
-  status_id     Int?
-  first_name    String
-  second_name   String
-  country       String?
-  created_at    DateTime @default(now()) @db.Timestamptz(0)
-  default_email String?
-
-  customer Customer?
-  status   LeadStatus? @relation(fields: [status_id], references: [id])
-  Phone    Phone[]
-}
-
-model Customer {
-  public_id String @unique @db.Uuid
-  id        Int    @id @default(autoincrement())
-  lead_id   Int    @unique
-  agent_id  Int?
-
-  emails   Email[]
-  password String
-
-  last_time_online DateTime @db.Timestamptz(0)
-
-  agent Agent? @relation(fields: [agent_id], references: [id])
-  leads Leads  @relation(fields: [lead_id], references: [id])
-}
-
-model Email {
-  id          Int      @id @default(autoincrement())
-  email       String
-  isMain      Boolean  @default(false)
-  customer_id Int
-  created_at  DateTime @default(now()) @db.Timestamptz(0)
-  customer    Customer @relation(fields: [customer_id], references: [id])
->>>>>>> 06eb569fb36151d8864fe204c876d16c4b4eb4ef
-}
-
-
-
-
-
-
-
 model Agent {
-<<<<<<< HEAD
-  publicId         String    @unique @db.Uuid @default(uuid())
-  id               Int       @id @default(autoincrement())
-  roleId           Int?
-  
-  
-  email            String     @db.VarChar(100)
-  password         String
-  lastOnline       DateTime   @db.Timestamptz(0)
-  
-  testRoles        TestRoleNames
-  testPermissions  PermsList
-  
-  
-  role             Role?      @relation(fields: [roleId], references: [id])
-
-  agentPermissions AgentPermission[]
-
-  desks            Desk[]     @relation("AgentDesks")
-  leads            Lead[]
-}
-
-model Role {
-  id               Int               @id @default(autoincrement())
-  name             String
-  
-
-  rolePermissions  RolePermission[]
-  agents           Agent[]
-=======
-  public_id String @unique @db.Uuid
-  id        Int    @id @default(autoincrement())
-  role_id   Int?
-
-  email            String        @db.VarChar(100)
-  password         String
-  last_time_online DateTime      @db.Timestamptz(0)
-  testRoles        TestRoleNames
-  testPermissions  PermsList
-
-  role Role? @relation(fields: [role_id], references: [id])
-
-  desks     Desk[]     @relation("AgentDesks")
-  customers Customer[]
-}
-
-model Role {
-  id     Int     @id @default(autoincrement())
-  name   String?
-  agents Agent[]
->>>>>>> 06eb569fb36151d8864fe204c876d16c4b4eb4ef
+  publicId        String            @unique @db.Uuid
+  id              Int               @id @default(autoincrement())
+  roleId          Int?
+  email           String            @db.VarChar(100)
+  password        String
+  lastOnline      DateTime          @db.Timestamptz(0)
+  testRoles       TestRoleNames
+  testPermissions PermsList
+  Role            Role?             @relation(fields: [roleId], references: [id])
+  AgentPermission AgentPermission[]
+  Lead            Lead[]
+  Desk            Desk[]            @relation("AgentDesks")
 }
 
 model AgentPermission {
-  // Переопределение разрешений для конкретного agent
   agentId      Int
   permissionId Int
   allowed      Boolean    @default(false)
+  Agent        Agent      @relation(fields: [agentId], references: [id])
+  Permission   Permission @relation(fields: [permissionId], references: [id])
 
-  agent        Agent      @relation(fields: [agentId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
-
-  @@id([agentId, permissionId]) // Primary Key
+  @@id([agentId, permissionId])
 }
 
-
-model Permission {
-  id               Int      @id @default(autoincrement())
-  key              String   @unique
-  name             String
-  description      String?
-  
-
-  rolePermissions  RolePermission[]
-  agentPermissions AgentPermission[]
+model Customer {
+  publicId   String   @unique @db.Uuid
+  id         Int      @id @default(autoincrement())
+  leadId     Int      @unique
+  password   String
+  lastOnline DateTime @db.Timestamptz(0)
+  Lead       Lead     @relation(fields: [leadId], references: [id])
+  Email      Email[]
 }
-
-model RolePermission {
-  // ManyToMany между Role и Permission
-  roleId       Int
-  permissionId Int
-  allowed      Boolean    @default(false)
-
-  role         Role       @relation(fields: [roleId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
-
-  @@id([roleId, permissionId]) // Primary Key
-}
-
-
 
 model Desk {
-<<<<<<< HEAD
-  id     Int            @id          @default(autoincrement())
-  name   String 
-  agents Agent[]                     @relation("AgentDesks")
-}
-
-model LeadStatus {
-  id           Int      @id        @default(autoincrement())
-  name         String
-  leads        Lead[]
-=======
-  id     Int     @id @default(autoincrement())
-  name   String
-  agents Agent[] @relation("AgentDesks")
-}
-
-model LeadStatus {
   id    Int     @id @default(autoincrement())
   name  String
-  leads Leads[]
->>>>>>> 06eb569fb36151d8864fe204c876d16c4b4eb4ef
+  Agent Agent[] @relation("AgentDesks")
+}
+
+model Email {
+  id         Int      @id @default(autoincrement())
+  email      String
+  isMain     Boolean  @default(false)
+  customerId Int
+  createdAt  DateTime @default(now()) @db.Timestamptz(0)
+  Customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model Lead {
+  id           Int         @id @default(autoincrement())
+  statusId     Int?
+  firstname    String
+  secondname   String
+  country      String?
+  createdAt    DateTime    @default(now()) @db.Timestamptz(0)
+  defaultEmail String?
+  agentId      Int?
+  isVerified   Boolean     @default(false)
+  Customer     Customer?
+  Agent        Agent?      @relation(fields: [agentId], references: [id])
+  LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
+  Phone        Phone[]
+}
+
+model LeadStatus {
+  id   Int    @id @default(autoincrement())
+  name String
+  Lead Lead[]
+}
+
+model Log {
+  id        String   @id
+  level     LogLevel @default(INFO)
+  message   String
+  context   Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+}
+
+model Permission {
+  id              Int               @id @default(autoincrement())
+  key             String            @unique
+  name            String
+  description     String?
+  AgentPermission AgentPermission[]
+  RolePermission  RolePermission[]
 }
 
 model Phone {
-  id      Int     @id @default(autoincrement())
-  phone   String
-  isMain  Boolean @default(false)
-  lead_id Int
-
+  id         Int      @id @default(autoincrement())
+  phone      String
+  isMain     Boolean  @default(false)
+  lead_id    Int
   created_at DateTime @default(now()) @db.Timestamptz(0)
-  Leads      Lead    @relation(fields: [lead_id], references: [id])
+  Lead       Lead     @relation(fields: [lead_id], references: [id])
+}
+
+model Role {
+  id             Int              @id @default(autoincrement())
+  name           String
+  Agent          Agent[]
+  RolePermission RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  allowed      Boolean    @default(false)
+  Permission   Permission @relation(fields: [permissionId], references: [id])
+  Role         Role       @relation(fields: [roleId], references: [id])
+
+  @@id([roleId, permissionId])
 }
 
 enum LogLevel {
@@ -237,19 +128,14 @@ enum LogLevel {
   ERROR
 }
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 06eb569fb36151d8864fe204c876d16c4b4eb4ef
-enum TestRoleNames {
-  ADMIN
-  MODERATOR
-}
-
 enum PermsList {
   action1
   action2
   action3
   action4
+}
+
+enum TestRoleNames {
+  ADMIN
+  MODERATOR
 }
