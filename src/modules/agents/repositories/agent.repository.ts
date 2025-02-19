@@ -1,75 +1,111 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { CreateAgent } from '@/shared/types/agent';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Agent } from '@prisma/client';
 import { UpdateAgent } from '@/modules/agents/dto';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
 export class AgentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAll(): Promise<Agent[]> {
-    return this.prisma.agent.findMany();
+    try {
+      return await this.prisma.agent.findMany();
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
-  async getById(id: number): Promise<Agent | null> {
-    return this.prisma.agent.findFirst({ where: { id } });
+  async findOneById(id: number): Promise<Agent | null> {
+    try {
+      return await this.prisma.agent.findFirst({ where: { id } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
-  async getByUUID(public_id: string): Promise<Agent | null> {
-    return this.prisma.agent.findFirst({ where: { public_id } });
+  async findOneByPublicId(publicId: string): Promise<Agent | null> {
+    try {
+      return await this.prisma.agent.findFirst({ where: { publicId } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
-  async getByEmail(email: string):Promise<Agent | null>{
-    return this.prisma.agent.findFirst({where: {email}});
+  async findOneByEmail(email: string): Promise<Agent | null> {
+    try {
+      return await this.prisma.agent.findFirst({ where: { email } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
-  async create(data: CreateAgent): Promise<Agent> {
+  async createOne(data: CreateAgent): Promise<Agent> {
+    const { deskIds, roleId, testPermissions, ...rest } = data;
+    try {
+      return await this.prisma.agent.create({
+        data: {
+          ...rest,
+          testPermissions,
+          ...(roleId ? { role: { connect: { id: roleId } } } : {}),
+          ...(deskIds ? { desks: { connect: deskIds.map((id) => ({ id })) } } : {}),
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  async deleteOneById(id: number): Promise<Agent | null> {
+    try {
+      return await this.prisma.agent.delete({ where: { id } });
+    } catch (error: any) {
+      // Handle error appropriately
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  async deleteByPublicId(publicId: string): Promise<Agent | null> {
+    try {
+      return await this.prisma.agent.delete({ where: { publicId } });
+    } catch (error: any) {
+      // Handle error appropriately
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  async updateOneById(id: number, data: UpdateAgent): Promise<Agent | null> {
     const { desk_ids, role_id, ...rest } = data;
-    return this.prisma.agent.create({
-      data: {
-        ...rest,
-        // Если role_id указан, обновляем связь с Role через nested connect:
-        ...(role_id ? { role: { connect: { id: role_id } } } : {}),
-        // Если указан список идентификаторов desk, привязываем их через nested connect:
-        ...(desk_ids ? { desks: { connect: desk_ids.map((id) => ({ id })) } } : {}),
-      },
-    });
+    try {
+      return await this.prisma.agent.update({
+        where: { id },
+        data: {
+          ...rest,
+          ...(role_id !== undefined ? { role: { connect: { id: role_id } } } : {}),
+          ...(desk_ids ? { desks: { set: desk_ids.map((id: number) => ({ id })) } } : {}),
+        },
+      });
+    } catch (error: any) {
+      // Handle error appropriately
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
-  async deleteById(id: number): Promise<Agent | null> {
-    return this.prisma.agent.delete({ where: { id } });
-  }
-
-  async deleteByUUID(public_id: string): Promise<Agent | null> {
-    return this.prisma.agent.delete({ where: { public_id } });
-  }
-
-  async updateById(id: number, data: UpdateAgent): Promise<Agent | null> {
+  async updateByPublicId(publicId: string, data: UpdateAgent): Promise<Agent | null> {
     const { desk_ids, role_id, ...rest } = data;
-    return this.prisma.agent.update({
-      where: { id },
-      data: {
-        ...rest,
-        ...(role_id !== undefined ? { role: { connect: { id: role_id } } } : {}),
-        // Операция set очищает предыдущие связи и устанавливает новые,
-        // если хотите добавлять/удалять по-отдельности, используйте connect/disconnect
-        ...(desk_ids ? { desks: { set: desk_ids.map((id: number) => ({ id })) } } : {}),
-      },
-    });
-  }
-
-  async updateByUUID(public_id: string, data: UpdateAgent): Promise<Agent | null> {
-    const { desk_ids, role_id, ...rest } = data;
-    return this.prisma.agent.update({
-      where: { public_id },
-      data: {
-        ...rest,
-        ...(role_id !== undefined ? { role: { connect: { id: role_id } } } : {}),
-        // Операция set очищает предыдущие связи и устанавливает новые,
-        // если хотите добавлять/удалять по-отдельности, используйте connect/disconnect
-        ...(desk_ids ? { desks: { set: desk_ids.map((id: number) => ({ id })) } } : {}),
-      },
-    });
+    try {
+      return await this.prisma.agent.update({
+        where: { publicId },
+        data: {
+          ...rest,
+          ...(role_id !== undefined ? { role: { connect: { id: role_id } } } : {}),
+          ...(desk_ids ? { desks: { set: desk_ids.map((id: number) => ({ id })) } } : {}),
+        },
+      });
+    } catch (error: any) {
+      // Handle error appropriately
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 }

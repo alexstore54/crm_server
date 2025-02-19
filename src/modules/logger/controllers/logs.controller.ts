@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { Log } from '@prisma/client';
 import { LogsService } from '@/modules/logger/services';
-import { GetLogByUserId, GetLogs } from '@/modules/logger/dto';
+import { GetLogs } from '@/modules/logger/dto';
 
 @Controller('logs')
 export class LogsController {
@@ -15,8 +15,8 @@ export class LogsController {
   }
 
   @Get('/users/:id')
-  async getLogsByUserId(@Param('id') params: GetLogByUserId): Promise<Log[]> {
-    return this.loggerService.getLogsByUserId(params.id);
+  async getLogsByUserId(@Param('id', ParseIntPipe) id: number): Promise<Log[]> {
+    return this.loggerService.getLogsByUserId(id);
   }
 
   @Get('/:id')

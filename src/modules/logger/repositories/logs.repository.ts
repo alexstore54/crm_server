@@ -2,12 +2,10 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
 import { Log, LogLevel } from '@prisma/client';
 import { CreateLog, UpdateLog } from '@/modules/logger/dto';
-import { object } from 'joi';
 
 @Injectable()
 export class LogsRepository {
-  constructor(private prisma: PrismaService) {
-  }
+  constructor(private prisma: PrismaService) {}
 
   public async getLogs(limit: number, offset: number): Promise<Log[]> {
     try {
@@ -23,7 +21,7 @@ export class LogsRepository {
     }
   }
 
-  public async createLog(data: CreateLog): Promise<Log> {
+  public async createOneLog(data: CreateLog): Promise<Log> {
     const level: LogLevel = (data.level || 'INFO').toUpperCase() as LogLevel;
     try {
       return await this.prisma.log.create({
@@ -38,7 +36,7 @@ export class LogsRepository {
     }
   }
 
-  public async updateLog(id: number, data: UpdateLog): Promise<Log> {
+  public async updateOneLog(id: number, data: UpdateLog): Promise<Log> {
     try {
       return await this.prisma.log.update({
         where: { id },
@@ -52,7 +50,7 @@ export class LogsRepository {
     }
   }
 
-  public async getLogsByUserId(userId: string): Promise<Log[]> {
+  public async findLogsByUserId(userId: number): Promise<Log[]> {
     try {
       return await this.prisma.log.findMany({
         where: { userId },
@@ -62,7 +60,7 @@ export class LogsRepository {
     }
   }
 
-  public async getLogById(id: number): Promise<Log | null> {
+  public async findOneLogById(id: number): Promise<Log | null> {
     try {
       return await this.prisma.log.findUnique({
         where: { id },

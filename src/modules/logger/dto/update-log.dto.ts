@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
 import { LogLevel } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { LogContext } from '@/modules/logger/dto/log-context.dto';
@@ -13,8 +13,8 @@ export class UpdateLog {
   readonly level?: LogLevel;
 
   @IsOptional()
-  @IsUUID()
-  readonly userId?: string;
+  @IsNumber()
+  readonly userId?: number;
 
   @IsOptional()
   @ValidateNested()

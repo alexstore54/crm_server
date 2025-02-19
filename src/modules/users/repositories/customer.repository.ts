@@ -14,8 +14,8 @@ export class CustomersRepository {
     try {
       const customers = await this.prisma.customer.findMany({
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -25,9 +25,9 @@ export class CustomersRepository {
       return customers.map((customer) =>
         UsersUtil.mapCustomerToFullCustomer(
           customer,
-          customer.leads,
-          customer.leads.Phone,
-          customer.emails,
+          customer.Lead,
+          customer.Lead.Phone,
+          customer.Email,
         ),
       );
     } catch (error: any) {
@@ -40,8 +40,8 @@ export class CustomersRepository {
       const customer = await this.prisma.customer.findFirst({
         where: { id },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -53,9 +53,9 @@ export class CustomersRepository {
       }
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -65,10 +65,10 @@ export class CustomersRepository {
   async findOneByPublicId(publicId: string): Promise<FullCustomer | null> {
     try {
       const customer = await this.prisma.customer.findFirst({
-        where: { public_id: publicId },
+        where: { publicId },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -80,9 +80,9 @@ export class CustomersRepository {
       }
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -93,13 +93,13 @@ export class CustomersRepository {
     try {
       const customer = await this.prisma.customer.findFirst({
         where: {
-          emails: {
+          Email: {
             some: { email },
           },
         },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -111,9 +111,9 @@ export class CustomersRepository {
       }
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -124,15 +124,15 @@ export class CustomersRepository {
     const { agentId, leadId, ...rest } = data;
     try {
       const customer = await this.prisma.customer.create({
-        //@ts-ignore
         data: {
           ...rest,
-          leads: { connect: { id: leadId } },
+          lastOnline: rest.lastTimeOnline,
+          Lead: { connect: { id: leadId } },
           ...(agentId ? { agent: { connect: { id: agentId } } } : {}),
         },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -141,22 +141,21 @@ export class CustomersRepository {
       });
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
   async deleteOneById(id: number): Promise<FullCustomer | null> {
     try {
       const customer = await this.prisma.customer.delete({
         where: { id },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -165,9 +164,9 @@ export class CustomersRepository {
       });
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -185,8 +184,8 @@ export class CustomersRepository {
           ...(agent_id !== undefined ? { agent: { connect: { id: agent_id } } } : {}),
         },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -195,9 +194,9 @@ export class CustomersRepository {
       });
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -208,15 +207,15 @@ export class CustomersRepository {
     const { agent_id, lead_id, ...rest } = data;
     try {
       const customer = await this.prisma.customer.update({
-        where: { public_id: publicId },
+        where: { publicId },
         data: {
           ...rest,
           ...(lead_id !== undefined ? { leads: { connect: { id: lead_id } } } : {}),
           ...(agent_id !== undefined ? { agent: { connect: { id: agent_id } } } : {}),
         },
         include: {
-          emails: true,
-          leads: {
+          Email: true,
+          Lead: {
             include: {
               Phone: true,
             },
@@ -225,9 +224,9 @@ export class CustomersRepository {
       });
       return UsersUtil.mapCustomerToFullCustomer(
         customer,
-        customer.leads,
-        customer.leads.Phone,
-        customer.emails,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

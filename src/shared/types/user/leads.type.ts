@@ -1,9 +1,9 @@
 import { Phone } from '@prisma/client';
 
-export type CreateLeads = {
-    first_name: string;
-    second_name: string;
+export type CreateLead = {
+    firstname: string;
+    lastname: string;
     country: string;
-    default_email?: string;
+    defaultEmail?: string;
     status_id?: number;
 }

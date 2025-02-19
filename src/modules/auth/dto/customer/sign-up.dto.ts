@@ -18,6 +18,11 @@ export class SignUpCustomer {
   password: string;
 
   @IsString()
+  @MinLength(4)
+  @MaxLength(30)
+  country: string;
+
+  @IsString()
   @MaxLength(25)
   @Matches(VALIDATION_REGEX.NAME)
   firstname: string;

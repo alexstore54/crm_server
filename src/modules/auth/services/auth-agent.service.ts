@@ -12,7 +12,7 @@ export class AuthAgentService {
   public async validate(data: SignInAgent): Promise<Agent> {
     const { email, password } = data;
 
-    const agent = await this.agentRepository.getByEmail(email);
+    const agent = await this.agentRepository.findOneByEmail(email);
     if (!agent) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }

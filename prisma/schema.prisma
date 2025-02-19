@@ -8,13 +8,13 @@ datasource db {
 }
 
 model Agent {
-  publicId        String            @unique @db.Uuid
+  publicId        String            @unique @default(uuid())
   id              Int               @id @default(autoincrement())
   roleId          Int?
   email           String            @db.VarChar(100)
   password        String
-  lastOnline      DateTime          @db.Timestamptz(0)
-  testRoles       TestRoleNames
+  lastOnline      DateTime?         @db.Timestamptz(0)
+  routeAccess     RouteAccess       @default(ADMIN)
   testPermissions PermsList
   Role            Role?             @relation(fields: [roleId], references: [id])
   AgentPermission AgentPermission[]
@@ -33,7 +33,7 @@ model AgentPermission {
 }
 
 model Customer {
-  publicId   String   @unique @db.Uuid
+  publicId   String   @unique @default(uuid())
   id         Int      @id @default(autoincrement())
   leadId     Int      @unique
   password   String
@@ -61,7 +61,7 @@ model Lead {
   id           Int         @id @default(autoincrement())
   statusId     Int?
   firstname    String
-  secondname   String
+  lastname     String
   country      String?
   createdAt    DateTime    @default(now()) @db.Timestamptz(0)
   defaultEmail String?
@@ -80,9 +80,10 @@ model LeadStatus {
 }
 
 model Log {
-  id        String   @id
+  id        Int      @id @default(autoincrement())
   level     LogLevel @default(INFO)
   message   String
+  userId    Int?
   context   Json?
   createdAt DateTime @default(now()) @db.Timestamptz(0)
 }
@@ -135,7 +136,7 @@ enum PermsList {
   action4
 }
 
-enum TestRoleNames {
+enum RouteAccess {
   ADMIN
   MODERATOR
 }

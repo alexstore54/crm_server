@@ -16,7 +16,7 @@ export class PrismaTransport extends Transport {
       this.emit('logged', info);
     });
 
-    await this.logsRepository.createLog(info);
+    await this.logsRepository.createOneLog(info);
     callback();
   }
 

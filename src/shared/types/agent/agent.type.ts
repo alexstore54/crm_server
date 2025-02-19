@@ -1,10 +1,12 @@
+import { Permission, PermsList } from '@prisma/client';
+
 export type CreateAgent = {
-    public_id: string;       
-    role_id?: number;        
-    email: string;
-    password: string;
-    last_time_online: Date;
-    desk_ids?: number[];     
-  };
+  publicId: string;
+  roleId?: number;
+  email: string;
+  password: string;
+  deskIds?: number[];
+  testPermissions: PermsList;
+};
 
 

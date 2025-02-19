@@ -4,7 +4,7 @@ import { FullCustomer } from '@/shared/types/user';
 import { CustomersRepository, LeadRepository } from '@/modules/users/repositories';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { SignUpCustomer } from '@/modules/auth/dto/customer';
-import { Leads } from '@prisma/client';
+import { Lead } from '@prisma/client';
 
 @Injectable()
 export class AuthCustomerService {
@@ -44,7 +44,7 @@ export class AuthCustomerService {
     return this.makeCustomerFromLead(existingLead, password);
   }
 
-  private async makeCustomerFromLead(lead: Leads, password: string): Promise<FullCustomer> {
+  private async makeCustomerFromLead(lead: Lead, password: string): Promise<FullCustomer> {
     return this.customerRepository.createOne({
       password,
       leadId: lead.id,
@@ -53,11 +53,13 @@ export class AuthCustomerService {
   }
 
   private async makeLeadAndCustomer(data: SignUpCustomer): Promise<FullCustomer> {
-    const { password, firstname, phone, lastname, email } = data;
+    const { password, firstname, phone, lastname, email, country } = data;
     const newLead = await this.leadRepository.createOne({
-      default_email: email,
-      first_name: firstname,
-      second_name: lastname,
+      defaultEmail: email,
+      firstname: firstname,
+      lastname: lastname,
+      country,
     });
+    return this.makeCustomerFromLead(newLead, password);
   }
 }

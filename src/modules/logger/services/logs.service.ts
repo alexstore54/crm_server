@@ -6,8 +6,8 @@ import { Log } from '@prisma/client';
 export class LogsService {
   constructor(private logRepository: LogsRepository) {}
 
-  public async getLogsByUserId(id: string): Promise<Log[]> {
-    return this.logRepository.getLogsByUserId(id);
+  public async getLogsByUserId(id: number): Promise<Log[]> {
+    return this.logRepository.findLogsByUserId(id);
   }
 
   public async getLogs(page: number, limit: number): Promise<Log[]> {
@@ -16,6 +16,6 @@ export class LogsService {
   }
 
   public async getLogById(id: number): Promise<Log | null> {
-    return this.logRepository.getLogById(id);
+    return this.logRepository.findOneLogById(id);
   }
 }

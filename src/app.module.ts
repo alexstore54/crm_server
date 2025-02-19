@@ -5,7 +5,6 @@ import { HealthModule } from '@/modules/health/health.module';
 import { CsrfMiddleware } from '@/common/middleware';
 import { GatewayModule } from '@/shared/gateway';
 import { UserModule } from '@/modules/users/user.module';
-import { CustomerModule } from '@/modules/customers/customer.module';
 
 
 @Module({
@@ -16,7 +15,6 @@ import { CustomerModule } from '@/modules/customers/customer.module';
     PrismaModule,
     HealthModule,
     UserModule,
-    CustomerModule,
   ],
   controllers: [],
   providers: [],
