@@ -8,7 +8,7 @@ import { FullCustomer } from '@/shared/types/user';
 import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { SignInCustomer, SignUpCustomer } from '@/modules/auth/dto/customer';
 
-@Controller('auth/users')
+@Controller('auth/customers')
 export class AuthCustomerController {
   constructor(
     private readonly authCustomerService: AuthCustomerService,
