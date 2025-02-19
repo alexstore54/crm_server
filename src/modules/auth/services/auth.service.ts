@@ -1,6 +1,6 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SessionsService } from '@/shared/services/sessions/sessions.service';
-import { ClientsGateway } from '@/shared/gateway';
+import { GatewayService } from '@/shared/gateway';
 import {
   AgentAuthPayload,
   AuthTokens,
@@ -13,12 +13,14 @@ import { BcryptHelper } from '@/shared/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from '@/modules/auth/services/tokens.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { AuthGateway } from '@/modules/auth/geateway';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly sessionService: SessionsService,
-    private readonly clientService: ClientsGateway,
+    private readonly gatewayService: GatewayService,
+    private readonly authGateway: AuthGateway,
     private readonly tokensService: TokensService,
   ) {}
 
@@ -37,46 +39,49 @@ export class AuthService {
       sessionUUID: sessionUUID,
       fingerprint,
       userAgent,
-      isOnline: false,
+      isOnline: true,
       refreshToken: tokens.refreshToken,
-      userId: user.public_id,
+      //#TODO - make publicID
+      userId: user.id.toString(),
     });
 
     const session = await this.sessionService.saveUserSession(createSessionInput);
 
-    // await this.clientService.connect(user.publicId, sessionUUID, socketClient);
+    //logout from all devices except current
+    if (userType === 'agent') {
+      //TODO: make publicID
+      await this.authGateway.logoutFromAllDevicesExceptCurrent(user.id.toString(), sessionUUID);
+    }
 
     return tokens;
   }
 
   public async logout(userPublicId: string, sessionUUID: SessionUUID) {
-    // this.server.to(sessionUUID).emit('logout');
     await this.sessionService.deleteUserSession(userPublicId, sessionUUID);
-    // this.gatewayService.removeClient(sessionUUID);
+    this.gatewayService.removeClient(sessionUUID);
   }
 
   public async refreshTokens(
-    userPublicId: string,
-    sessionUUID: SessionUUID,
+    payload: AgentAuthPayload | CustomerAuthPayload,
     refreshToken: string,
-    payload: CustomerAuthPayload | AgentAuthPayload,
   ): Promise<AuthTokens> {
+    const { sub: userPublicId, sessionUUID } = payload;
+
     const session = await this.sessionService.getUserSession(userPublicId, sessionUUID);
     if (!session) {
-      throw new ForbiddenException(ERROR_MESSAGES.ACCESS_DENIED);
+      throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_DENIED);
     }
+    const isTokensCompare = await BcryptHelper.compare(refreshToken, session.hashedRefreshToken);
 
-    const hashedRefreshToken = await BcryptHelper.hash(refreshToken);
-    if (session.hashedRefreshToken !== hashedRefreshToken) {
-      throw new ForbiddenException(ERROR_MESSAGES.ACCESS_DENIED);
+    if (!isTokensCompare) {
+      throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_DENIED);
     }
 
     const tokens = await this.tokensService.getTokens(payload);
-    const newHashedRefreshToken = await BcryptHelper.hash(tokens.refreshToken);
+    const newHashedToken = await BcryptHelper.hash(tokens.refreshToken);
     await this.sessionService.updateUserSession(userPublicId, sessionUUID, {
       ...session,
-      isOnline: true,
-      refreshToken: newHashedRefreshToken,
+      refreshToken: newHashedToken,
     });
 
     return tokens;

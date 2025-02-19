@@ -5,4 +5,6 @@ export const ERROR_MESSAGES = {
   ACCESS_TOKEN_NOT_FOUND: 'Access token not found',
   INVALID_CREDS: 'Invalid credentials',
   ACCESS_DENIED: 'Access Denied',
+  USER_EXISTS: 'User already exists',
+  DB_ERROR: 'Error by query to database'
 };

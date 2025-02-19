@@ -1,25 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { Agent } from '@prisma/client';
 import { AgentRepository } from '@/modules/agents/repositories/agent.repository';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { BcryptHelper } from '@/shared/helpers';
 
 @Injectable()
 export class AuthAgentService {
   constructor(private readonly agentRepository: AgentRepository) {}
 
-  public async getProfile() {
-    return 'Agent Profile';
-  }
-
-  public async getProfileById() {
-    return 'Agent Profile';
-  }
-
-  public async signIn(data: SignInAgent): Promise<Agent | null> {
+  public async validate(data: SignInAgent): Promise<Agent> {
     const { email, password } = data;
 
-    const agent = {};
+    const agent = await this.agentRepository.getByEmail(email);
     if (!agent) {
+      throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
+
+    const isPasswordMatch = await BcryptHelper.compare(password, agent.password);
+    if (!isPasswordMatch) {
+      throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
+    }
+
+    return agent;
   }
 }

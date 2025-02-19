@@ -1,22 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { SignUpAgent } from '@/modules/auth/dto/agent/sign-up.dto';
-import { SignInUser } from '@/modules/auth/dto/user/sign-in.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { SignInCustomer } from '@/modules/auth/dto/customer/sign-in.dto';
+import { FullCustomer } from '@/shared/types/user';
+import { CustomersRepository, LeadRepository } from '@/modules/users/repositories';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { SignUpCustomer } from '@/modules/auth/dto/customer';
+import { Leads } from '@prisma/client';
 
 @Injectable()
 export class AuthCustomerService {
-  public async getProfile() {
-    return 'Customer Profile';
-  }
+  constructor(
+    private readonly customerRepository: CustomersRepository,
+    private readonly leadRepository: LeadRepository,
+  ) {}
 
-  public async getProfileById() {
-    return 'Customer Profile';
-  }
-
-  public async signIn(data: SignInUser): Promise<any> {
+  public async validate(data: SignInCustomer): Promise<FullCustomer> {
     const { email, password } = data;
+    const customer = await this.customerRepository.findOneByEmail(email);
+    if (!customer) {
+      throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
+    }
+
+    const isPasswordMatch = password === customer.password;
+
+    if (!isPasswordMatch) {
+      throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
+    }
+
+    return customer;
   }
 
-  public async signUp(data: SignUpAgent): Promise<any> {
-    return 'Customer Profile';
+  public async signUp(data: SignUpCustomer): Promise<FullCustomer> {
+    const { email, password, phone } = data;
+    const customer = await this.customerRepository.findOneByEmail(email);
+    if (customer) {
+      throw new BadRequestException(ERROR_MESSAGES.USER_EXISTS);
+    }
+    const existingLead = await this.leadRepository.findOneByPhone(phone);
+
+    if (!existingLead) {
+      return this.makeLeadAndCustomer(data);
+    }
+
+    return this.makeCustomerFromLead(existingLead, password);
+  }
+
+  private async makeCustomerFromLead(lead: Leads, password: string): Promise<FullCustomer> {
+    return this.customerRepository.createOne({
+      password,
+      leadId: lead.id,
+      lastTimeOnline: new Date(),
+    });
+  }
+
+  private async makeLeadAndCustomer(data: SignUpCustomer): Promise<FullCustomer> {
+    const { password, firstname, phone, lastname, email } = data;
+    const newLead = await this.leadRepository.createOne({
+      default_email: email,
+      first_name: firstname,
+      second_name: lastname,
+    });
   }
 }

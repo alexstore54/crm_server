@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Headers, Post, Req, Res } from '@nestjs/common';
 import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { Response } from 'express';
@@ -6,7 +6,8 @@ import { AuthService } from '@/modules/auth/services';
 import { CookiesUtil } from '@/shared/utils';
 import { AuthTokens } from '@/shared/types/auth';
 import { Agent } from '@prisma/client';
-import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { RequestWithAgentPayload } from '@/shared/types/auth/request-with-user.type';
+import { RESPONSE_STATUS } from '@/shared/constants/response';
 
 @Controller('auth/agents')
 export class AuthAgentController {
@@ -22,11 +23,7 @@ export class AuthAgentController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const agent: Agent | null = await this.authAgentService.signIn(body);
-
-    if (!agent) {
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_CREDS);
-    }
+    const agent: Agent = await this.authAgentService.validate(body);
 
     const tokens: AuthTokens = await this.authService.authenticate('agent', {
       user: agent,
@@ -36,16 +33,23 @@ export class AuthAgentController {
 
     CookiesUtil.setAuthTokens(res, tokens.accessToken, tokens.refreshToken);
 
-    return res.status(200).send('success');
+    return res.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
 
   @Post('logout')
-  async logout() {
-    // this.authService.logout()
+  async logout(@Req() request: RequestWithAgentPayload, @Res() response: Response) {
+    const payload = request.user;
+    await this.authService.logout(payload.sub, payload.sessionUUID);
+    CookiesUtil.clearAuthTokens(response);
+    return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
 
   @Post('refresh')
-  async refreshTokens(@Req() request: Request, @Res() response: Response) {
-    ///
+  async refreshTokens(@Req() request: RequestWithAgentPayload, @Res() response: Response) {
+    const payload = request.user;
+    const refreshToken = request.cookies['refresh_token'];
+    const tokens: AuthTokens = await this.authService.refreshTokens(payload, refreshToken);
+    CookiesUtil.setAuthTokens(response, tokens.accessToken, tokens.refreshToken);
+    return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
 }

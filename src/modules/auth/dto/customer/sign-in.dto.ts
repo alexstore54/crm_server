@@ -2,7 +2,7 @@ import { IsEmail, IsString, Matches, MaxLength, MinLength } from 'class-validato
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 
-export class SignUpAgent {
+export class SignInCustomer {
   @IsEmail()
   email: string;
 

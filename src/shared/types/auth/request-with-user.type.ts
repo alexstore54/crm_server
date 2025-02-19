@@ -1,5 +1,10 @@
-import {Request} from 'express';
+import { Request } from 'express';
+import { AgentAuthPayload, CustomerAuthPayload } from '@/shared/types/auth/auth-payload.type';
 
-export interface RequestWithUser extends Request {
-  user: any;
+export interface RequestWithCustomerPayload extends Request {
+  user: CustomerAuthPayload;
+}
+
+export interface RequestWithAgentPayload extends Request {
+  user: AgentAuthPayload;
 }
