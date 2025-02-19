@@ -8,91 +8,90 @@ datasource db {
 }
 
 model Log {
-  id         String      @id @default(uuid())
-  level      LogLevel    @default(INFO)
+  id         String   @id @default(uuid())
+  level      LogLevel @default(INFO)
   message    String
   context    Json?
-  created_at DateTime    @default(now())   @db.Timestamptz(0)
+  created_at DateTime @default(now()) @db.Timestamptz(0)
 }
 
 model Leads {
-  id                  Int        @id @default(autoincrement())
-  status_id           Int?       
-  first_name          String
-  second_name         String
-  country             String?
-  created_at          DateTime   @default(now()) @db.Timestamptz(0)
-  default_email       String?
-  
-  customer    Customer?
-  status      LeadStatus? @relation(fields: [status_id], references: [id])
-  Phone       Phone[]
+  id            Int      @id @default(autoincrement())
+  status_id     Int?
+  firstname     String
+  second_name   String
+  country       String?
+  created_at    DateTime @default(now()) @db.Timestamptz(0)
+  default_email String?
+
+  customer Customer?
+  status   LeadStatus? @relation(fields: [status_id], references: [id])
+  Phone    Phone[]
 }
 
 model Customer {
-  public_id        String   @unique @db.Uuid
-  id               Int      @id @default(autoincrement())
-  lead_id          Int      @unique
-  agent_id         Int?     
-  
-  emails           Email[]
-  password         String
-  
-  last_time_online DateTime  @db.Timestamptz(0)
+  public_id String @unique @db.Uuid
+  id        Int    @id @default(autoincrement())
+  lead_id   Int    @unique
+  agent_id  Int?
 
-  agent            Agent?    @relation(fields: [agent_id], references: [id])
-  leads            Leads     @relation(fields: [lead_id], references: [id])
+  emails   Email[]
+  password String
+
+  last_time_online DateTime @db.Timestamptz(0)
+
+  agent Agent? @relation(fields: [agent_id], references: [id])
+  leads Leads  @relation(fields: [lead_id], references: [id])
 }
 
 model Email {
-  id               Int      @id @default(autoincrement())
-  email            String
-  isMain           Boolean  @default(false)
-  customer_id      Int
-  created_at       DateTime @default(now()) @db.Timestamptz(0)
-  
-  customer         Customer @relation(fields: [customer_id], references: [id])
+  id          Int      @id @default(autoincrement())
+  email       String
+  isMain      Boolean  @default(false)
+  customer_id Int
+  created_at  DateTime @default(now()) @db.Timestamptz(0)
+
+  customer Customer @relation(fields: [customer_id], references: [id])
 }
 
 model Agent {
-  public_id        String    @unique @db.Uuid
-  id               Int       @id @default(autoincrement())
-  role_id          Int?
-  
-  
-  email            String    @db.VarChar(100)
-  password         String
-  last_time_online DateTime  @db.Timestamptz(0)
-  role             Role?     @relation(fields: [role_id], references: [id])
+  public_id String @unique @db.Uuid
+  id        Int    @id @default(autoincrement())
+  role_id   Int?
 
-  desks            Desk[]    @relation("AgentDesks")
-  customers        Customer[]
+  email            String   @db.VarChar(100)
+  password         String
+  last_time_online DateTime @db.Timestamptz(0)
+  role             Role?    @relation(fields: [role_id], references: [id])
+
+  desks     Desk[]     @relation("AgentDesks")
+  customers Customer[]
 }
 
 model Role {
-  id               Int     @id @default(autoincrement())
-  name             String?
-  agents           Agent[]
+  id     Int     @id @default(autoincrement())
+  name   String?
+  agents Agent[]
 }
 
 model Desk {
-  id     Int        @id      @default(autoincrement())
-  name   String 
-  agents Agent[]          @relation("AgentDesks")
+  id     Int     @id @default(autoincrement())
+  name   String
+  agents Agent[] @relation("AgentDesks")
 }
 
 model LeadStatus {
-  id          Int    @id        @default(autoincrement())
-  name        String
-  leads        Leads[]
+  id    Int     @id @default(autoincrement())
+  name  String
+  leads Leads[]
 }
 
 model Phone {
-  id         Int      @id @default(autoincrement())
-  phone      String
-  isMain     Boolean  @default(false)
-  lead_id    Int
-  
+  id      Int     @id @default(autoincrement())
+  phone   String
+  isMain  Boolean @default(false)
+  lead_id Int
+
   created_at DateTime @default(now()) @db.Timestamptz(0)
   Leads      Leads    @relation(fields: [lead_id], references: [id])
 }
