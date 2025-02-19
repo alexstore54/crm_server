@@ -20,6 +20,9 @@ export class AgentRepository {
     return this.prisma.agent.findFirst({ where: { public_id } });
   }
 
+  async getByEmail(email: string):Promise<Agent | null>{
+    return this.prisma.agent.findFirst({where: {email}});
+  }
 
   async create(data: CreateAgent): Promise<Agent> {
     const { desk_ids, role_id, ...rest } = data;
