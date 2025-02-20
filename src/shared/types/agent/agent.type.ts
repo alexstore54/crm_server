@@ -8,5 +8,3 @@ export type CreateAgent = {
   deskIds?: number[];
   testPermissions: PermsList;
 };
-
-

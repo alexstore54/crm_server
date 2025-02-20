@@ -10,7 +10,7 @@ export class CreateLog {
   @IsOptional()
   @IsEnum(LogLevel)
   readonly level?: LogLevel;
-  
+
   @IsOptional()
   @IsNumber()
   readonly userId?: number;

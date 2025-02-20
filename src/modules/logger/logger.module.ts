@@ -23,20 +23,13 @@ import { PrismaTransport } from '@/modules/logger/transports';
             level: (configService.get<LogLevel>(configKeys.LOG_LEVEL) ?? 'info').toLowerCase(),
           }),
           new winston.transports.Console({
-            format: winston.format.combine(
-              winston.format.timestamp(),
-              winston.format.json(),
-            ),
+            format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
           }),
         ],
       }),
-    })
+    }),
   ],
-  providers: [
-    AppLoggerService,
-    LogsRepository,
-    LogsService,
-  ],
+  providers: [AppLoggerService, LogsRepository, LogsService],
   controllers: [LogsController],
   exports: [AppLoggerService, LogsRepository],
 })

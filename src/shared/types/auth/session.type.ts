@@ -9,14 +9,14 @@ export type Session = {
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
-}
+};
 
 export interface CreateSessionInput {
   userId: string;
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
-  sessionUUID: SessionUUID,
+  sessionUUID: SessionUUID;
   hashedRefreshToken?: string;
 }
 

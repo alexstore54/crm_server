@@ -8,7 +8,6 @@ import { configKeys } from '@/common/config';
 import { AppLoggerService } from '@/modules/logger/services';
 import cookieParser from 'cookie-parser';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -21,11 +20,13 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalFilters(new AppExceptionFilter(logger));
   app.useGlobalInterceptors(new AppLoggingInterceptor(logger));
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   await app.listen(config.get(configKeys.APP_PORT) || 3000);
   logger.log(`Application is running on: ${await app.getUrl()}`);

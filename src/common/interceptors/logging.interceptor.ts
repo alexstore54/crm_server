@@ -6,8 +6,7 @@ import { AppLoggerService } from '@/modules/logger/services';
 
 @Injectable()
 export class AppLoggingInterceptor implements NestInterceptor {
-  constructor(private logger: AppLoggerService) {
-  }
+  constructor(private logger: AppLoggerService) {}
 
   intercept(
     context: ExecutionContext,
@@ -16,19 +15,16 @@ export class AppLoggingInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const { method, url } = request;
 
-
     const now = Date.now();
-    return next
-      .handle()
-      .pipe(
-        tap(() => {
-          const logEntry: CreateLog = {
-            message: `Request to ${method} ${url} took ${Date.now() - now}ms`,
-            context: { path: url},
-            level: LogLevel.INFO,
-          };
-          this.logger.log(logEntry.message, logEntry);
-        }),
-      );
+    return next.handle().pipe(
+      tap(() => {
+        const logEntry: CreateLog = {
+          message: `Request to ${method} ${url} took ${Date.now() - now}ms`,
+          context: { path: url },
+          level: LogLevel.INFO,
+        };
+        this.logger.log(logEntry.message, logEntry);
+      }),
+    );
   }
 }

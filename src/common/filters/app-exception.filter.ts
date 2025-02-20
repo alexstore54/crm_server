@@ -5,12 +5,8 @@ import { Request, Response } from 'express';
 import { AppLoggerService } from '@/modules/logger/services';
 import { LogLevel } from '@prisma/client';
 
-
 export class AppExceptionFilter implements ExceptionFilter {
-  constructor(
-    private logger: AppLoggerService,
-  ) {}
-
+  constructor(private logger: AppLoggerService) {}
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();

@@ -11,7 +11,8 @@ import {
   SessionsController,
 } from '@/modules/auth/controllers';
 import {
-  AuthAgentService, AuthCustomerService,
+  AuthAgentService,
+  AuthCustomerService,
   AuthGoogleService,
   AuthService,
   TokensService,

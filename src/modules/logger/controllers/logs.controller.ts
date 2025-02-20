@@ -5,8 +5,7 @@ import { GetLogs } from '@/modules/logger/dto';
 
 @Controller('logs')
 export class LogsController {
-  constructor(private loggerService: LogsService) {
-  }
+  constructor(private loggerService: LogsService) {}
 
   @Get()
   async getLogs(@Query() query: GetLogs): Promise<Log[]> {

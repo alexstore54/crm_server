@@ -10,7 +10,7 @@ export class SignInCustomer {
   @MinLength(8)
   @MaxLength(20)
   @Matches(VALIDATION_REGEX.PASSWORD, {
-    message: VALIDATION_ERRORS.PASSWORD
+    message: VALIDATION_ERRORS.PASSWORD,
   })
   password: string;
 }

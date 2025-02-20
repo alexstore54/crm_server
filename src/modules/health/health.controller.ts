@@ -27,7 +27,12 @@ export class HealthController {
   async check() {
     return this.health.check([
       () => this.healthService.dbHealthCheck(),
-      () => this.redisIndicator.checkHealth('redis', { type: 'redis', client: this.redis, timeout: 500 }),
+      () =>
+        this.redisIndicator.checkHealth('redis', {
+          type: 'redis',
+          client: this.redis,
+          timeout: 500,
+        }),
     ]);
   }
 }

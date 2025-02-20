@@ -1,20 +1,11 @@
 import { Request, Response } from 'express';
 
 export class CookiesUtil {
-  public static setCookies(
-    res: Response,
-    name: string,
-    value: string,
-    options?: any,
-  ): void {
+  public static setCookies(res: Response, name: string, value: string, options?: any): void {
     res.cookie(name, value, options);
   }
 
-  public static setAuthTokens(
-    res: Response,
-    accessToken: string,
-    refreshToken: string,
-  ) {
+  public static setAuthTokens(res: Response, accessToken: string, refreshToken: string) {
     this.setCookies(res, 'access_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

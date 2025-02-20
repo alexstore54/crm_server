@@ -5,6 +5,4 @@ import { SessionsService } from '@/shared/services/sessions/sessions.service';
   providers: [SessionsService],
   exports: [SessionsService],
 })
-export class SessionsModule {
-
-}
+export class SessionsModule {}

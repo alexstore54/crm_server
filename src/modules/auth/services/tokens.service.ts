@@ -9,8 +9,7 @@ export class TokensService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {
-  }
+  ) {}
 
   public async getTokens(...args: unknown[]): Promise<AuthTokens> {
     const payload = { ...args };
@@ -22,9 +21,7 @@ export class TokensService {
         },
         {
           secret: process.env.JWT_SECRET_KEY,
-          expiresIn: this.configService.get(
-            configKeys.ACCESS_TOKEN_EXPIRES_IN,
-          ),
+          expiresIn: this.configService.get(configKeys.ACCESS_TOKEN_EXPIRES_IN),
         },
       ),
       this.jwtService.signAsync(
@@ -33,9 +30,7 @@ export class TokensService {
         },
         {
           secret: process.env.JWT_SECRET_KEY,
-          expiresIn: this.configService.get(
-            configKeys.REFRESH_TOKEN_EXPIRES_IN,
-          ),
+          expiresIn: this.configService.get(configKeys.REFRESH_TOKEN_EXPIRES_IN),
         },
       ),
     ]);
@@ -45,6 +40,4 @@ export class TokensService {
       refreshToken,
     };
   }
-
-
 }

@@ -7,29 +7,17 @@ import { GOOGLE_STRATEGY_SCOPE } from '@/shared/constants/auth/google.constant';
 import { configKeys } from '@/common/config';
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(
-  Strategy,
-  STRATEGIES_NAMES.GOOGLE,
-) {
+export class GoogleStrategy extends PassportStrategy(Strategy, STRATEGIES_NAMES.GOOGLE) {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get<string>(
-        configKeys.GOOGLE_CLIENT_ID,
-      ) as string,
-      clientSecret: configService.get<string>(
-        configKeys.GOOGLE_CLIENT_SECRET,
-      ) as string,
+      clientID: configService.get<string>(configKeys.GOOGLE_CLIENT_ID) as string,
+      clientSecret: configService.get<string>(configKeys.GOOGLE_CLIENT_SECRET) as string,
       callbackURL: configService.get<string>(configKeys.GOOGLE_CALLBACK_URL),
       scope: GOOGLE_STRATEGY_SCOPE,
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
-  ) {
+  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) {
     const { id, emails, displayName } = profile;
     const user = {
       googleId: id,

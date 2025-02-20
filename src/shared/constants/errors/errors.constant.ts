@@ -6,5 +6,5 @@ export const ERROR_MESSAGES = {
   INVALID_CREDS: 'Invalid credentials',
   ACCESS_DENIED: 'Access Denied',
   USER_EXISTS: 'User already exists',
-  DB_ERROR: 'Error by query to database'
+  DB_ERROR: 'Error by query to database',
 };

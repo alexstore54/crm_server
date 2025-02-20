@@ -5,9 +5,9 @@ export type AgentAuthPayload = {
   role: string;
   sessionUUID: SessionUUID;
   sub: string;
-}
+};
 
 export type CustomerAuthPayload = {
   sessionUUID: SessionUUID;
   sub: string;
-}
+};
