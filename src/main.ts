@@ -18,7 +18,7 @@ async function bootstrap() {
     origin: config.get<string>(configKeys.CORS_ORIGIN),
   });
   app.use(cookieParser());
-  app.useGlobalFilters(new AppExceptionFilter(logger));
+  app.useGlobalFilters(new AppExceptionFilter(logger, config));
   app.useGlobalInterceptors(new AppLoggingInterceptor(logger));
   app.useGlobalPipes(
     new ValidationPipe({

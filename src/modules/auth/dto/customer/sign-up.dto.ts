@@ -24,7 +24,7 @@ export class SignUpCustomer {
 
   @IsString()
   @MaxLength(25)
-  @Matches(VALIDATION_REGEX.NAME)
+  @Matches(VALIDATION_REGEX.NAME, { message: VALIDATION_ERRORS.NAME })
   firstname: string;
 
   @IsString()
