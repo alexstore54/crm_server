@@ -104,7 +104,7 @@ export class AuthService {
   private mapAgentPayload(user: any, sessionUUID: SessionUUID): AgentAuthPayload {
     return {
       descId: user.descId,
-      role: user.role,
+      routeAccess: user.routeAccess,
       sessionUUID,
       sub: user.publicId,
     };

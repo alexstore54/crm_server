@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import csrf from 'csrf';
-import { configKeys } from '@/common/config/app-config.schema';
+import { configKeys } from '@/shared/schemas/app-config.schema';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

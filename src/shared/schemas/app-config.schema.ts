@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import { NodeEnv } from 'common/config/types';
-import { AppConfigUtil } from '@/common/config/utils';
+import { NodeEnv } from '@/common/config/types';
 import { LogLevel } from '@prisma/client';
+import { SchemaUtil } from '@/shared/utils';
 
 export const appConfigValidationSchema = {
   NODE_ENV: Joi.string()
@@ -28,4 +28,4 @@ export const appConfigValidationSchema = {
 
 export const validationSchema = Joi.object(appConfigValidationSchema);
 
-export const configKeys = AppConfigUtil.getConfigKeys(appConfigValidationSchema);
+export const configKeys = SchemaUtil.getConfigKeys(appConfigValidationSchema);

@@ -4,7 +4,7 @@ import { HealthService } from '@/modules/health/health.service';
 import { RedisHealthIndicator } from '@liaoliaots/nestjs-redis-health';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
-import { configKeys } from '@/common/config';
+import { configKeys } from '@/shared/schemas';
 
 @Controller('health')
 export class HealthController {

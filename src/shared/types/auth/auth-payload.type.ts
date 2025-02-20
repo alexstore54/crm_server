@@ -1,8 +1,9 @@
 import { SessionUUID } from '@/shared/types/auth/session.type';
+import { RouteAccess } from '@prisma/client';
 
 export type AgentAuthPayload = {
   descId?: string;
-  role: string;
+  routeAccess: RouteAccess;
   sessionUUID: SessionUUID;
   sub: string;
 };

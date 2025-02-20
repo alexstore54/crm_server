@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthTokens } from '@/shared/types/auth';
-import { configKeys } from '@/common/config';
+import { configKeys } from '@/shared/schemas';
 
 @Injectable()
 export class TokensService {

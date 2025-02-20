@@ -4,6 +4,7 @@ import { AppLoggerModule } from '@/modules/logger/logger.module';
 import { AppLoggerService } from '@/modules/logger/services/logger.service';
 import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -40,6 +41,11 @@ export class AppConfigModule {
             secret: configService.get<string>('JWT_SECRET'),
             global: true,
           }),
+        }),
+        PassportModule.register({
+          defaultStrategy: 'jwt',
+          session: false,
+          global: true,
         }),
       ],
       providers: [AppLoggerService],

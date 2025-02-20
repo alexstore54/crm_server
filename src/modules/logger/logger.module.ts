@@ -1,7 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { configKeys } from '@/common/config';
 import winston from 'winston';
 import { AppLoggerService } from '@/modules/logger/services/logger.service';
 import { LogLevel } from '@prisma/client';
@@ -9,6 +8,7 @@ import { LogsRepository } from '@/modules/logger/repositories';
 import { LogsController } from '@/modules/logger/controllers/logs.controller';
 import { LogsService } from '@/modules/logger/services';
 import { PrismaTransport } from '@/modules/logger/transports';
+import { configKeys } from '@/shared/schemas';
 
 @Global()
 @Module({

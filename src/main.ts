@@ -4,9 +4,9 @@ import { AppExceptionFilter } from '@/common/filters';
 import { AppLoggingInterceptor } from '@/common/interceptors';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { configKeys } from '@/common/config';
 import { AppLoggerService } from '@/modules/logger/services';
 import cookieParser from 'cookie-parser';
+import { configKeys } from '@/shared/schemas';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

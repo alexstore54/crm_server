@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import * as process from 'node:process';
-import { configKeys } from '@/common/config';
+import { configKeys } from '@/shared/schemas';
 
 dotenv.config();
 
