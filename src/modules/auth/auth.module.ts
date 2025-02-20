@@ -21,7 +21,8 @@ import { AuthGateway } from '@/modules/auth/geateway';
 import { CustomersRepository } from '@/modules/users/repositories';
 import { AgentRepository } from '@/modules/agents/repositories/agent.repository';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { AgentRefreshTokenGuard, CustomerRefreshTokenGuard } from '@/common/guards/tokens';
+import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
+import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
 
 @Module({
   imports: [GatewayModule, SessionsModule, AgentModule, UserModule],
@@ -49,8 +50,8 @@ import { AgentRefreshTokenGuard, CustomerRefreshTokenGuard } from '@/common/guar
     GatewayService,
     ClientsGateway,
     //Guards
-    CustomerRefreshTokenGuard,
-    AgentRefreshTokenGuard,
+    CustomerRefreshGuard,
+    AgentRefreshGuard,
   ],
 })
 export class AuthModule {}

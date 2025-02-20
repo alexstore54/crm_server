@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Headers, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthTokens, RequestWithCustomerPayload } from '@/shared/types/auth';
 import { CookiesUtil } from '@/shared/utils';
@@ -7,6 +7,7 @@ import { AuthCustomerService } from '@/modules/auth/services/auth-customer.servi
 import { FullCustomer } from '@/shared/types/user';
 import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { SignInCustomer, SignUpCustomer } from '@/modules/auth/dto/customer';
+import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
 
 @Controller('auth/customers')
 export class AuthCustomerController {
@@ -53,6 +54,7 @@ export class AuthCustomerController {
     return res.status(201).send(RESPONSE_STATUS.SUCCESS);
   }
 
+  @UseGuards(CustomerRefreshGuard)
   @Post('logout')
   async logout(@Req() request: RequestWithCustomerPayload, @Res() response: Response) {
     const user = request.user;
@@ -60,7 +62,7 @@ export class AuthCustomerController {
     CookiesUtil.clearAuthTokens(response);
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
-
+  @UseGuards(CustomerRefreshGuard)
   @Post('refresh')
   async refreshTokens(@Req() request: RequestWithCustomerPayload, @Res() response: Response) {
     const payload = request.user;

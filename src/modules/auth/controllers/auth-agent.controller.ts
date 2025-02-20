@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Headers, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthAgentService } from '@/modules/auth/services/auth-agent.service';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { Response } from 'express';
@@ -8,6 +8,7 @@ import { AuthTokens } from '@/shared/types/auth';
 import { Agent } from '@prisma/client';
 import { RequestWithAgentPayload } from '@/shared/types/auth/request-with-user.type';
 import { RESPONSE_STATUS } from '@/shared/constants/response';
+import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
 
 @Controller('auth/agents')
 export class AuthAgentController {
@@ -36,6 +37,7 @@ export class AuthAgentController {
     return res.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
 
+  @UseGuards(AgentRefreshGuard)
   @Post('logout')
   async logout(@Req() request: RequestWithAgentPayload, @Res() response: Response) {
     const payload = request.user;
@@ -44,6 +46,7 @@ export class AuthAgentController {
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
 
+  @UseGuards(AgentRefreshGuard)
   @Post('refresh')
   async refreshTokens(@Req() request: RequestWithAgentPayload, @Res() response: Response) {
     const payload = request.user;

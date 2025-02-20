@@ -3,4 +3,4 @@ import { AuthGuard } from '@nestjs/passport';
 import { STRATEGIES_NAMES } from '@/shared/constants/auth';
 
 @Injectable()
-export class CustomerAccessTokenGuard extends AuthGuard(STRATEGIES_NAMES.CUSTOMER_ACCESS_TOKEN) {}
+export class AgentAccessGuard extends AuthGuard(STRATEGIES_NAMES.AGENT_ACCESS_TOKEN) {}
