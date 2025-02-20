@@ -9,7 +9,7 @@ import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { SignInCustomer, SignUpCustomer } from '@/modules/auth/dto/customer';
 import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
 
-@Controller('auth/customers')
+@Controller('auth/customer')
 export class AuthCustomerController {
   constructor(
     private readonly authCustomerService: AuthCustomerService,
@@ -62,6 +62,7 @@ export class AuthCustomerController {
     CookiesUtil.clearAuthTokens(response);
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
+
   @UseGuards(CustomerRefreshGuard)
   @Post('refresh')
   async refreshTokens(@Req() request: RequestWithCustomerPayload, @Res() response: Response) {

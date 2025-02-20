@@ -10,7 +10,7 @@ import { agentAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
 import { configKeys } from '@/shared/schemas';
 
 @Injectable()
-export class RefreshTokenJWTStrategy extends PassportStrategy(
+export class AgentRefreshTokenStrategy extends PassportStrategy(
   Strategy,
   STRATEGIES_NAMES.AGENT_REFRESH_TOKEN,
 ) {

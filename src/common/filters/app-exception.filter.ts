@@ -21,6 +21,8 @@ export class AppExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    console.log(exception);
+
     //создаем статус ошибки, и сообщение
     const status = FiltersUtil.getExceptionStatus(exception);
     const message = FiltersUtil.getExceptionMessage(exception);
@@ -33,7 +35,6 @@ export class AppExceptionFilter implements ExceptionFilter {
       ? FiltersUtil.getExceptionDetails(exception)
       : undefined;
 
-    //логгируем ошибку
     this.logger.error(message, {
       message,
       level: LogLevel.ERROR,

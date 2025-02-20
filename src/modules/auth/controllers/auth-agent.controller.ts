@@ -10,7 +10,7 @@ import { RequestWithAgentPayload } from '@/shared/types/auth/request-with-user.t
 import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
 
-@Controller('auth/agents')
+@Controller('auth/agent')
 export class AuthAgentController {
   constructor(
     private readonly authAgentService: AuthAgentService,

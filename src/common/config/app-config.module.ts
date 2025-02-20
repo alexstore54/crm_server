@@ -5,6 +5,11 @@ import { AppLoggerService } from '@/modules/logger/services/logger.service';
 import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import {
+  AgentAccessTokenStrategy, AgentRefreshTokenStrategy,
+  CustomerAccessTokenStrategy,
+  CustomerRefreshTokenStrategy,
+} from '@/common/strategies/jwt';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -18,6 +23,7 @@ export class AppConfigModule {
       global: true,
       module: AppConfigModule,
       imports: [
+        //Libraries and logger
         AppLoggerModule,
         ConfigModule.forRoot({
           ...options.config,
@@ -48,7 +54,14 @@ export class AppConfigModule {
           global: true,
         }),
       ],
-      providers: [AppLoggerService],
+      providers: [
+        AppLoggerService,
+        //Strategies
+        AgentAccessTokenStrategy,
+        AgentRefreshTokenStrategy,
+        CustomerAccessTokenStrategy,
+        CustomerRefreshTokenStrategy
+      ],
       exports: [ConfigModule],
     };
   }

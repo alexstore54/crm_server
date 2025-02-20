@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, ValidationError } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 export class FiltersUtil {
@@ -16,10 +16,17 @@ export class FiltersUtil {
   }
 
   public static getExceptionDetails(exception: any): string[] | undefined {
-    const response = exception.getResponse();
+    if (!(exception instanceof HttpException)) {
+      return undefined;
+    }
+    const response = exception.getResponse() as { message?: string | string[] };
+
+    if (!response || typeof response !== 'object') {
+      return undefined;
+    }
     console.log(exception);
-    if (Array.isArray(response['message'])) {
-      return response['message'];
+    if (Array.isArray(response.message)) {
+      return response.message;
     }
     return undefined;
   }
