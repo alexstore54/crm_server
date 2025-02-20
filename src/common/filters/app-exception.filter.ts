@@ -21,7 +21,6 @@ export class AppExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    console.log(exception);
 
     //создаем статус ошибки, и сообщение
     const status = FiltersUtil.getExceptionStatus(exception);

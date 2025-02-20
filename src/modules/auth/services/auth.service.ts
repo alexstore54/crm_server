@@ -41,16 +41,14 @@ export class AuthService {
       userAgent,
       isOnline: true,
       refreshToken: tokens.refreshToken,
-      //#TODO - make publicID
-      userId: user.id.toString(),
+      userId: user.publicId,
     });
 
     const session = await this.sessionService.saveUserSession(createSessionInput);
 
     //logout from all devices except current
     if (userType === 'agent') {
-      //TODO: make publicID
-      await this.authGateway.logoutFromAllDevicesExceptCurrent(user.id.toString(), sessionUUID);
+      await this.authGateway.logoutFromAllDevicesExceptCurrent(user.publicId, sessionUUID);
     }
 
     return tokens;

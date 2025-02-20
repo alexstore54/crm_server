@@ -24,7 +24,6 @@ export class FiltersUtil {
     if (!response || typeof response !== 'object') {
       return undefined;
     }
-    console.log(exception);
     if (Array.isArray(response.message)) {
       return response.message;
     }
