@@ -143,7 +143,12 @@ export class AgentService {
         if (!agent) {
           throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
         }
+        // Три основных сценария обновления привилегий: 
+        // 1) Когда указан roleId, но не указаны permissions 
+        // 2) Когда указаны permissions, но не указан roleId 
+        // 3) Когда указаны и roleId и permissions
         return await this.prisma.$transaction(async (tx) => {
+            // 1) Если указан roleId, но не указаны permissions
             if(roleId && !permissions){
                 
                 const updatedAgent = await this.agentRepository.updateOneWithTx(agent.id, {roleId}, tx, null);
@@ -166,7 +171,10 @@ export class AgentService {
                 }
 
                 return updatedAgent
-            }else if(!roleId && permissions){
+              
+            }
+            // 2) Если указаны permissions, но не указан roleId
+            else if(!roleId && permissions){
                   
                   // Пробрасываю массив permissions и roleId для поиска тем самым валидируя permissionId на фактическое существование в базе
                   const rolePermissions = await this.rolePermissionRepository.getRolePermissionsByRoleIdAndPermsIdsWithTx(agent.roleId, permissions, tx);
@@ -201,17 +209,23 @@ export class AgentService {
 
 
                     return agent;
-            }else if(roleId && permissions){
-              
+            }
+            // 3) Если указаны и roleId и permissions
+            else if(roleId && permissions){
+
                   const updatedAgent = await this.agentRepository.updateOneWithTx(agent.id, { roleId }, tx, null);
+                  // Пробрасываю массив permissions и roleId для поиска тем самым валидируя permissionId на фактическое существование в базе
                   const rolePermissions = await this.rolePermissionRepository.getRolePermissionsByRoleIdAndPermsIdsWithTx(updatedAgent.roleId, permissions, tx);
+
+                  // Если не нашли ни одного разрешения, значит не было указано ни одного валидного permissionId
                   if(rolePermissions.length === 0){
                       throw new InternalServerErrorException(`${ERROR_MESSAGES.INVALID_DATA}`);
                   }   
                   //Фильтрую permissions на уникальность permissionId
                   const RPids = new Set(rolePermissions.map(rp => rp.permissionId));
                   const filteredIncomingPermissions = permissions.filter(a => RPids.has(a.permissionId));
-
+                  
+                  // Перезаписываю разрешения, которые отличаются от дефолтных
                   const overrided = filteredIncomingPermissions.map(perm => {
                         const rolePerm = rolePermissions.find(rp => rp.permissionId === perm.permissionId);
                         // Если по какой-то причине не нашли соответствие (не должно случиться, но на всякий случай)
@@ -221,11 +235,11 @@ export class AgentService {
                         // Иначе возвращаем объект, который реально перезапишем в AgentPermission
                         
                         return {
-                          ...perm,
-                          agentId: updatedAgent.id,
-                          allowed: perm.allowed,
+                            ...perm,
+                            agentId: updatedAgent.id,
+                            allowed: perm.allowed,
                         };
-                    }).filter(item => item !== undefined);
+                    }).filter(item => item !== undefined); // Вырезаю undefined, если такие есть
 
                     if(overrided.length === 0){
                         await this.agentPermissionRepository.deleteManyByAgentIdWithTx(updatedAgent.id, tx);
