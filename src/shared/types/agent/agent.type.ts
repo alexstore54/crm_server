@@ -1,4 +1,4 @@
-import { Permission, PermsList } from '@prisma/client';
+import { Permission } from '@prisma/client';
 
 export type CreateAgent = {
   publicId: string;
@@ -6,5 +6,4 @@ export type CreateAgent = {
   email: string;
   password: string;
   deskIds?: number[];
-  testPermissions: PermsList;
 };

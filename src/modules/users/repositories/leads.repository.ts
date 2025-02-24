@@ -4,6 +4,7 @@ import { Lead } from '@prisma/client';
 import { CreateLead } from '@/shared/types/user';
 import { UpdateLead } from '@/modules/users/dto/lead';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { CreateLeadCustomerDto } from '@/modules/agents/dto/create-lead-customer.dto';
 
 @Injectable()
 export class LeadRepository {
@@ -12,6 +13,26 @@ export class LeadRepository {
   async getAll(): Promise<Lead[]> {
     try {
       return await this.prisma.lead.findMany();
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  async getLeadsByAgent(agentId: number): Promise<Lead[]> {
+    try {
+      return await this.prisma.lead.findMany({
+        where: { agentId },
+        include: {
+          Customer: {
+            include: { 
+              Email: true  
+            }
+          },
+          Agent: true,       
+          LeadStatus: true,  
+          Phone: true        
+        }
+      });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -44,13 +65,65 @@ export class LeadRepository {
     }
   }
 
-  async createOne(data: CreateLead): Promise<Lead> {
+  async createOne(data: CreateLeadCustomerDto): Promise<Lead> {
+    const {
+      firstname,
+      lastname,
+      country,
+      defaultEmail,
+      agentId,
+      statusId,
+      password,
+      lastOnline,
+      emails,
+      phones,
+    } = data;
+
     try {
-      return await this.prisma.lead.create({ data });
+      return this.prisma.lead.create({
+        data: {
+          firstname,
+          lastname,
+          country,
+          defaultEmail,
+          agentId,
+          statusId,
+          Customer: {
+            create: {
+              password,
+              lastOnline,
+              Email: {
+                create: emails.map((email) => ({
+                  email: email.email,
+                  isMain: email.isMain ?? false,
+                })),
+              },
+            },
+          },
+          // Если переданы телефоны, создаем их для лида
+          Phone:
+            phones && phones.length > 0
+              ? {
+                  create: phones.map((phone) => ({
+                    phone: phone.phone,
+                    isMain: phone.isMain ?? false,
+                  })),
+                }
+              : undefined,
+        },
+        include: {
+          Customer: {
+            include: { Email: true },
+          },
+          Phone: true,
+        },
+      });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+
+
 
   async deleteOneById(id: number): Promise<Lead | null> {
     try {

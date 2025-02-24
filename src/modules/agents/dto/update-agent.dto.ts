@@ -8,14 +8,17 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
+import { Type } from 'class-transformer';
+
 
 export class UpdateAgent {
   @IsOptional()
   @IsNumber()
-  role_id?: number;
+  roleId?: number;
 
   @IsOptional()
   @IsEmail()
@@ -30,11 +33,14 @@ export class UpdateAgent {
   })
   password?: string;
 
-  @IsOptional()
-  @IsDate()
-  last_time_online?: Date;
+
 
   @IsOptional()
+  @ValidateIf(o => o.deskIds !== null)
   @IsArray()
-  desk_ids?: number[];
+  @Type(() => Number)
+  @IsNumber({}, { each: true })
+  deskIds?: number[];
+
+
 }

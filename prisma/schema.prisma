@@ -10,16 +10,16 @@ datasource db {
 model Agent {
   publicId        String            @unique @default(uuid())
   id              Int               @id @default(autoincrement())
-  roleId          Int?
+  roleId          Int
   email           String            @db.VarChar(100)
   password        String
   lastOnline      DateTime?         @db.Timestamptz(0)
   routeAccess     RouteAccess       @default(ADMIN)
-  testPermissions PermsList
-  Role            Role?             @relation(fields: [roleId], references: [id])
+  
+  Role            Role              @relation(fields: [roleId], references: [id])
   AgentPermission AgentPermission[]
   Lead            Lead[]
-  Desk            Desk[]            @relation("AgentDesks")
+  Desk            Desk[]            @relation("AgentDesks") // manyToMany
 }
 
 model AgentPermission {
@@ -127,13 +127,6 @@ enum LogLevel {
   INFO
   WARN
   ERROR
-}
-
-enum PermsList {
-  action1
-  action2
-  action3
-  action4
 }
 
 enum RouteAccess {
