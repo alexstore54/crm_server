@@ -7,11 +7,11 @@ export const agentAuthPayloadSchema: ObjectSchema<AgentAuthPayload> = Joi.object
   routeAccess: Joi.string()
     .valid(...Object.values(RouteAccess))
     .required(),
-  sessionUUID: Joi.string().uuid().required(),
+  payloadUUID: Joi.string().uuid().required(),
   sub: Joi.string().required(),
 });
 
 export const customerAuthPayloadSchema: ObjectSchema<CustomerAuthPayload> = Joi.object({
-  sessionUUID: Joi.string().uuid().required(),
+  payloadUUID: Joi.string().uuid().required(),
   sub: Joi.string().required(),
 });

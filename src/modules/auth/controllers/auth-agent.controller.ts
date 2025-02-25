@@ -41,7 +41,7 @@ export class AuthAgentController {
   @Post('logout')
   async logout(@Req() request: RequestWithAgentPayload, @Res() response: Response) {
     const payload = request.user;
-    await this.authService.logout(payload.sub, payload.sessionUUID);
+    await this.authService.logout(payload.sub, payload.payloadUUID);
     CookiesUtil.clearAuthTokens(response);
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }

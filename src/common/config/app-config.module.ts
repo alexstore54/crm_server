@@ -11,6 +11,7 @@ import {
   CustomerAccessTokenStrategy,
   CustomerRefreshTokenStrategy,
 } from '@/common/strategies/jwt';
+import { REDIS_CONFIG } from '@/shared/constants/config';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -35,10 +36,20 @@ export class AppConfigModule {
           inject: [ConfigService],
           //@ts-ignore
           useFactory: (configService: ConfigService): RedisModuleOptions => ({
-            config: {
-              host: configService.get<string>('REDIS_HOST'),
-              port: configService.get<number>('REDIS_PORT'),
-            },
+            config: [
+              {
+                host: configService.get<string>('REDIS_HOST'),
+                port: configService.get<number>('REDIS_PORT'),
+                db: REDIS_CONFIG.SESSIONS.DB,
+                namespace: REDIS_CONFIG.SESSIONS.NAMESPACE,
+              },
+              {
+                host: configService.get<string>('REDIS_HOST'),
+                port: configService.get<number>('REDIS_PORT'),
+                db: REDIS_CONFIG.PERMISSIONS.DB,
+                namespace: REDIS_CONFIG.PERMISSIONS.NAMESPACE,
+              },
+            ],
           }),
         }),
         JwtModule.registerAsync({

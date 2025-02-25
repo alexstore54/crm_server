@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, Param } from '@nestjs/common';
-import { SessionsService } from '@/shared/services/sessions/sessions.service';
+import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
 
 //TODO: add guards
 @Controller('sessions')

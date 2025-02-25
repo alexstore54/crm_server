@@ -1,14 +1,14 @@
-import { SessionUUID } from '@/shared/types/auth/session.type';
 import { RouteAccess } from '@prisma/client';
+import { PayloadUUID } from '@/shared/types/redis';
 
 export type AgentAuthPayload = {
   descId?: string;
   routeAccess: RouteAccess;
-  sessionUUID: SessionUUID;
+  payloadUUID: PayloadUUID;
   sub: string;
 };
 
 export type CustomerAuthPayload = {
-  sessionUUID: SessionUUID;
+  payloadUUID: PayloadUUID;
   sub: string;
 };

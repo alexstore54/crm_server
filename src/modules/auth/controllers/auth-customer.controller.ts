@@ -58,7 +58,7 @@ export class AuthCustomerController {
   @Post('logout')
   async logout(@Req() request: RequestWithCustomerPayload, @Res() response: Response) {
     const user = request.user;
-    await this.authService.logout(user.sub, user.sessionUUID);
+    await this.authService.logout(user.sub, user.payloadUUID);
     CookiesUtil.clearAuthTokens(response);
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }

@@ -1,10 +1,11 @@
+import { PayloadUUID } from '@/shared/types/redis/redis.type';
+
 export type SessionId = string;
-export type SessionUUID = string;
 
 export type Session = {
   userId: string;
   // role: string;
-  sessionUUID: SessionUUID;
+  payloadUUID: PayloadUUID;
   hashedRefreshToken: string;
   fingerprint: string;
   userAgent: string;
@@ -16,7 +17,7 @@ export interface CreateSessionInput {
   fingerprint: string;
   userAgent: string;
   isOnline: boolean;
-  sessionUUID: SessionUUID;
+  payloadUUID: PayloadUUID;
   hashedRefreshToken?: string;
 }
 

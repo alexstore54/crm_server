@@ -1,9 +1,9 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { SocketNamespaces } from '@/shared/types/socket';
-import { SessionsService } from '@/shared/services/sessions/sessions.service';
+import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
 import { GatewayService } from '@/shared/gateway';
 import { Server } from 'socket.io';
-import { SessionUUID } from '@/shared/types/auth';
+import { PayloadUUID } from '@/shared/types/redis';
 
 @WebSocketGateway({ namespace: SocketNamespaces.auth })
 export class AuthGateway {
@@ -15,29 +15,29 @@ export class AuthGateway {
     private readonly gatewayService: GatewayService,
   ) {}
 
-  public async logoutUser(userPublicId: string, sessionUUID: SessionUUID) {
-    this.server.to(sessionUUID).emit('logout');
-    await this.sessionsService.deleteUserSession(userPublicId, sessionUUID);
-    this.gatewayService.removeClient(sessionUUID);
+  public async logoutUser(userPublicId: string, payloadUUID: PayloadUUID) {
+    this.server.to(payloadUUID).emit('logout');
+    await this.sessionsService.deleteUserSession(userPublicId, payloadUUID);
+    this.gatewayService.removeClient(payloadUUID);
   }
 
   public async logoutFromAllDevices(userPublicId: string) {
     const sessions = await this.sessionsService.getAllUserSessions(userPublicId);
     sessions.forEach((session) => {
-      this.server.to(session.sessionUUID).emit('logout');
-      this.gatewayService.removeClient(session.sessionUUID);
+      this.server.to(session.payloadUUID).emit('logout');
+      this.gatewayService.removeClient(session.payloadUUID);
     });
     await this.sessionsService.deleteAllUserSessions(userPublicId);
   }
 
-  public async logoutFromAllDevicesExceptCurrent(userPublicId: string, sessionUUID: SessionUUID) {
+  public async logoutFromAllDevicesExceptCurrent(userPublicId: string, payloadUUID: PayloadUUID) {
     const sessions = await this.sessionsService.getAllUserSessions(userPublicId);
     sessions.forEach((session) => {
-      if (session.sessionUUID !== sessionUUID) {
-        this.server.to(session.sessionUUID).emit('logout');
-        this.gatewayService.removeClient(session.sessionUUID);
+      if (session.payloadUUID !== payloadUUID) {
+        this.server.to(session.payloadUUID).emit('logout');
+        this.gatewayService.removeClient(session.payloadUUID);
       }
     });
-    await this.sessionsService.deleteAllUserSessionsExceptCurrent(userPublicId, sessionUUID);
+    await this.sessionsService.deleteAllUserSessionsExceptCurrent(userPublicId, payloadUUID);
   }
 }

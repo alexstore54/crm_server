@@ -1,19 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { SessionsService } from '@/shared/services/sessions/sessions.service';
+import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
 import { GatewayService } from '@/shared/gateway';
-import {
-  AgentAuthPayload,
-  AuthTokens,
-  CreateSessionInput,
-  CustomerAuthPayload,
-  SessionUUID,
-} from '@/shared/types/auth';
+import { AgentAuthPayload, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
 import { AuthenticateArgs, MakeSessionArgs, UserType } from '@/modules/auth/types/auth-args.type';
 import { BcryptHelper } from '@/shared/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from '@/modules/auth/services/tokens.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { AuthGateway } from '@/modules/auth/geateway';
+import { CreateSessionInput, PayloadUUID } from '@/shared/types/redis';
 
 @Injectable()
 export class AuthService {
@@ -26,17 +21,17 @@ export class AuthService {
 
   public async authenticate(userType: UserType, args: AuthenticateArgs): Promise<AuthTokens> {
     const { user, userAgent, fingerprint } = args;
-    const sessionUUID: SessionUUID = uuidv4();
+    const payloadUUID: PayloadUUID = uuidv4();
 
     const payload =
       userType === 'agent'
-        ? this.mapAgentPayload(user, sessionUUID)
-        : this.mapCustomerPayload(user, sessionUUID);
+        ? this.mapAgentPayload(user, payloadUUID)
+        : this.mapCustomerPayload(user, payloadUUID);
 
     const tokens = await this.tokensService.getTokens({ ...payload });
 
     const createSessionInput = await this.makeSession({
-      sessionUUID: sessionUUID,
+      payloadUUID: payloadUUID,
       fingerprint,
       userAgent,
       isOnline: true,
@@ -48,24 +43,24 @@ export class AuthService {
 
     //logout from all devices except current
     if (userType === 'agent') {
-      await this.authGateway.logoutFromAllDevicesExceptCurrent(user.publicId, sessionUUID);
+      await this.authGateway.logoutFromAllDevicesExceptCurrent(user.publicId, payloadUUID);
     }
 
     return tokens;
   }
 
-  public async logout(userPublicId: string, sessionUUID: SessionUUID) {
-    await this.sessionService.deleteUserSession(userPublicId, sessionUUID);
-    this.gatewayService.removeClient(sessionUUID);
+  public async logout(userPublicId: string, payloadUUID: PayloadUUID) {
+    await this.sessionService.deleteUserSession(userPublicId, payloadUUID);
+    this.gatewayService.removeClient(payloadUUID);
   }
 
   public async refreshTokens(
     payload: AgentAuthPayload | CustomerAuthPayload,
     refreshToken: string,
   ): Promise<AuthTokens> {
-    const { sub: userPublicId, sessionUUID } = payload;
+    const { sub: userPublicId, payloadUUID } = payload;
 
-    const session = await this.sessionService.getUserSession(userPublicId, sessionUUID);
+    const session = await this.sessionService.getUserSession(userPublicId, payloadUUID);
     if (!session) {
       throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_DENIED);
     }
@@ -77,7 +72,7 @@ export class AuthService {
 
     const tokens = await this.tokensService.getTokens(payload);
     const newHashedToken = await BcryptHelper.hash(tokens.refreshToken);
-    await this.sessionService.updateUserSession(userPublicId, sessionUUID, {
+    await this.sessionService.updateUserSession(userPublicId, payloadUUID, {
       ...session,
       refreshToken: newHashedToken,
     });
@@ -86,31 +81,31 @@ export class AuthService {
   }
 
   private async makeSession(args: MakeSessionArgs): Promise<CreateSessionInput> {
-    const { refreshToken, sessionUUID, isOnline, userId, userAgent, fingerprint } = args;
+    const { refreshToken, payloadUUID, isOnline, userId, userAgent, fingerprint } = args;
     const hashedRefreshToken = await BcryptHelper.hash(refreshToken);
 
     return {
       fingerprint,
       hashedRefreshToken,
       isOnline,
-      sessionUUID,
+      payloadUUID: payloadUUID,
       userId,
       userAgent,
     };
   }
 
-  private mapAgentPayload(user: any, sessionUUID: SessionUUID): AgentAuthPayload {
+  private mapAgentPayload(user: any, payloadUUID: PayloadUUID): AgentAuthPayload {
     return {
       descId: user.descId,
       routeAccess: user.routeAccess,
-      sessionUUID,
+      payloadUUID,
       sub: user.publicId,
     };
   }
 
-  private mapCustomerPayload(user: any, sessionUUID: SessionUUID): CustomerAuthPayload {
+  private mapCustomerPayload(user: any, payloadUUID: PayloadUUID): CustomerAuthPayload {
     return {
-      sessionUUID,
+      payloadUUID,
       sub: user.publicId,
     };
   }

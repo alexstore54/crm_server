@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ClientsGateway, GatewayModule, GatewayService } from '@/shared/gateway';
-import { SessionsModule, SessionsService } from '@/shared/services';
+import { SessionsModule, SessionsService } from '@/shared/services/redis';
 import { AgentModule } from '@/modules/agent/agent.module';
 import { UserModule } from '@/modules/user/user.module';
 import {

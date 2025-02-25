@@ -1,12 +1,13 @@
 import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { GatewayService } from '@/shared/gateway/gateway.service';
-import { SessionsService } from '@/shared/services/sessions/sessions.service';
+import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CookiesUtil } from '@/shared/utils';
 import { JwtService } from '@nestjs/jwt';
-import { AgentAuthPayload, Session, SessionId } from '@/shared/types/auth';
+import { AgentAuthPayload } from '@/shared/types/auth';
 import { UnauthorizedException } from '@nestjs/common';
+import { Session, SessionId } from '@/shared/types/redis';
 
 @WebSocketGateway({ cors: true })
 export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -25,13 +26,13 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     const payload = this.jwtService.verify<AgentAuthPayload>(accessToken);
     if (!payload) throw new UnauthorizedException(ERROR_MESSAGES.SESSION_NOT_FOUND);
-    const { sub, sessionUUID } = payload;
+    const { sub, payloadUUID } = payload;
 
-    client.data.sessionId = sessionUUID;
+    client.data.sessionId = payloadUUID;
     client.data.userId = sub;
 
-    this.gatewayService.addClient(sessionUUID, client);
-    await this.updateUserOnlineStatus(sub, sessionUUID, true);
+    this.gatewayService.addClient(payloadUUID, client);
+    await this.updateUserOnlineStatus(sub, payloadUUID, true);
   }
 
   public async connect(userId: string, sessionId: SessionId, client: Socket) {
@@ -55,6 +56,6 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
       ...session,
       isOnline,
     };
-    await this.sessionsService.updateUserSession(userId, session.sessionUUID, updatedSession);
+    await this.sessionsService.updateUserSession(userId, session.payloadUUID, updatedSession);
   }
 }

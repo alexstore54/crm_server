@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { SessionsService } from '@/shared/services/sessions/sessions.service';
+import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
 
 @Module({
   providers: [SessionsService],

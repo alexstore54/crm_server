@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { SessionId } from '@/shared/types/auth';
 import { SocketRooms } from '@/shared/types/socket';
+import { SessionId } from '@/shared/types/redis';
 
 @Injectable()
 export class GatewayService {

@@ -53,9 +53,9 @@ export class AuthCustomerService {
   }
 
   private async makeLeadAndCustomer(data: SignUpCustomer): Promise<FullCustomer> {
-    const {password} = data;
+    const { password } = data;
     const newLead = await this.leadRepository.createOne({
-     ...data,
+      ...data,
     });
     return this.makeCustomerFromLead(newLead, password);
   }
