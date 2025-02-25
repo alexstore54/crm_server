@@ -9,26 +9,26 @@ import { UpdateAgentPerms } from '../dto/update-agent-perms.dto';
 
 @Controller('agent')
 export class AgentController {
-  constructor(private readonly agentSerive: AgentService) {}
+  constructor(private readonly agentService: AgentService) {}
 
   @UseGuards(AgentAccessGuard)
   @Get('leads')
   async getLeadsByAgentId(@Req() request: RequestWithAgentPayload) {
     const payload = request.user;
 
-    return this.agentSerive.getLeadsByAgentId(payload.sub);
+    return this.agentService.getLeadsByPublicId(payload.sub);
   }
 
   @UseGuards(AgentAccessGuard, ModeratorGuard)
   @Post('create')
   async createAgent(@Body() body: CreateAgent, @Req() request: RequestWithAgentPayload) {
-    return this.agentSerive.createAgent(body);
+    return this.agentService.createAgent(body);
   }
 
   @UseGuards(AgentAccessGuard, ModeratorGuard)
   @Patch('update/:publicId')
   async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {
-    return this.agentSerive.updateAgentByPublicId(publicId, body);
+    return this.agentService.updateAgentByPublicId(publicId, body);
   }
 
   @UseGuards(AgentAccessGuard, ModeratorGuard)
@@ -37,7 +37,7 @@ export class AgentController {
     @Param('publicId') publicId: string,
     @Body() body: UpdateAgentPerms,
   ) {
-    return this.agentSerive.updateAgentPermissionsByPublicId(publicId, body);
+    return this.agentService.updateAgentPermissionsByPublicId(publicId, body);
   }
 
   // @UseGuards(AgentAccessGuard, ModeratorGuard)
@@ -48,7 +48,7 @@ export class AgentController {
   //     @Res()  response: Response
   // ) {
 
-  //     return this.agentSerive.createLeadWithCustomerByAgent(body);
+  //     return this.agentService.createLeadWithCustomerByAgent(body);
   // }
 
   // @UseGuards(AgentAccessGuard)

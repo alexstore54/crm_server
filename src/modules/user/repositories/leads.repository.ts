@@ -1,10 +1,8 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Lead } from '@prisma/client';
-import { CreateLead } from '@/shared/types/user';
-import { UpdateLead } from '@/modules/users/dto/lead';
+import { UpdateLead } from '@/modules/user/dto/lead';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { CreateLeadCustomerDto } from '@/modules/agents/dto/create-lead-customer.dto';
 
 @Injectable()
 export class LeadRepository {
@@ -18,7 +16,7 @@ export class LeadRepository {
     }
   }
 
-  async getLeadsByAgent(agentId: number): Promise<Lead[]> {
+  async getLeadsByAgentId(agentId: number): Promise<Lead[]> {
     try {
       return await this.prisma.lead.findMany({
         where: { agentId },

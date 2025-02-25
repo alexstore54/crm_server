@@ -1,8 +1,8 @@
 import { PrismaService } from '@/shared/db/prisma';
-import { CreateAgent } from '@/modules/agents/dto';
+import { CreateAgent } from '@/modules/agent/dto';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Agent, Desk, Prisma } from '@prisma/client';
-import { UpdateAgent } from '@/modules/agents/dto';
+import { UpdateAgent } from '@/modules/agent/dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()

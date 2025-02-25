@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SignInCustomer } from '@/modules/auth/dto/customer/sign-in.dto';
 import { FullCustomer } from '@/shared/types/user';
-import { CustomersRepository, LeadRepository } from '@/modules/users/repositories';
+import { CustomersRepository, LeadRepository } from '@/modules/user/repositories';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { SignUpCustomer } from '@/modules/auth/dto/customer';
 import { Lead } from '@prisma/client';

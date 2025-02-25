@@ -1,16 +1,18 @@
-import { LeadRepository } from '@/modules/users/repositories';
+import { LeadRepository } from '@/modules/user/repositories';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { AgentRepository } from '../repositories/agent.repository';
-import { Agent, Lead } from '@prisma/client';
-import { CreateAgent, UpdateAgent } from '../dto';
+import { Lead } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
-import { DeskRepository } from '../repositories/desk.repository';
-import { RolePermissionRepository } from '../repositories/role-permission.repository';
-import { AgentPermissionRepository } from '../repositories/agent-permission.repository';
-import { AgentPerms } from '../types/agent-perms.type';
-import { arraysEqual } from '@/shared/utils/array/arraysEqual';
-import { UpdateAgentPerms } from '../dto/update-agent-perms.dto';
+import {
+  AgentPermissionRepository,
+  AgentRepository,
+  DeskRepository,
+  RolePermissionRepository,
+} from '@/modules/agent/repositories';
+import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
+import { AgentPerms } from '@/modules/agent/types/agent-perms.type';
+import { UpdateAgentPerms } from '@/modules/agent/dto/update-agent-perms.dto';
+import { ArrayUtil } from '@/shared/utils';
 
 @Injectable()
 export class AgentService {
@@ -23,34 +25,31 @@ export class AgentService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async getLeadsByAgentId(agentPublicId: string): Promise<Lead[]> {
-    const agent = await this.agentRepository.findOneByPublicId(agentPublicId);
+  public async getLeadsByPublicId(publicId: string): Promise<Lead[]> {
+    const agent = await this.agentRepository.findOneByPublicId(publicId);
     if (!agent) {
-      throw new NotFoundException('Agent not found');
+      throw new NotFoundException(ERROR_MESSAGES.AGENT_NOT_FOUND);
     }
 
     try {
-      return await this.leadRepository.getLeadsByAgent(agent.id);
+      return await this.leadRepository.getLeadsByAgentId(agent.id);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
   }
 
-  async createAgent(data: CreateAgent) {
+  public async createAgent(data: CreateAgent) {
     const { permissions, deskIds } = data;
 
-    try {
-      const isExistAgent = await this.agentRepository.findOneByEmail(data.email);
-      if (isExistAgent) {
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.USER_EXISTS}`);
-      }
+    const isExistAgent = await this.agentRepository.findOneByEmail(data.email);
+    if (isExistAgent) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.USER_EXISTS}`);
+    }
 
+    try {
       return this.prisma.$transaction(async (tx) => {
         // Если deskIds переданы – получаем связанные записи, иначе оставляем null
-        const desks =
-          deskIds && deskIds.length > 0
-            ? await this.deskRepository.findManyByIdsWithTx(deskIds, tx)
-            : null;
+        const desks = await this.getDesksByIds(deskIds, tx);
 
         // Создаем агента, передавая desks (если они есть, иначе null)
         const newAgent = await this.agentRepository.createOneWithTx(data, tx, desks);
@@ -59,9 +58,11 @@ export class AgentService {
         if (permissions && permissions.length > 0) {
           // Фильтруем входящие разрешения на уникальность permissionId
           const uniqueMap = new Map<number, boolean>();
+
           for (const perm of permissions) {
             uniqueMap.set(perm.permissionId, perm.allowed);
           }
+
           const uniqueIncoming = Array.from(uniqueMap.entries()).map(([permissionId, allowed]) => ({
             permissionId,
             allowed,
@@ -70,6 +71,7 @@ export class AgentService {
           const rolePermissions = await this.rolePermissionRepository.getRolePermissionsByRoleId(
             newAgent.roleId,
           );
+
           // Выбираем только те разрешения, где значение отличается от дефолтного
           const result: AgentPerms[] = uniqueIncoming.reduce((acc, incoming) => {
             const rolePerm = rolePermissions.find(
@@ -98,14 +100,16 @@ export class AgentService {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
   }
-  async updateAgentByPublicId(publicId: string, data: UpdateAgent) {
+
+  public async updateAgentByPublicId(publicId: string, data: UpdateAgent) {
     const { deskIds, ...rest } = data;
+    const currentAgent = await this.agentRepository.findOneByPublicIdWithDesks(publicId);
+    if (!currentAgent) {
+      throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
+    }
+
     try {
-      const currentAgent = await this.agentRepository.findOneByPublicIdWithDesks(publicId);
-      if (!currentAgent) {
-        throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
-      }
-      return await this.prisma.$transaction(async (tx) => {
+      return this.prisma.$transaction(async (tx) => {
         let newDeskIds: number[] | null = null;
 
         if (deskIds) {
@@ -116,7 +120,7 @@ export class AgentService {
           const currentDeskIds = currentAgent.Desk.map((desk) => desk.id);
 
           // Если наборы отличаются, обновляем связь
-          if (!arraysEqual(currentDeskIds, validDeskIds)) {
+          if (!ArrayUtil.isArraysEqual(currentDeskIds, validDeskIds)) {
             newDeskIds = validDeskIds;
           }
         }
@@ -133,16 +137,18 @@ export class AgentService {
     }
   }
 
-  async updateAgentPermissionsByPublicId(publicId: string, data: UpdateAgentPerms) {
+  public async updateAgentPermissionsByPublicId(publicId: string, data: UpdateAgentPerms) {
     const { roleId, permissions } = data;
+    if (!roleId && !permissions) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.EMPTY_DATA}`);
+    }
+
+    const agent = await this.agentRepository.findOneByPublicId(publicId);
+    if (!agent) {
+      throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
+    }
+
     try {
-      if (!roleId && !permissions) {
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.EMPTY_DATA}`);
-      }
-      const agent = await this.agentRepository.findOneByPublicId(publicId);
-      if (!agent) {
-        throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
-      }
       // Три основных сценария обновления привилегий:
       // 1) Когда указан roleId, но не указаны permissions
       // 2) Когда указаны permissions, но не указан roleId
@@ -156,8 +162,10 @@ export class AgentService {
             tx,
             null,
           );
+
           const rolePermissions =
             await this.rolePermissionRepository.getRolePermissionsByRoleIdWithTx(roleId, tx);
+
           const agentPermissions =
             await this.agentPermissionRepository.getAgentPermissionsByAgentIdWithTx(agent.id, tx);
 
@@ -281,5 +289,11 @@ export class AgentService {
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR + error.message}`);
     }
+  }
+
+  private async getDesksByIds(deskIds: number[] | undefined, tx: any) {
+    return deskIds && deskIds.length > 0
+      ? this.deskRepository.findManyByIdsWithTx(deskIds, tx)
+      : null;
   }
 }

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
 import { Agent } from '@prisma/client';
-import { AgentRepository } from '@/modules/agents/repositories/agent.repository';
+import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { BcryptHelper } from '@/shared/helpers';
 

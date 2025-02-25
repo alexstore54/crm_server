@@ -11,4 +11,6 @@ export const ERROR_MESSAGES = {
   USER_EXISTS: 'User already exists',
   USER_IS_NOT_EXISTS: 'User is not exists',
   DB_ERROR: 'Error by query to database',
+  AGENT_NOT_FOUND: 'Agent not found',
+  ONE_FIELD_REQUIRED: 'At least one property must be provided'
 };

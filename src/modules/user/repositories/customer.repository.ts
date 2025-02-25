@@ -1,7 +1,7 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { UpdateCustomer } from '@/modules/users/dto/customer';
-import { CreateCustomer } from '@/modules/users/types';
+import { UpdateCustomer } from '@/modules/user/dto/customer';
+import { CreateCustomer } from '@/modules/user/types';
 import { FullCustomer } from '@/shared/types/user';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { UsersUtil } from '@/shared/utils';
