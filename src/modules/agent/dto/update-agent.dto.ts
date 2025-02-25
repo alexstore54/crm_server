@@ -13,7 +13,6 @@ import {
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { ERROR_MESSAGES, VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
-import { IsOnePropertyRequired } from '@/common/decorators';
 
 export class UpdateAgent {
   @IsOptional()

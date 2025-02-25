@@ -1,5 +1,5 @@
 import { Customer, Email, Lead, Phone } from '@prisma/client';
-import { CustomerEmail, FullCustomer, UserPhone } from '@/shared/types/user';
+import { UserEmail, FullCustomer, UserPhone } from '@/shared/types/user';
 
 export class UsersUtil {
   public static mapCustomerToFullCustomer(
@@ -21,7 +21,7 @@ export class UsersUtil {
     };
   }
 
-  public static mapEmailsToCustomerEmails(emails: Email[]): CustomerEmail[] {
+  public static mapEmailsToCustomerEmails(emails: Email[]): UserEmail[] {
     return emails.map((email) => ({
       email: email.email,
       isMain: email.isMain,

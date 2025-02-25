@@ -3,12 +3,13 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Lead } from '@prisma/client';
 import { UpdateLead } from '@/modules/user/dto/lead';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { CreateLeadInputParams } from '@/modules/user/types';
 
 @Injectable()
 export class LeadRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAll(): Promise<Lead[]> {
+  public async getAll(): Promise<Lead[]> {
     try {
       return await this.prisma.lead.findMany();
     } catch (error: any) {
@@ -16,7 +17,7 @@ export class LeadRepository {
     }
   }
 
-  async getLeadsByAgentId(agentId: number): Promise<Lead[]> {
+  public async getLeadsByAgentId(agentId: number): Promise<Lead[]> {
     try {
       return await this.prisma.lead.findMany({
         where: { agentId },
@@ -36,7 +37,7 @@ export class LeadRepository {
     }
   }
 
-  async findOneById(id: number): Promise<Lead | null> {
+  public async findOneById(id: number): Promise<Lead | null> {
     try {
       return await this.prisma.lead.findFirst({ where: { id } });
     } catch (error: any) {
@@ -44,7 +45,7 @@ export class LeadRepository {
     }
   }
 
-  async findOneByPhone(phone: string): Promise<Lead | null> {
+  public async findOneByPhone(phone: string): Promise<Lead | null> {
     try {
       return await this.prisma.lead.findFirst({
         where: {
@@ -63,33 +64,16 @@ export class LeadRepository {
     }
   }
 
-  async createOne(data: CreateLeadCustomerDto): Promise<Lead> {
-    const {
-      firstname,
-      lastname,
-      country,
-      defaultEmail,
-      agentId,
-      statusId,
-      password,
-      lastOnline,
-      emails,
-      phones,
-    } = data;
+  async createOne(data: CreateLeadInputParams): Promise<Lead> {
+    const { password, emails, phones, ...rest } = data;
 
     try {
       return this.prisma.lead.create({
         data: {
-          firstname,
-          lastname,
-          country,
-          defaultEmail,
-          agentId,
-          statusId,
+          ...rest,
           Customer: {
             create: {
               password,
-              lastOnline,
               Email: {
                 create: emails.map((email) => ({
                   email: email.email,
@@ -98,7 +82,6 @@ export class LeadRepository {
               },
             },
           },
-          // Если переданы телефоны, создаем их для лида
           Phone:
             phones && phones.length > 0
               ? {
@@ -121,7 +104,7 @@ export class LeadRepository {
     }
   }
 
-  async deleteOneById(id: number): Promise<Lead | null> {
+  public async deleteOneById(id: number): Promise<Lead | null> {
     try {
       return await this.prisma.lead.delete({ where: { id } });
     } catch (error: any) {
@@ -129,7 +112,7 @@ export class LeadRepository {
     }
   }
 
-  async updateOneById(id: number, data: UpdateLead): Promise<Lead | null> {
+  public async updateOneById(id: number, data: UpdateLead): Promise<Lead | null> {
     const { status_id, ...rest } = data;
     try {
       return await this.prisma.lead.update({

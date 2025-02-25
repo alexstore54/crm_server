@@ -17,6 +17,6 @@ import {
     AgentPermissionRepository,
     RolePermissionRepository,
   ],
-  exports: [RolePermissionRepository, AgentPermissionRepository]
+  exports: [RolePermissionRepository, AgentPermissionRepository],
 })
 export class PermissionModule {}

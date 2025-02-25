@@ -1,3 +1,1 @@
-export class AgentUtil {
-
-}
+export class AgentUtil {}

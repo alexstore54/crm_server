@@ -1,4 +1,4 @@
-export type CustomerEmail = {
+export type UserEmail = {
   email: string;
   isMain: boolean;
 };
