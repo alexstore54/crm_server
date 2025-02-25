@@ -15,7 +15,6 @@ model Agent {
   password        String
   lastOnline      DateTime?         @db.Timestamptz(0)
   routeAccess     RouteAccess       @default(ADMIN)
-  
   Role            Role              @relation(fields: [roleId], references: [id])
   AgentPermission AgentPermission[]
   Lead            Lead[]

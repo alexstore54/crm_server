@@ -1,7 +1,5 @@
 import {
   IsArray,
-  IsBoolean,
-  IsDate,
   IsEmail,
   IsNumber,
   IsOptional,
@@ -15,6 +13,7 @@ import {
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
+import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 
 export class CreateAgent {
   @IsNumber()
@@ -44,15 +43,6 @@ export class CreateAgent {
   @ValidateIf((o) => o.permissions !== null)
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AgentPermissionDto)
-  permissions?: AgentPermissionDto[];
-}
-
-export class AgentPermissionDto {
-  @IsNumber()
-  permissionId: number;
-
-  @IsOptional()
-  @IsBoolean()
-  allowed: boolean;
+  @Type(() => IncomingPermission)
+  permissions?: IncomingPermission[];
 }

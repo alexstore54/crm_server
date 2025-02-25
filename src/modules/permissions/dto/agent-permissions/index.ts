@@ -1,0 +1,1 @@
+export { IncomingPermission } from '@/modules/permissions/dto/agent-permissions/agent-permission.dto';

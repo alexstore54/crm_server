@@ -1,4 +1,4 @@
-export type AgentPerms = {
+export type AgentPermission = {
   agentId: number;
   permissionId: number;
   allowed: boolean;

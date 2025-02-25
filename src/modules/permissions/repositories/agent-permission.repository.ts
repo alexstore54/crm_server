@@ -1,14 +1,16 @@
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { AgentPerms } from '../types/agent-perms.type';
+import { AgentPermission, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AgentPermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAgentPermissionsByAgentIdWithTx(agentId: number, tx: Prisma.TransactionClient) {
+  async getManyByAgentIdWithTx(
+    agentId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<AgentPermission[]> {
     try {
       return tx.agentPermission.findMany({
         where: {
@@ -32,7 +34,7 @@ export class AgentPermissionRepository {
     }
   }
 
-  async createManyWithTx(data: AgentPerms[], tx: Prisma.TransactionClient) {
+  async createManyWithTx(data: AgentPermission[], tx: Prisma.TransactionClient) {
     try {
       return tx.agentPermission.createMany({ data });
     } catch (error: any) {

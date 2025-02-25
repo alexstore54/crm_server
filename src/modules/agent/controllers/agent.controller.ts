@@ -3,7 +3,6 @@ import { AgentAccessGuard, ModeratorGuard } from '@/common/guards/tokens/agent';
 import { RequestWithAgentPayload } from '@/shared/types/auth';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, UpdateAgent } from '../dto';
-import { UpdateAgentPerms } from '../dto/update-agent-perms.dto';
 
 // import { CreateLeadCustomerDto } from '../dto/create-lead-customer.dto';
 
@@ -29,15 +28,6 @@ export class AgentController {
   @Patch('update/:publicId')
   async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {
     return this.agentService.updateAgentByPublicId(publicId, body);
-  }
-
-  @UseGuards(AgentAccessGuard, ModeratorGuard)
-  @Patch(':publicId/permissions/update')
-  async updateAgentPermissions(
-    @Param('publicId') publicId: string,
-    @Body() body: UpdateAgentPerms,
-  ) {
-    return this.agentService.updateAgentPermissionsByPublicId(publicId, body);
   }
 
   // @UseGuards(AgentAccessGuard, ModeratorGuard)

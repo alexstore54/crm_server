@@ -7,6 +7,8 @@ import { UserModule } from '@/modules/user/user.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { GatewayModule } from '@/shared/gateway';
 import { validationSchema } from '@/shared/schemas';
+import { AgentModule } from '@/modules/agent/agent.module';
+import { PermissionModule } from '@/modules/permissions/permission.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { validationSchema } from '@/shared/schemas';
     GatewayModule,
     AuthModule,
     UserModule,
+    AgentModule,
+    PermissionModule,
   ],
   controllers: [],
   providers: [],

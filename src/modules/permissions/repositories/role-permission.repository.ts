@@ -1,7 +1,8 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable } from '@nestjs/common';
 import { Prisma, RolePermission } from '@prisma/client';
-import { AgentPermissionDto } from '../dto';
+
+import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 
 @Injectable()
 export class RolePermissionRepository {
@@ -15,7 +16,7 @@ export class RolePermissionRepository {
     });
   }
 
-  async getRolePermissionsByRoleIdWithTx(
+  async getManyByRoleIdWithTx(
     roleId: number,
     tx: Prisma.TransactionClient,
   ): Promise<RolePermission[]> {
@@ -26,9 +27,9 @@ export class RolePermissionRepository {
     });
   }
 
-  async getRolePermissionsByRoleIdAndPermsIdsWithTx(
+  async getOneByRoleIdAndPermsIdsWithTx(
     roleId: number,
-    permissions: AgentPermissionDto[],
+    permissions: IncomingPermission[],
     tx: Prisma.TransactionClient,
   ): Promise<RolePermission[]> {
     return tx.rolePermission.findMany({
