@@ -16,11 +16,7 @@ import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
 
-
-
-
 export class CreateAgent {
-  
   @IsNumber()
   roleId: number;
 
@@ -37,23 +33,20 @@ export class CreateAgent {
   })
   password: string;
 
-
   @IsOptional()
-  @ValidateIf(o => o.deskIds !== null)
+  @ValidateIf((o) => o.deskIds !== null)
   @IsArray()
   @Type(() => Number)
   @IsNumber({}, { each: true })
   deskIds?: number[];
 
   @IsOptional()
-  @ValidateIf(o => o.permissions !== null)
+  @ValidateIf((o) => o.permissions !== null)
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => AgentPermissionDto)
   permissions?: AgentPermissionDto[];
 }
-
-
 
 export class AgentPermissionDto {
   @IsNumber()
@@ -63,4 +56,3 @@ export class AgentPermissionDto {
   @IsBoolean()
   allowed: boolean;
 }
-

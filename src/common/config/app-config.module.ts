@@ -6,7 +6,8 @@ import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import {
-  AgentAccessTokenStrategy, AgentRefreshTokenStrategy,
+  AgentAccessTokenStrategy,
+  AgentRefreshTokenStrategy,
   CustomerAccessTokenStrategy,
   CustomerRefreshTokenStrategy,
 } from '@/common/strategies/jwt';
@@ -60,7 +61,7 @@ export class AppConfigModule {
         AgentAccessTokenStrategy,
         AgentRefreshTokenStrategy,
         CustomerAccessTokenStrategy,
-        CustomerRefreshTokenStrategy
+        CustomerRefreshTokenStrategy,
       ],
       exports: [ConfigModule],
     };

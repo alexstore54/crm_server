@@ -24,14 +24,14 @@ export class LeadRepository {
         where: { agentId },
         include: {
           Customer: {
-            include: { 
-              Email: true  
-            }
+            include: {
+              Email: true,
+            },
           },
-          Agent: true,       
-          LeadStatus: true,  
-          Phone: true        
-        }
+          Agent: true,
+          LeadStatus: true,
+          Phone: true,
+        },
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -122,8 +122,6 @@ export class LeadRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
-
 
   async deleteOneById(id: number): Promise<Lead | null> {
     try {

@@ -14,7 +14,6 @@ import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
 
-
 export class UpdateAgent {
   @IsOptional()
   @IsNumber()
@@ -33,14 +32,10 @@ export class UpdateAgent {
   })
   password?: string;
 
-
-
   @IsOptional()
-  @ValidateIf(o => o.deskIds !== null)
+  @ValidateIf((o) => o.deskIds !== null)
   @IsArray()
   @Type(() => Number)
   @IsNumber({}, { each: true })
   deskIds?: number[];
-
-
 }

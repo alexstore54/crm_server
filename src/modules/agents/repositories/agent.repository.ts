@@ -26,35 +26,36 @@ export class AgentRepository {
   }
 
   async findOneByPublicId(publicId: string): Promise<Agent | null> {
-      try {
-          return this.prisma.agent.findFirst({ where: { publicId } });
-      } catch (error: any) {
-          throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-      }
+    try {
+      return this.prisma.agent.findFirst({ where: { publicId } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
-  async findOneByPublicIdWithDesks(publicId: string){
-    try{
+  async findOneByPublicIdWithDesks(publicId: string) {
+    try {
       return this.prisma.agent.findFirst({
-            where: {publicId},
-            include: {Desk: true}
+        where: { publicId },
+        include: { Desk: true },
       });
-    }catch(error:any){
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}` )}
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
   async findOneByEmail(email: string): Promise<Agent | null> {
     try {
       return this.prisma.agent.findFirst({ where: { email } });
     } catch (error: any) {
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
-  } 
+  }
 
   async createOneWithTx(
-    data: CreateAgent,        // данные для создания агента (email, password, roleId, ...)
+    data: CreateAgent, // данные для создания агента (email, password, roleId, ...)
     tx: Prisma.TransactionClient,
-    desks: Desk[] | null,           
+    desks: Desk[] | null,
   ) {
     try {
       return tx.agent.create({
@@ -62,39 +63,40 @@ export class AgentRepository {
           email: data.email,
           password: data.password,
           roleId: data.roleId,
-          
-          Desk: desks && desks.length
-                ? {
-                    connect: desks.map((desk) => ({ id: desk.id })),
-                  }
-                : undefined,
+
+          Desk:
+            desks && desks.length
+              ? {
+                  connect: desks.map((desk) => ({ id: desk.id })),
+                }
+              : undefined,
         },
       });
     } catch (error: any) {
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
   async updateOneWithTx(
-    id:number,
-    data: UpdateAgent ,
+    id: number,
+    data: UpdateAgent,
     tx: Prisma.TransactionClient,
     desks: number[] | null,
-  ){
-    try{
-        return tx.agent.update({
-            where: {id},
-            data: {
-                ...data,
-                Desk: desks ? {
-                    set: desks.map(id => ({ id }))
-                } : undefined
-            }
-        
-        })
-
-    }catch(error:any){
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+  ) {
+    try {
+      return tx.agent.update({
+        where: { id },
+        data: {
+          ...data,
+          Desk: desks
+            ? {
+                set: desks.map((id) => ({ id })),
+              }
+            : undefined,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 

@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MutationAccessGuard implements CanActivate {
@@ -10,7 +10,7 @@ export class MutationAccessGuard implements CanActivate {
     if (user.id === params.id || user.routeAccess) {
       return true;
     } else {
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
   }
 }

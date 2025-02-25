@@ -1,4 +1,12 @@
-import { IsEmail, IsPhoneNumber, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsPhoneNumber,
+  IsString,
+  Length,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 
@@ -18,8 +26,7 @@ export class SignUpCustomer {
   password: string;
 
   @IsString()
-  @MinLength(4)
-  @MaxLength(30)
+  @Length(2)
   country: string;
 
   @IsString()
