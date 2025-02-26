@@ -1,19 +1,19 @@
 import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { GatewayService } from '@/shared/gateway/gateway.service';
-import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CookiesUtil } from '@/shared/utils';
 import { JwtService } from '@nestjs/jwt';
 import { AgentAuthPayload } from '@/shared/types/auth';
 import { UnauthorizedException } from '@nestjs/common';
-import { Session, SessionId } from '@/shared/types/redis';
+import { PayloadId, Session } from '@/shared/types/redis';
+import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 
 @WebSocketGateway({ cors: true })
 export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly gatewayService: GatewayService,
-    private readonly sessionsService: SessionsService,
+    private readonly authRedisService: AuthRedisService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -28,34 +28,38 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (!payload) throw new UnauthorizedException(ERROR_MESSAGES.SESSION_NOT_FOUND);
     const { sub, payloadUUID } = payload;
 
-    client.data.sessionId = payloadUUID;
+    client.data.payloadId = payloadUUID;
     client.data.userId = sub;
 
     this.gatewayService.addClient(payloadUUID, client);
     await this.updateUserOnlineStatus(sub, payloadUUID, true);
   }
 
-  public async connect(userId: string, sessionId: SessionId, client: Socket) {
-    client.data.sessionId = sessionId;
-    client.data.userId = userId;
+  public async connect(userPublicId: string, payloadId: PayloadId, client: Socket) {
+    client.data.payloadId = payloadId;
+    client.data.userId = userPublicId;
 
-    this.gatewayService.addClient(sessionId, client);
+    this.gatewayService.addClient(payloadId, client);
   }
 
   async handleDisconnect(client: Socket) {
-    const { sessionId, userId } = client.data;
-    this.gatewayService.removeClient(sessionId);
-    await this.updateUserOnlineStatus(userId, sessionId, false);
+    const { payloadId, userId } = client.data;
+    this.gatewayService.removeClient(payloadId);
+    await this.updateUserOnlineStatus(userId, payloadId, false);
   }
 
-  private async updateUserOnlineStatus(userId: string, sessionId: SessionId, isOnline: boolean) {
-    const session = await this.sessionsService.getUserSessionBySessionId(sessionId);
+  private async updateUserOnlineStatus(
+    userPublicId: string,
+    payloadId: PayloadId,
+    isOnline: boolean,
+  ) {
+    const session = await this.authRedisService.getOneSession(userPublicId, payloadId);
     if (!session) throw new UnauthorizedException(ERROR_MESSAGES.SESSION_NOT_FOUND);
 
     const updatedSession: Session = {
       ...session,
       isOnline,
     };
-    await this.sessionsService.updateUserSession(userId, session.payloadUUID, updatedSession);
+    await this.authRedisService.updateSession(userPublicId, session.payloadUUID, updatedSession);
   }
 }

@@ -3,7 +3,6 @@ import { PayloadUUID } from '@/shared/types/redis';
 
 export type AgentAuthPayload = {
   descId?: string;
-  routeAccess: RouteAccess;
   payloadUUID: PayloadUUID;
   sub: string;
 };

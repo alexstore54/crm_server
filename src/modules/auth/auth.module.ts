@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ClientsGateway, GatewayModule, GatewayService } from '@/shared/gateway';
-import { SessionsModule, SessionsService } from '@/shared/services/redis';
 import { AgentModule } from '@/modules/agent/agent.module';
 import { UserModule } from '@/modules/user/user.module';
 import {
@@ -20,12 +19,13 @@ import {
 import { AuthGateway } from '@/modules/auth/geateway';
 import { CustomersRepository } from '@/modules/user/repositories';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
 import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
+import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 
 @Module({
-  imports: [GatewayModule, SessionsModule, AgentModule, UserModule],
+  imports: [GatewayModule, AuthRedisModule, AgentModule, UserModule],
   controllers: [
     AuthController,
     AuthCustomerController,
@@ -41,7 +41,7 @@ import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
     AuthCustomerService,
     AuthGoogleService,
     TokensService,
-    SessionsService,
+    AuthRedisService,
     //Repositories
     CustomersRepository,
     AgentRepository,

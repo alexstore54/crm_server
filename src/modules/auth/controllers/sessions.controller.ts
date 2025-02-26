@@ -1,18 +1,13 @@
-import { Controller, Delete, Get, Param } from '@nestjs/common';
-import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
+import { Controller, Get, Param } from '@nestjs/common';
+import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 
 //TODO: add guards
 @Controller('sessions')
 export class SessionsController {
-  constructor(private readonly sessionsService: SessionsService) {}
+  constructor(private readonly authRedisService: AuthRedisService) {}
 
   @Get('users/:id')
   async getUserSessions(@Param('id') userId: string) {
-    return await this.sessionsService.getAllUserSessions(userId);
-  }
-
-  @Delete('users/:id')
-  async deleteUserSessions(@Param('id') userId: string) {
-    return await this.sessionsService.deleteAllUserSessions(userId);
+    return await this.authRedisService.getAllSessionsByUserId(userId);
   }
 }

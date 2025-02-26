@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { GatewayService } from '@/shared/gateway/gateway.service';
 import { ClientsGateway } from '@/shared/gateway/clients.gateway';
-import { SessionsModule } from '@/shared/services/redis';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
+import { AuthRedisModule } from '@/shared/services/redis/auth-redis';
 
 @Module({
-  imports: [SessionsModule],
+  imports: [AuthRedisModule],
   providers: [ClientsGateway, GatewayService, JwtService],
   exports: [ClientsGateway, GatewayService],
 })

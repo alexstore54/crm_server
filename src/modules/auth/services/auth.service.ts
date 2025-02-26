@@ -1,5 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { SessionsService } from '@/shared/services/redis/sessions/sessions.service';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { GatewayService } from '@/shared/gateway';
 import { AgentAuthPayload, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
 import { AuthenticateArgs, MakeSessionArgs, UserType } from '@/modules/auth/types/auth-args.type';
@@ -9,11 +8,13 @@ import { TokensService } from '@/modules/auth/services/tokens.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { AuthGateway } from '@/modules/auth/geateway';
 import { CreateSessionInput, PayloadUUID } from '@/shared/types/redis';
+import { AuthRedisService } from '@/shared/services/redis/auth-redis';
+import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly sessionService: SessionsService,
+    private readonly authRedisService: AuthRedisService,
     private readonly gatewayService: GatewayService,
     private readonly authGateway: AuthGateway,
     private readonly tokensService: TokensService,
@@ -21,6 +22,7 @@ export class AuthService {
 
   public async authenticate(userType: UserType, args: AuthenticateArgs): Promise<AuthTokens> {
     const { user, userAgent, fingerprint } = args;
+    const { publicId } = user;
     const payloadUUID: PayloadUUID = uuidv4();
 
     const payload =
@@ -39,18 +41,34 @@ export class AuthService {
       userId: user.publicId,
     });
 
-    const session = await this.sessionService.saveUserSession(createSessionInput);
-
-    //logout from all devices except current
     if (userType === 'agent') {
+      const permissions = args.permissions;
+      if (!permissions) {
+        throw new InternalServerErrorException(ERROR_MESSAGES.PERMISSIONS_NOT_PROVIDED);
+      }
+      const permissionsInput = PermissionsUtil.mapAgentPermissionsToPayload(permissions);
+      await this.authRedisService.saveAgent({
+        agentPublicId: publicId,
+        payloadUUID,
+        sessionInput: { ...createSessionInput },
+        permissionsInput: {
+          permissions: permissionsInput,
+        },
+      });
       await this.authGateway.logoutFromAllDevicesExceptCurrent(user.publicId, payloadUUID);
+    } else {
+      await this.authRedisService.saveCustomer({
+        customerPublicId: publicId,
+        payloadUUID,
+        sessionInput: { ...createSessionInput },
+      });
     }
 
     return tokens;
   }
 
   public async logout(userPublicId: string, payloadUUID: PayloadUUID) {
-    await this.sessionService.deleteUserSession(userPublicId, payloadUUID);
+    await this.authRedisService.deleteOneSession(userPublicId, payloadUUID);
     this.gatewayService.removeClient(payloadUUID);
   }
 
@@ -60,7 +78,7 @@ export class AuthService {
   ): Promise<AuthTokens> {
     const { sub: userPublicId, payloadUUID } = payload;
 
-    const session = await this.sessionService.getUserSession(userPublicId, payloadUUID);
+    const session = await this.authRedisService.getOneSession(userPublicId, payloadUUID);
     if (!session) {
       throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_DENIED);
     }
@@ -72,10 +90,16 @@ export class AuthService {
 
     const tokens = await this.tokensService.getTokens(payload);
     const newHashedToken = await BcryptHelper.hash(tokens.refreshToken);
-    await this.sessionService.updateUserSession(userPublicId, payloadUUID, {
+    await this.authRedisService.updateSession(userPublicId, payloadUUID, {
       ...session,
       refreshToken: newHashedToken,
     });
+
+    const isAgent = 'descId' in payload;
+
+    if (isAgent) {
+      await this.authRedisService.refreshPermissions(userPublicId, payloadUUID);
+    }
 
     return tokens;
   }
@@ -88,8 +112,7 @@ export class AuthService {
       fingerprint,
       hashedRefreshToken,
       isOnline,
-      payloadUUID: payloadUUID,
-      userId,
+      payloadUUID,
       userAgent,
     };
   }
@@ -97,7 +120,6 @@ export class AuthService {
   private mapAgentPayload(user: any, payloadUUID: PayloadUUID): AgentAuthPayload {
     return {
       descId: user.descId,
-      routeAccess: user.routeAccess,
       payloadUUID,
       sub: user.publicId,
     };

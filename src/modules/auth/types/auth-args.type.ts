@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { Agent } from '@prisma/client';
+import { Agent, AgentPermission } from '@prisma/client';
 import { FullCustomer } from '@/shared/types/user';
 import { PayloadUUID } from '@/shared/types/redis';
 
@@ -14,6 +14,7 @@ export interface AuthenticateArgs {
   user: Agent | FullCustomer;
   fingerprint: string;
   userAgent: string;
+  permissions?: AgentPermission[]
 }
 
 export interface MakeSessionArgs {
