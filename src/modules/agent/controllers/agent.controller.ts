@@ -4,7 +4,7 @@ import { RequestWithAgentPayload } from '@/shared/types/auth';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, UpdateAgent } from '../dto';
 
-@Controller('agent')
+@Controller('agents')
 export class AgentController {
   constructor(private readonly agentService: AgentService) {}
 
@@ -28,32 +28,4 @@ export class AgentController {
     return this.agentService.updateAgentByPublicId(publicId, body);
   }
 
-  // @UseGuards(AgentAccessGuard, ModeratorGuard)
-  // @Post('leads/create')
-  // async createLead(
-  //     @Body() body: CreateLeadCustomerDto ,
-  //     @Req()  request: RequestWithAgentPayload,
-  //     @Res()  response: Response
-  // ) {
-
-  //     return this.agentService.createLeadWithCustomerByAgent(body);
-  // }
-
-  // @UseGuards(AgentAccessGuard)
-  // @Post('leads/create')
-  // async createLead(
-  //     @Req() request: RequestWithAgentPayload
-  // ) {
-  //     const payload = request.user;
-
-  // }
-
-  // @UseGuards(AgentAccessGuard)
-  // @Post('leads/create')
-  // async createLead(
-  //     @Req() request: RequestWithAgentPayload
-  // ) {
-  //     const payload = request.user;
-
-  // }
 }

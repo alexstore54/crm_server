@@ -12,6 +12,7 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
 import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
 import { DECORATORS_METADATA } from '@/shared/constants/metadata';
+import { Permissions } from '@/shared/types/redis';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -27,23 +28,23 @@ export class PermissionsGuard implements CanActivate {
     if (error) {
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
     }
-    const requiredPermission = this.reflector.get<PermissionsKeys>(
-      DECORATORS_METADATA.REQUIRED_PERMISSION,
+    const requiredPermission = this.reflector.get<PermissionsKeys[]>(
+      DECORATORS_METADATA.REQUIRED_PERMISSIONS,
       context.getHandler(),
     );
 
-    if (!requiredPermission) {
-      throw new ForbiddenException(ERROR_MESSAGES.REQUIRED_PERMISSION);
+    if (!requiredPermission || !requiredPermission.length) {
+      throw new ForbiddenException(ERROR_MESSAGES.REQUIRED_PERMISSIONS);
     }
 
     const { payloadUUID, sub } = payload;
 
-    const permissions = await this.authRedisService.getOnePermissions(sub, payloadUUID);
+    const permissions: Permissions | null = await this.authRedisService.getOnePermissions(sub, payloadUUID);
 
-    if (!permissions || !permissions[requiredPermission]) {
+    if (!permissions || !requiredPermission.some((permission) => permissions[permission])) {
       throw new ForbiddenException(ERROR_MESSAGES.PERMISSIONS_NOT_PROVIDED);
     }
 
-    return permissions[requiredPermission];
+    return true;
   }
 }
