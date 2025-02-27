@@ -14,12 +14,10 @@ model Agent {
   email           String            @db.VarChar(100)
   password        String
   lastOnline      DateTime?         @db.Timestamptz(0)
-  routeAccess     RouteAccess       @default(ADMIN)
-  
   Role            Role              @relation(fields: [roleId], references: [id])
   AgentPermission AgentPermission[]
   Lead            Lead[]
-  Desk            Desk[]            @relation("AgentDesks") // manyToMany
+  Desk            Desk[]            @relation("AgentDesks")
 }
 
 model AgentPermission {
@@ -64,9 +62,7 @@ model Lead {
   lastname     String?
   country      String?
   createdAt    DateTime    @default(now()) @db.Timestamptz(0)
-
-  defaultEmail String?     
-
+  defaultEmail String?
   agentId      Int?
   isVerified   Boolean     @default(false)
   Customer     Customer?
@@ -82,12 +78,12 @@ model LeadStatus {
 }
 
 model Log {
-  id        Int      @id @default(autoincrement())
   level     LogLevel @default(INFO)
   message   String
-  userId    Int?
   context   Json?
   createdAt DateTime @default(now()) @db.Timestamptz(0)
+  userId    Int?
+  id        Int      @id @default(autoincrement())
 }
 
 model Permission {
@@ -103,8 +99,8 @@ model Phone {
   id         Int      @id @default(autoincrement())
   phone      String
   isMain     Boolean  @default(false)
-  leadId     Int
   created_at DateTime @default(now()) @db.Timestamptz(0)
+  leadId     Int
   Lead       Lead     @relation(fields: [leadId], references: [id])
 }
 
@@ -130,10 +126,3 @@ enum LogLevel {
   WARN
   ERROR
 }
-
-enum RouteAccess {
-  ADMIN
-  MODERATOR
-}
-
-
