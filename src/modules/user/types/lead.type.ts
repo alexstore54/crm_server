@@ -11,4 +11,3 @@ export interface CreateLeadInput {
   emails: UserEmail[];
   phones: UserPhone[];
 }
- 

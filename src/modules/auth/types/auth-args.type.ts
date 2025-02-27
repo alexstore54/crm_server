@@ -14,7 +14,7 @@ export interface AuthenticateArgs {
   user: Agent | FullCustomer;
   fingerprint: string;
   userAgent: string;
-  permissions?: AgentPermission[]
+  permissions?: AgentPermission[];
 }
 
 export interface MakeSessionArgs {

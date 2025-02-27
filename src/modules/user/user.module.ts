@@ -7,13 +7,7 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 
 @Module({
   controllers: [CustomerController, LeadsController],
-  providers: [
-    CustomerService,
-    LeadsService,
-    CustomersRepository,
-    LeadRepository,
-    AgentAccessGuard,
-  ],
+  providers: [CustomerService, LeadsService, CustomersRepository, LeadRepository, AgentAccessGuard],
   exports: [CustomersRepository, LeadRepository],
 })
 export class UserModule {}

@@ -4,8 +4,6 @@ import { RequestWithAgentPayload } from '@/shared/types/auth';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, UpdateAgent } from '../dto';
 
-// import { CreateLeadCustomerDto } from '../dto/create-lead-customer.dto';
-
 @Controller('agent')
 export class AgentController {
   constructor(private readonly agentService: AgentService) {}

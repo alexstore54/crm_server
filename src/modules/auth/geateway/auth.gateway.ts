@@ -40,8 +40,7 @@ export class AuthGateway {
   }
 
   public async logoutFromAllDevicesExceptCurrent(userPublicId: string, payloadUUID: PayloadUUID) {
-    const sessions = await this.authRedisService.getAllSessionsByUserId(
-      userPublicId);
+    const sessions = await this.authRedisService.getAllSessionsByUserId(userPublicId);
     sessions.forEach((session) => {
       if (session.payloadUUID !== payloadUUID) {
         this.server.to(session.payloadUUID).emit('logout');

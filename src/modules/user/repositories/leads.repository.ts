@@ -66,7 +66,7 @@ export class LeadRepository {
 
   async createOne(data: CreateLeadInput): Promise<Lead> {
     const { password, emails, phones, ...rest } = data;
-    
+
     try {
       return this.prisma.lead.create({
         data: {
@@ -101,7 +101,7 @@ export class LeadRepository {
         },
       });
     } catch (error: any) {
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
   // public async createOne(data): Promise<Lead> {

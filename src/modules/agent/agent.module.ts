@@ -12,10 +12,7 @@ import {
 import { DeskRepository } from '@/modules/agent/repositories';
 
 @Module({
-  imports: [
-    UserModule,
-    forwardRef(() => PermissionModule),
-  ],
+  imports: [UserModule, forwardRef(() => PermissionModule)],
   providers: [
     AgentService,
     AgentRepository,
@@ -23,7 +20,6 @@ import { DeskRepository } from '@/modules/agent/repositories';
     AgentPermissionRepository,
     RolePermissionRepository,
     DeskRepository,
-
   ],
   controllers: [AgentController],
   exports: [AgentRepository],
