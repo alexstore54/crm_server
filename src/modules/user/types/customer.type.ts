@@ -1,6 +1,6 @@
 export type CreateCustomer = {
   leadId: number;
   agentId?: number;
-  lastTimeOnline: Date;
+  lastOnline?: Date;
   password: string;
 };

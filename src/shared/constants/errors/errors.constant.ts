@@ -14,6 +14,7 @@ export const ERROR_MESSAGES = {
   AGENT_NOT_FOUND: 'Agent not found',
   ONE_FIELD_REQUIRED: 'At least one property must be provided',
   REDIS_ERROR: 'Redis error',
+  PASSWORDS_NOT_MATCH: 'Passwords do not match',
   PERMISSIONS_NOT_PROVIDED: 'Permissions not provided',
   REQUIRED_PERMISSION: 'Required permission must me provided',
 };

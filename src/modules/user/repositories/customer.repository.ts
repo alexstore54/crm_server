@@ -62,6 +62,16 @@ export class CustomersRepository {
     }
   }
 
+  async findOneByLeadId(leadId: number){
+     try{
+        return this.prisma.customer.findFirst({
+            where: {leadId}
+        })
+     }catch(error: any){
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+     }
+  }
+
   async findOneByPublicId(publicId: string): Promise<FullCustomer | null> {
     try {
       const customer = await this.prisma.customer.findFirst({
@@ -126,7 +136,6 @@ export class CustomersRepository {
       const customer = await this.prisma.customer.create({
         data: {
           ...rest,
-          lastOnline: rest.lastTimeOnline,
           Lead: { connect: { id: leadId } },
           ...(agentId ? { agent: { connect: { id: agentId } } } : {}),
         },
@@ -140,10 +149,10 @@ export class CustomersRepository {
         },
       });
       return UsersUtil.mapCustomerToFullCustomer(
-        customer,
-        customer.Lead,
-        customer.Lead.Phone,
-        customer.Email,
+            customer,
+            customer.Lead,
+            customer.Lead.Phone,
+            customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

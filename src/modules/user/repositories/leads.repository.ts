@@ -66,7 +66,7 @@ export class LeadRepository {
 
   async createOne(data: CreateLeadInputParams): Promise<Lead> {
     const { password, emails, phones, ...rest } = data;
-
+    
     try {
       return this.prisma.lead.create({
         data: {
@@ -74,6 +74,7 @@ export class LeadRepository {
           Customer: {
             create: {
               password,
+              lastOnline: new Date(),
               Email: {
                 create: emails.map((email) => ({
                   email: email.email,
@@ -100,9 +101,20 @@ export class LeadRepository {
         },
       });
     } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+  // public async createOne(data): Promise<Lead> {
+  //   try{
+  //     return this.prisma.lead.create({
+  //       data: {
+
+  //       }
+  //     })
+  //   }catch(error: any){
+  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+  //   }
+  // }
 
   public async deleteOneById(id: number): Promise<Lead | null> {
     try {
@@ -113,13 +125,13 @@ export class LeadRepository {
   }
 
   public async updateOneById(id: number, data: UpdateLead): Promise<Lead | null> {
-    const { status_id, ...rest } = data;
+    const { statusId, ...rest } = data;
     try {
       return await this.prisma.lead.update({
         where: { id },
         data: {
           ...rest,
-          ...(status_id !== undefined ? { status: { connect: { id: status_id } } } : {}),
+          ...(statusId !== undefined ? { status: { connect: { id: statusId } } } : {}),
         },
       });
     } catch (error: any) {
