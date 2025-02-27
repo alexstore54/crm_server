@@ -13,4 +13,5 @@ export const ERROR_MESSAGES = {
   DB_ERROR: 'Error by query to database',
   AGENT_NOT_FOUND: 'Agent not found',
   ONE_FIELD_REQUIRED: 'At least one property must be provided',
+  PASSWORDS_NOT_MATCH: 'Passwords do not match',
 };

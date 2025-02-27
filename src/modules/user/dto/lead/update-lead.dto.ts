@@ -3,7 +3,7 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class UpdateLead {
   @IsOptional()
   @IsString()
-  country?: string;
+  country?: string | null;
 
   @IsOptional()
   @IsString()
@@ -11,9 +11,9 @@ export class UpdateLead {
 
   @IsOptional()
   @IsString()
-  second_name?: string;
+  lastname?: string;
 
   @IsOptional()
   @IsNumber()
-  status_id?: number;
+  statusId?: number | null;
 }

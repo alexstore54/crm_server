@@ -43,6 +43,7 @@ export class AuthCustomerController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
+    
     const customer: FullCustomer = await this.authCustomerService.signUp(body);
     const tokens: AuthTokens = await this.authService.authenticate('customer', {
       user: customer,

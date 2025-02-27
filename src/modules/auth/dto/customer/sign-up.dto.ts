@@ -26,8 +26,12 @@ export class SignUpCustomer {
   password: string;
 
   @IsString()
-  @Length(2)
-  country: string;
+  @MinLength(8)
+  @MaxLength(20)
+  @Matches(VALIDATION_REGEX.PASSWORD, {
+    message: VALIDATION_ERRORS.PASSWORD,
+  })
+  repeatPassword: string;
 
   @IsString()
   @MaxLength(25)

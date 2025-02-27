@@ -15,6 +15,7 @@ model Agent {
   password        String
   lastOnline      DateTime?         @db.Timestamptz(0)
   routeAccess     RouteAccess       @default(ADMIN)
+  
   Role            Role              @relation(fields: [roleId], references: [id])
   AgentPermission AgentPermission[]
   Lead            Lead[]
@@ -32,12 +33,12 @@ model AgentPermission {
 }
 
 model Customer {
-  publicId   String   @unique @default(uuid())
-  id         Int      @id @default(autoincrement())
-  leadId     Int      @unique
+  publicId   String    @unique @default(uuid())
+  id         Int       @id @default(autoincrement())
+  leadId     Int       @unique
   password   String
-  lastOnline DateTime @db.Timestamptz(0)
-  Lead       Lead     @relation(fields: [leadId], references: [id])
+  lastOnline DateTime? @db.Timestamptz(0)
+  Lead       Lead      @relation(fields: [leadId], references: [id])
   Email      Email[]
 }
 
@@ -59,11 +60,13 @@ model Email {
 model Lead {
   id           Int         @id @default(autoincrement())
   statusId     Int?
-  firstname    String
-  lastname     String
+  firstname    String?
+  lastname     String?
   country      String?
   createdAt    DateTime    @default(now()) @db.Timestamptz(0)
-  defaultEmail String?
+
+  defaultEmail String?     
+
   agentId      Int?
   isVerified   Boolean     @default(false)
   Customer     Customer?
@@ -100,9 +103,9 @@ model Phone {
   id         Int      @id @default(autoincrement())
   phone      String
   isMain     Boolean  @default(false)
-  lead_id    Int
+  leadId     Int
   created_at DateTime @default(now()) @db.Timestamptz(0)
-  Lead       Lead     @relation(fields: [lead_id], references: [id])
+  Lead       Lead     @relation(fields: [leadId], references: [id])
 }
 
 model Role {
@@ -132,3 +135,5 @@ enum RouteAccess {
   ADMIN
   MODERATOR
 }
+
+

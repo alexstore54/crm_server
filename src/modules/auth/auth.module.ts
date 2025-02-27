@@ -18,7 +18,7 @@ import {
   TokensService,
 } from '@/modules/auth/services';
 import { AuthGateway } from '@/modules/auth/geateway';
-import { CustomersRepository } from '@/modules/user/repositories';
+import { CustomersRepository, EmailRepository } from '@/modules/user/repositories';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
@@ -45,6 +45,7 @@ import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
     //Repositories
     CustomersRepository,
     AgentRepository,
+    EmailRepository,
     //Gateways
     AuthGateway,
     GatewayService,
