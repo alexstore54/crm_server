@@ -1,6 +1,6 @@
 import { UserEmail, UserPhone } from '@/shared/types/user';
 
-export interface CreateLeadInputParams {
+export interface CreateLeadInput {
   firstname: string;
   lastname: string;
   country?: string;

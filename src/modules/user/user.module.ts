@@ -3,7 +3,7 @@ import { CustomerService, LeadsService } from '@/modules/user/services';
 import { CustomerController } from '@/modules/user/controllers/customer.controller';
 import { LeadsController } from '@/modules/user/controllers/leads.controller';
 import { CustomersRepository, LeadRepository } from '@/modules/user/repositories';
-import { AgentAccessGuard, ModeratorGuard } from '@/common/guards/tokens/agent';
+import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 
 @Module({
   controllers: [CustomerController, LeadsController],
@@ -13,7 +13,6 @@ import { AgentAccessGuard, ModeratorGuard } from '@/common/guards/tokens/agent';
     CustomersRepository,
     LeadRepository,
     AgentAccessGuard,
-    ModeratorGuard,
   ],
   exports: [CustomersRepository, LeadRepository],
 })

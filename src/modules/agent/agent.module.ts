@@ -1,24 +1,29 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AgentService } from '@/modules/agent/services/agent.service';
 import { AgentController } from '@/modules/agent/controllers/agent.controller';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
-import { AgentAccessGuard, ModeratorGuard } from '@/common/guards/tokens/agent';
+import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { UserModule } from '@/modules/user/user.module';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import {
   AgentPermissionRepository,
   RolePermissionRepository,
 } from '@/modules/permissions/repositories';
+import { DeskRepository } from '@/modules/agent/repositories';
 
 @Module({
-  imports: [UserModule, PermissionModule],
+  imports: [
+    UserModule,
+    forwardRef(() => PermissionModule),
+  ],
   providers: [
     AgentService,
     AgentRepository,
     AgentAccessGuard,
-    ModeratorGuard,
     AgentPermissionRepository,
     RolePermissionRepository,
+    DeskRepository,
+
   ],
   controllers: [AgentController],
   exports: [AgentRepository],

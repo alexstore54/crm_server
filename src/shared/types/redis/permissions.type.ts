@@ -1,5 +1,3 @@
-export type PermissionsId = string;
-
 export type Permissions  = {
   read: boolean;
   write: boolean;

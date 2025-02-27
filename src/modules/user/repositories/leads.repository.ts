@@ -3,7 +3,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Lead } from '@prisma/client';
 import { UpdateLead } from '@/modules/user/dto/lead';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { CreateLeadInputParams } from '@/modules/user/types';
+import { CreateLeadInput } from '@/modules/user/types';
 
 @Injectable()
 export class LeadRepository {
@@ -64,7 +64,7 @@ export class LeadRepository {
     }
   }
 
-  async createOne(data: CreateLeadInputParams): Promise<Lead> {
+  async createOne(data: CreateLeadInput): Promise<Lead> {
     const { password, emails, phones, ...rest } = data;
     
     try {

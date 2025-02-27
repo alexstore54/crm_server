@@ -26,14 +26,6 @@ export class SignUpCustomer {
   password: string;
 
   @IsString()
-  @MinLength(8)
-  @MaxLength(20)
-  @Matches(VALIDATION_REGEX.PASSWORD, {
-    message: VALIDATION_ERRORS.PASSWORD,
-  })
-  repeatPassword: string;
-
-  @IsString()
   @MaxLength(25)
   @Matches(VALIDATION_REGEX.NAME, { message: VALIDATION_ERRORS.NAME })
   firstname: string;
