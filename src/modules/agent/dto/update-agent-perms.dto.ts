@@ -1,6 +1,6 @@
 import { IsArray, IsNumber, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsOnePropertyRequired } from '@/common/decorators';
+import { IsOnePropertyRequired } from '@/common/decorators/validation';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 
 export class UpdateAgentPerms {

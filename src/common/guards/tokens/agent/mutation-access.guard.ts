@@ -7,7 +7,7 @@ export class MutationAccessGuard implements CanActivate {
     const user = request.user;
     const params = request.params;
 
-    if (user.id === params.id || user.routeAccess) {
+    if (user.id === params.id || user?.deskIds) {
       return true;
     } else {
       throw new ForbiddenException();

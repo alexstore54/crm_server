@@ -2,7 +2,7 @@ import { RouteAccess } from '@prisma/client';
 import { PayloadUUID } from '@/shared/types/redis';
 
 export type AgentAuthPayload = {
-  descId?: string;
+  deskIds?: number[];
   payloadUUID: PayloadUUID;
   sub: string;
 };

@@ -15,4 +15,5 @@ export const ERROR_MESSAGES = {
   ONE_FIELD_REQUIRED: 'At least one property must be provided',
   REDIS_ERROR: 'Redis error',
   PERMISSIONS_NOT_PROVIDED: 'Permissions not provided',
+  REQUIRED_PERMISSION: 'Required permission must me provided',
 };
