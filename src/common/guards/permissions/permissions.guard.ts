@@ -39,9 +39,17 @@ export class PermissionsGuard implements CanActivate {
 
     const { payloadUUID, sub } = payload;
 
-    const permissions: Permissions | null = await this.authRedisService.getOnePermissions(sub, payloadUUID);
+    const permissions: Permissions | null = await this.authRedisService.getOnePermissions(
+      sub,
+      payloadUUID,
+    );
 
-    if (!permissions || !requiredPermission.some((permission) => permissions[permission])) {
+    if (
+      !permissions ||
+      !requiredPermission.some(
+        (permissionKey) => permissions[permissionKey as unknown as keyof Permissions],
+      )
+    ) {
       throw new ForbiddenException(ERROR_MESSAGES.PERMISSIONS_NOT_PROVIDED);
     }
 

@@ -13,6 +13,7 @@ import {
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { ERROR_MESSAGES, VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
+import { UserValidation } from '@/common/decorators/validation';
 
 export class UpdateAgent {
   @IsOptional()
@@ -24,18 +25,10 @@ export class UpdateAgent {
   email?: string;
 
   @IsOptional()
-  @IsString()
-  @MinLength(8)
-  @MaxLength(20)
-  @Matches(VALIDATION_REGEX.PASSWORD, {
-    message: VALIDATION_ERRORS.PASSWORD,
-  })
+  @UserValidation.validatePassword()
   password?: string;
 
   @IsOptional()
-  @ValidateIf((o) => o.deskIds !== null)
-  @IsArray()
-  @Type(() => Number)
-  @IsNumber({}, { each: true })
+  @UserValidation.validateDesksIdArray()
   deskIds?: number[];
 }

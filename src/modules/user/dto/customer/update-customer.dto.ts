@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
+import { UserValidation } from '@/common/decorators/validation';
 
 export class UpdateCustomer {
   @IsOptional()
@@ -24,11 +25,6 @@ export class UpdateCustomer {
   last_time_online?: Date;
 
   @IsOptional()
-  @IsString()
-  @MinLength(8)
-  @MaxLength(20)
-  @Matches(VALIDATION_REGEX.PASSWORD, {
-    message: VALIDATION_ERRORS.PASSWORD,
-  })
+  @UserValidation.validatePassword()
   password?: string;
 }
