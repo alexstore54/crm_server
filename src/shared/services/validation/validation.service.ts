@@ -6,20 +6,27 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 export class ValidationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // public async isAgentsInOneTeam(publicIds: string[], teamId: number): Promise<boolean> {
-  //   try {
-  //     const agents = await this.prisma.agent.findMany({
-  //       where: {
-  //         publicId: { in: publicIds },
-  //       },
-  //       include: {
-  //       },
-  //     });
-  //     return agents.length === publicIds.length;
-  //   } catch (error: any) {
-  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-  //   }
-  // }
+  public async getGeneralInstuctions(publicIds: string[]): Promise<string[]> {
+
+  }
+
+  public async isAgentsInOneTeam(publicIds: string[], publicTeamId: string): Promise<boolean> {
+    try {
+      const agents = await this.prisma.agent.findMany({
+        where: {
+          publicId: { in: publicIds },
+          Team: {
+            some: {
+              publicId: publicTeamId,
+            },
+          },
+        },
+      });
+      return agents.length === publicIds.length;
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 
   public async isAgentsInOneDesk(publicIds: string[], deskPublicId: string): Promise<boolean> {
     try {

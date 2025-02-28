@@ -81,7 +81,7 @@ export class AgentService {
     }
   }
 
-  public async updateAgentByPublicId(publicId: string, data: UpdateAgent) {
+  public async updateByPublicId(publicId: string, data: UpdateAgent) {
     const { deskIds, ...rest } = data;
 
     const currentAgent = await this.agentRepository.findOneByPublicIdWithDesks(publicId);

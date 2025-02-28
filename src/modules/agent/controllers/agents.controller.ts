@@ -34,30 +34,41 @@ export class AgentsController {
   ) {
     const { publicId } = params;
     const payload = request.user;
+    const { teamPublicId, deskPublicId } = payload;
+    const publicIds = [publicId, payload.sub];
 
     const isAgentsInOneDesk = await this.validationService.isAgentsInOneDesk(
-      [publicId, payload.sub],
-      payload.deskPublicId,
+      publicIds,
+      deskPublicId,
     );
 
     if (isAgentsInOneDesk) {
       return this.agentService.getLeadsByPublicId(publicId);
     }
 
-    //TODO: implement check for team
+    const isAgentInOneTeam = await this.validationService.isAgentsInOneTeam(
+      publicIds,
+      teamPublicId,
+    );
+
+    if (isAgentInOneTeam) {
+      return this.agentService.getLeadsByPublicId(publicId);
+    }
 
     throw new ForbiddenException(ERROR_MESSAGES.DONT_HAVE_RIGHTS);
   }
 
-  @UseGuards(AgentAccessGuard)
+  @SomePermissionRequired([PermissionsKeys.CREATE_AGENTS])
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post('create')
   async createAgent(@Body() body: CreateAgent) {
     return this.agentService.createAgent(body);
   }
 
-  @UseGuards(AgentAccessGuard)
-  @Patch('update/:publicId')
+  @SomePermissionRequired([PermissionsKeys.UPDATE_ALL_AGENTS])
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Patch(':publicId/update')
   async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {
-    return this.agentService.updateAgentByPublicId(publicId, body);
+    return this.agentService.updateByPublicId(publicId, body);
   }
 }
