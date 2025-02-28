@@ -119,7 +119,7 @@ export class AuthService {
 
   private mapAgentPayload(user: any, payloadUUID: PayloadUUID): AgentAuthPayload {
     return {
-      deskIds: user.descId,
+      deskPublicId: user.descId,
       payloadUUID,
       sub: user.publicId,
     };

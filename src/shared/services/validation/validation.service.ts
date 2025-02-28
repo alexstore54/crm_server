@@ -1,17 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
 export class ValidationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async isAgentsInOneTeam(agentPublicId1: string, agentPublicId2: string, teamId: number) {
+  // public async isAgentsInOneTeam(publicIds: string[], teamId: number): Promise<boolean> {
+  //   try {
+  //     const agents = await this.prisma.agent.findMany({
+  //       where: {
+  //         publicId: { in: publicIds },
+  //       },
+  //       include: {
+  //       },
+  //     });
+  //     return agents.length === publicIds.length;
+  //   } catch (error: any) {
+  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+  //   }
+  // }
+
+  public async isAgentsInOneDesk(publicIds: string[], deskPublicId: string): Promise<boolean> {
     try {
-
+      const agents = await this.prisma.agent.findMany({
+        where: {
+          publicId: { in: publicIds },
+          Desk: {
+            some: {
+              publicId: deskPublicId,
+            },
+          },
+        },
+      });
+      return agents.length === publicIds.length;
     } catch (error: any) {
-
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
-  public async isAgentsInOneDesk(checkedAgentPublicId: string, deskId: number) {}
 }
