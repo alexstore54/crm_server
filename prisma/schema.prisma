@@ -34,6 +34,7 @@ model Customer {
   publicId   String    @unique @default(uuid())
   id         Int       @id @default(autoincrement())
   leadId     Int       @unique
+  
   password   String
   lastOnline DateTime? @db.Timestamptz(0)
   Lead       Lead      @relation(fields: [leadId], references: [id])
@@ -41,9 +42,11 @@ model Customer {
 }
 
 model Desk {
-  id    Int     @id @default(autoincrement())
-  name  String
-  Agent Agent[] @relation("AgentDesks")
+  id          Int     @id @default(autoincrement())
+  name        String
+
+  Lead        Lead[] 
+  Agent       Agent[] @relation("AgentDesks")
 }
 
 model Email {
@@ -62,13 +65,15 @@ model Lead {
   lastname     String?
   country      String?
   createdAt    DateTime    @default(now()) @db.Timestamptz(0)
-  defaultEmail String?
+  defaultEmail String
   agentId      Int?
+  deskId       Int
   isVerified   Boolean     @default(false)
   Customer     Customer?
   Agent        Agent?      @relation(fields: [agentId], references: [id])
   LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
   Phone        Phone[]
+  Desk         Desk        @relation(fields: [deskId], references: [id])
 }
 
 model LeadStatus {

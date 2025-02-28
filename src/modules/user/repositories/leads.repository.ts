@@ -1,6 +1,6 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Lead } from '@prisma/client';
+import { Lead, Prisma } from '@prisma/client';
 import { UpdateLead } from '@/modules/user/dto/lead';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CreateLeadInput } from '@/modules/user/types';
@@ -64,57 +64,89 @@ export class LeadRepository {
     }
   }
 
-  async createOne(data: CreateLeadInput): Promise<Lead> {
-    const { password, emails, phones, ...rest } = data;
-
-    try {
-      return this.prisma.lead.create({
-        data: {
-          ...rest,
-          Customer: {
-            create: {
-              password,
-              lastOnline: new Date(),
-              Email: {
-                create: emails.map((email) => ({
-                  email: email.email,
-                  isMain: email.isMain ?? false,
-                })),
-              },
-            },
-          },
-          Phone:
-            phones && phones.length > 0
-              ? {
-                  create: phones.map((phone) => ({
-                    phone: phone.phone,
-                    isMain: phone.isMain ?? false,
-                  })),
-                }
-              : undefined,
-        },
-        include: {
-          Customer: {
-            include: { Email: true },
-          },
-          Phone: true,
-        },
-      });
-    } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-    }
-  }
-  // public async createOne(data): Promise<Lead> {
-  //   try{
+  // async createOne(data: CreateLeadInput): Promise<Lead> {
+  //   const { password, emails, phones, ...rest } = data;
+    
+  //   try {
   //     return this.prisma.lead.create({
   //       data: {
-
-  //       }
-  //     })
-  //   }catch(error: any){
-  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+  //         ...rest,
+  //         Customer: {
+  //           create: {
+  //             password,
+  //             lastOnline: new Date(),
+  //             Email: {
+  //               create: emails.map((email) => ({
+  //                 email: email.email,
+  //                 isMain: email.isMain ?? false,
+  //               })),
+  //             },
+  //           },
+  //         },
+  //         Phone:
+  //           phones && phones.length > 0
+  //             ? {
+  //                 create: phones.map((phone) => ({
+  //                   phone: phone.phone,
+  //                   isMain: phone.isMain ?? false,
+  //                 })),
+  //               }
+  //             : undefined,
+  //       },
+  //       include: {
+  //         Customer: {
+  //           include: { Email: true },
+  //         },
+  //         Phone: true,
+  //       },
+  //     });
+  //   } catch (error: any) {
+  //       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
   //   }
   // }
+
+  
+  public async createOne(data: CreateLeadInput, isMainPhone: boolean | null = null):Promise<Lead> {
+    const {email, ...rest} = data;
+    
+    try{
+      return this.prisma.lead.create({
+        data: { 
+            ...rest,
+            defaultEmail: email,
+            Phone: {
+              create: {
+                  phone: data.phone,
+                  isMain: isMainPhone ?? false,
+              }
+            }
+        }
+      })
+    }catch(error: any){
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async createOneWithTx(data: CreateLeadInput, isMainPhone: boolean | null = null, tx: Prisma.TransactionClient ): Promise<Lead> {
+    const {email, ...rest} = data;
+    
+    try{
+      return tx.lead.create({
+        data: { 
+            ...rest,
+            defaultEmail: email,
+            Phone: {
+              create: {
+                phone: data.phone,
+                isMain: isMainPhone ?? false,
+              }
+            }
+        }
+      })
+    }catch(error: any){
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 
   public async deleteOneById(id: number): Promise<Lead | null> {
     try {

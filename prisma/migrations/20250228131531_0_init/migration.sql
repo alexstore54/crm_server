@@ -1,22 +1,14 @@
 -- CreateEnum
 CREATE TYPE "LogLevel" AS ENUM ('INFO', 'WARN', 'ERROR');
 
--- CreateEnum
-CREATE TYPE "PermsList" AS ENUM ('action1', 'action2', 'action3', 'action4');
-
--- CreateEnum
-CREATE TYPE "TestRoleNames" AS ENUM ('ADMIN', 'MODERATOR');
-
 -- CreateTable
 CREATE TABLE "Agent" (
     "publicId" TEXT NOT NULL,
     "id" SERIAL NOT NULL,
-    "roleId" INTEGER,
+    "roleId" INTEGER NOT NULL,
     "email" VARCHAR(100) NOT NULL,
     "password" TEXT NOT NULL,
-    "lastOnline" TIMESTAMPTZ(0) NOT NULL,
-    "testRoles" "TestRoleNames" NOT NULL,
-    "testPermissions" "PermsList" NOT NULL,
+    "lastOnline" TIMESTAMPTZ(0),
 
     CONSTRAINT "Agent_pkey" PRIMARY KEY ("id")
 );
@@ -36,7 +28,7 @@ CREATE TABLE "Customer" (
     "id" SERIAL NOT NULL,
     "leadId" INTEGER NOT NULL,
     "password" TEXT NOT NULL,
-    "lastOnline" TIMESTAMPTZ(0) NOT NULL,
+    "lastOnline" TIMESTAMPTZ(0),
 
     CONSTRAINT "Customer_pkey" PRIMARY KEY ("id")
 );
@@ -64,12 +56,13 @@ CREATE TABLE "Email" (
 CREATE TABLE "Lead" (
     "id" SERIAL NOT NULL,
     "statusId" INTEGER,
-    "firstname" TEXT NOT NULL,
-    "lastname" TEXT NOT NULL,
+    "firstname" TEXT,
+    "lastname" TEXT,
     "country" TEXT,
     "createdAt" TIMESTAMPTZ(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "defaultEmail" TEXT,
+    "defaultEmail" TEXT NOT NULL,
     "agentId" INTEGER,
+    "deskId" INTEGER NOT NULL,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Lead_pkey" PRIMARY KEY ("id")
@@ -85,11 +78,12 @@ CREATE TABLE "LeadStatus" (
 
 -- CreateTable
 CREATE TABLE "Log" (
-    "id" TEXT NOT NULL,
     "level" "LogLevel" NOT NULL DEFAULT 'INFO',
     "message" TEXT NOT NULL,
     "context" JSONB,
     "createdAt" TIMESTAMPTZ(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" INTEGER,
+    "id" SERIAL NOT NULL,
 
     CONSTRAINT "Log_pkey" PRIMARY KEY ("id")
 );
@@ -109,8 +103,8 @@ CREATE TABLE "Phone" (
     "id" SERIAL NOT NULL,
     "phone" TEXT NOT NULL,
     "isMain" BOOLEAN NOT NULL DEFAULT false,
-    "lead_id" INTEGER NOT NULL,
     "created_at" TIMESTAMPTZ(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "leadId" INTEGER NOT NULL,
 
     CONSTRAINT "Phone_pkey" PRIMARY KEY ("id")
 );
@@ -156,7 +150,7 @@ CREATE UNIQUE INDEX "Permission_key_key" ON "Permission"("key");
 CREATE INDEX "_AgentDesks_B_index" ON "_AgentDesks"("B");
 
 -- AddForeignKey
-ALTER TABLE "Agent" ADD CONSTRAINT "Agent_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Agent" ADD CONSTRAINT "Agent_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AgentPermission" ADD CONSTRAINT "AgentPermission_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES "Agent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -177,7 +171,10 @@ ALTER TABLE "Lead" ADD CONSTRAINT "Lead_agentId_fkey" FOREIGN KEY ("agentId") RE
 ALTER TABLE "Lead" ADD CONSTRAINT "Lead_statusId_fkey" FOREIGN KEY ("statusId") REFERENCES "LeadStatus"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Phone" ADD CONSTRAINT "Phone_lead_id_fkey" FOREIGN KEY ("lead_id") REFERENCES "Lead"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Lead" ADD CONSTRAINT "Lead_deskId_fkey" FOREIGN KEY ("deskId") REFERENCES "Desk"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Phone" ADD CONSTRAINT "Phone_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "Lead"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RolePermission" ADD CONSTRAINT "RolePermission_permissionId_fkey" FOREIGN KEY ("permissionId") REFERENCES "Permission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
