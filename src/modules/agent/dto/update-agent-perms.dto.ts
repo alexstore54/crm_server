@@ -1,6 +1,5 @@
-import { IsArray, IsNumber, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { IsOnePropertyRequired } from '@/common/decorators/validation';
+import { IsNumber, IsOptional } from 'class-validator';
+import { IsOnePropertyRequired, UserValidation } from '@/common/decorators/validation';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 
 export class UpdateAgentPerms {
@@ -11,9 +10,6 @@ export class UpdateAgentPerms {
 
   @IsOnePropertyRequired()
   @IsOptional()
-  @ValidateIf((o) => o.permissions !== null)
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => IncomingPermission)
+  @UserValidation.validatePermissionsArray()
   permissions?: IncomingPermission[];
 }

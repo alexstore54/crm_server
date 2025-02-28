@@ -1,19 +1,6 @@
-import {
-  IsArray,
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Matches,
-  MaxLength,
-  MinLength,
-  ValidateIf,
-  ValidateNested,
-} from 'class-validator';
-import { VALIDATION_REGEX } from '@/shared/constants/auth';
-import { VALIDATION_ERRORS } from '@/shared/constants/errors';
-import { Type } from 'class-transformer';
+import { IsEmail, IsNumber, IsOptional } from 'class-validator';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
+import { UserValidation } from '@/common/decorators/validation';
 
 export class CreateAgent {
   @IsNumber()
@@ -23,26 +10,14 @@ export class CreateAgent {
   @IsEmail()
   email: string;
 
-  @IsOptional()
-  @IsString()
-  @MinLength(8)
-  @MaxLength(20)
-  @Matches(VALIDATION_REGEX.PASSWORD, {
-    message: VALIDATION_ERRORS.PASSWORD,
-  })
+  @UserValidation.validatePassword()
   password: string;
 
   @IsOptional()
-  @ValidateIf((o) => o.deskIds !== null)
-  @IsArray()
-  @Type(() => Number)
-  @IsNumber({}, { each: true })
+  @UserValidation.validateDesksIdArray()
   deskIds?: number[];
 
   @IsOptional()
-  @ValidateIf((o) => o.permissions !== null)
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => IncomingPermission)
+  @UserValidation.validatePermissionsArray()
   permissions?: IncomingPermission[];
 }

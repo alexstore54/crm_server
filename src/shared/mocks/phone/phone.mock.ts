@@ -6,7 +6,7 @@ export const getMockedMainPhone = (): Phone => ({
   created_at: new Date(),
   leadId: 1,
   id: 1,
-})
+});
 
 export const getMockedPhone = (): Phone => ({
   phone: '123456789',
@@ -14,4 +14,4 @@ export const getMockedPhone = (): Phone => ({
   created_at: new Date(),
   leadId: 1,
   id: 1,
-})
+});

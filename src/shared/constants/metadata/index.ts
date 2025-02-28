@@ -1,1 +1,1 @@
-export * from  './decorators-metadata.constant';
+export * from './decorators-metadata.constant';

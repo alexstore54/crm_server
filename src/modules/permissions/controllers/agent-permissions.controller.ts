@@ -7,7 +7,6 @@ import { AgentPermissionsService } from '@/modules/permissions/service';
 export class AgentPermissionsController {
   constructor(private readonly agentPermissionsService: AgentPermissionsService) {}
 
-
   //TODO: Add permissions guards
   @UseGuards(AgentAccessGuard)
   @Patch(':publicId/permissions/update')

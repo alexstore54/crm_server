@@ -1,4 +1,4 @@
-import { FiltersUtil } from "./filters.util";
+import { FiltersUtil } from './filters.util';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
@@ -10,7 +10,9 @@ describe('FiltersUtil', () => {
     });
 
     it('должен вернуть INTERNAL_SERVER_ERROR, если передан неизвестный тип ошибки', () => {
-      expect(FiltersUtil.getExceptionStatus(new Error('Ошибка'))).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(FiltersUtil.getExceptionStatus(new Error('Ошибка'))).toBe(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     });
   });
 
@@ -21,17 +23,24 @@ describe('FiltersUtil', () => {
     });
 
     it('должен вернуть переданное сообщение, если исключение не HttpException', () => {
-      expect(FiltersUtil.getExceptionMessage(new Error(), 'Произошла ошибка')).toBe('Произошла ошибка');
+      expect(FiltersUtil.getExceptionMessage(new Error(), 'Произошла ошибка')).toBe(
+        'Произошла ошибка',
+      );
     });
 
     it('должен вернуть стандартное сообщение, если исключение не HttpException и сообщение не передано', () => {
-      expect(FiltersUtil.getExceptionMessage(new Error())).toBe(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
+      expect(FiltersUtil.getExceptionMessage(new Error())).toBe(
+        ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      );
     });
   });
 
   describe('getExceptionDetails', () => {
     it('должен вернуть массив сообщений, если HttpException содержит массив', () => {
-      const exception = new HttpException({ message: ['Ошибка 1', 'Ошибка 2'] }, HttpStatus.BAD_REQUEST);
+      const exception = new HttpException(
+        { message: ['Ошибка 1', 'Ошибка 2'] },
+        HttpStatus.BAD_REQUEST,
+      );
       expect(FiltersUtil.getExceptionDetails(exception)).toEqual(['Ошибка 1', 'Ошибка 2']);
     });
 

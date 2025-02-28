@@ -1,4 +1,4 @@
-import { SchemaUtil } from "./schema.util";
+import { SchemaUtil } from './schema.util';
 
 describe('SchemaUtil', () => {
   describe('getConfigKeys', () => {
@@ -22,19 +22,18 @@ describe('SchemaUtil', () => {
       expect(SchemaUtil.getConfigKeys({})).toEqual({});
     });
 
-
     it('should handle input with non-string values', () => {
-        const input = {
-            NODE_ENV: 'development',
-            APP_PORT: 3000,
-            IS_PRODUCTION: true,
-        };
+      const input = {
+        NODE_ENV: 'development',
+        APP_PORT: 3000,
+        IS_PRODUCTION: true,
+      };
 
-        const expectedOutput = {
-            NODE_ENV: 'NODE_ENV',
-            APP_PORT: 'APP_PORT',
-            IS_PRODUCTION: 'IS_PRODUCTION',
-        };
+      const expectedOutput = {
+        NODE_ENV: 'NODE_ENV',
+        APP_PORT: 'APP_PORT',
+        IS_PRODUCTION: 'IS_PRODUCTION',
+      };
 
       expect(SchemaUtil.getConfigKeys(input)).toEqual(expectedOutput);
     });

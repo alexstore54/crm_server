@@ -63,14 +63,14 @@ export class CustomersRepository {
     }
   }
 
-  async findOneByLeadId(leadId: number){
-     try{
-        return this.prisma.customer.findFirst({
-            where: {leadId}
-        })
-     }catch(error: any){
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-     }
+  async findOneByLeadId(leadId: number) {
+    try {
+      return this.prisma.customer.findFirst({
+        where: { leadId },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
   async findOneByPublicId(publicId: string): Promise<FullCustomer | null> {
@@ -176,10 +176,10 @@ export class CustomersRepository {
         },
       });
       return UsersUtil.mapCustomerToFullCustomer(
-            customer,
-            customer.Lead,
-            customer.Lead.Phone,
-            customer.Email,
+        customer,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

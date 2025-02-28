@@ -1,14 +1,5 @@
-import {
-  IsEmail,
-  IsPhoneNumber,
-  IsString,
-  Length,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
-import { VALIDATION_REGEX } from '@/shared/constants/auth';
-import { VALIDATION_ERRORS } from '@/shared/constants/errors';
+import { IsEmail, IsPhoneNumber } from 'class-validator';
+import { UserValidation } from '@/common/decorators/validation';
 
 export class SignUpCustomer {
   @IsEmail()
@@ -17,21 +8,12 @@ export class SignUpCustomer {
   @IsPhoneNumber()
   phone: string;
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(20)
-  @Matches(VALIDATION_REGEX.PASSWORD, {
-    message: VALIDATION_ERRORS.PASSWORD,
-  })
+  @UserValidation.validatePassword()
   password: string;
 
-  @IsString()
-  @MaxLength(25)
-  @Matches(VALIDATION_REGEX.NAME, { message: VALIDATION_ERRORS.NAME })
+  @UserValidation.validateName()
   firstname: string;
 
-  @IsString()
-  @MaxLength(25)
-  @Matches(VALIDATION_REGEX.NAME)
+  @UserValidation.validateName()
   lastname: string;
 }

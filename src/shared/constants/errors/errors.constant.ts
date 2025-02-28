@@ -16,5 +16,5 @@ export const ERROR_MESSAGES = {
   REDIS_ERROR: 'Redis error',
   PASSWORDS_NOT_MATCH: 'Passwords do not match',
   PERMISSIONS_NOT_PROVIDED: 'Permissions not provided',
-  REQUIRED_PERMISSION: 'Required permission must me provided',
+  REQUIRED_PERMISSIONS: 'Required permissions must me provided',
 };

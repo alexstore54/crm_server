@@ -1,2 +1,1 @@
-export class CreateLead {
-}
+export class CreateLead {}
