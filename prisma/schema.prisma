@@ -18,6 +18,7 @@ model Agent {
   AgentPermission AgentPermission[]
   Lead            Lead[]
   Desk            Desk[]            @relation("AgentDesks")
+  Team            Team[]            @relation("AgentTeams")
 }
 
 model AgentPermission {
@@ -42,20 +43,21 @@ model Customer {
 }
 
 model Desk {
-  id          Int     @id @default(autoincrement())
+  publicId    String    @unique @default(uuid())
+  id          Int       @id @default(autoincrement())
   name        String
 
   Lead        Lead[] 
-  Agent       Agent[] @relation("AgentDesks")
+  Agent       Agent[]   @relation("AgentDesks")
 }
 
 model Email {
-  id         Int      @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   email      String
-  isMain     Boolean  @default(false)
+  isMain     Boolean    @default(false)
   customerId Int
-  createdAt  DateTime @default(now()) @db.Timestamptz(0)
-  Customer   Customer @relation(fields: [customerId], references: [id])
+  createdAt  DateTime   @default(now()) @db.Timestamptz(0)
+  Customer   Customer   @relation(fields: [customerId], references: [id])
 }
 
 model Lead {
@@ -67,13 +69,13 @@ model Lead {
   createdAt    DateTime    @default(now()) @db.Timestamptz(0)
   defaultEmail String
   agentId      Int?
-  deskId       Int
+  deskId       Int?
   isVerified   Boolean     @default(false)
   Customer     Customer?
   Agent        Agent?      @relation(fields: [agentId], references: [id])
   LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
   Phone        Phone[]
-  Desk         Desk        @relation(fields: [deskId], references: [id])
+  Desk         Desk?        @relation(fields: [deskId], references: [id])
 }
 
 model LeadStatus {
@@ -98,6 +100,15 @@ model Permission {
   description     String?
   AgentPermission AgentPermission[]
   RolePermission  RolePermission[]
+}
+
+model Team {
+  publicId   String    @unique @default(uuid())
+  id         Int       @id @default(autoincrement())
+
+  name       String    
+  Agents     Agent[]   @relation("AgentTeams")
+
 }
 
 model Phone {

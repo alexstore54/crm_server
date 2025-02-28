@@ -35,6 +35,7 @@ CREATE TABLE "Customer" (
 
 -- CreateTable
 CREATE TABLE "Desk" (
+    "publicId" TEXT NOT NULL,
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
 
@@ -62,7 +63,7 @@ CREATE TABLE "Lead" (
     "createdAt" TIMESTAMPTZ(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "defaultEmail" TEXT NOT NULL,
     "agentId" INTEGER,
-    "deskId" INTEGER NOT NULL,
+    "deskId" INTEGER,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Lead_pkey" PRIMARY KEY ("id")
@@ -96,6 +97,15 @@ CREATE TABLE "Permission" (
     "description" TEXT,
 
     CONSTRAINT "Permission_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Team" (
+    "publicId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Team_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -134,6 +144,14 @@ CREATE TABLE "_AgentDesks" (
     CONSTRAINT "_AgentDesks_AB_pkey" PRIMARY KEY ("A","B")
 );
 
+-- CreateTable
+CREATE TABLE "_AgentTeams" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL,
+
+    CONSTRAINT "_AgentTeams_AB_pkey" PRIMARY KEY ("A","B")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Agent_publicId_key" ON "Agent"("publicId");
 
@@ -144,10 +162,19 @@ CREATE UNIQUE INDEX "Customer_publicId_key" ON "Customer"("publicId");
 CREATE UNIQUE INDEX "Customer_leadId_key" ON "Customer"("leadId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Desk_publicId_key" ON "Desk"("publicId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Permission_key_key" ON "Permission"("key");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Team_publicId_key" ON "Team"("publicId");
+
+-- CreateIndex
 CREATE INDEX "_AgentDesks_B_index" ON "_AgentDesks"("B");
+
+-- CreateIndex
+CREATE INDEX "_AgentTeams_B_index" ON "_AgentTeams"("B");
 
 -- AddForeignKey
 ALTER TABLE "Agent" ADD CONSTRAINT "Agent_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -171,7 +198,7 @@ ALTER TABLE "Lead" ADD CONSTRAINT "Lead_agentId_fkey" FOREIGN KEY ("agentId") RE
 ALTER TABLE "Lead" ADD CONSTRAINT "Lead_statusId_fkey" FOREIGN KEY ("statusId") REFERENCES "LeadStatus"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Lead" ADD CONSTRAINT "Lead_deskId_fkey" FOREIGN KEY ("deskId") REFERENCES "Desk"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Lead" ADD CONSTRAINT "Lead_deskId_fkey" FOREIGN KEY ("deskId") REFERENCES "Desk"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Phone" ADD CONSTRAINT "Phone_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "Lead"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -187,3 +214,9 @@ ALTER TABLE "_AgentDesks" ADD CONSTRAINT "_AgentDesks_A_fkey" FOREIGN KEY ("A") 
 
 -- AddForeignKey
 ALTER TABLE "_AgentDesks" ADD CONSTRAINT "_AgentDesks_B_fkey" FOREIGN KEY ("B") REFERENCES "Desk"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_AgentTeams" ADD CONSTRAINT "_AgentTeams_A_fkey" FOREIGN KEY ("A") REFERENCES "Agent"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_AgentTeams" ADD CONSTRAINT "_AgentTeams_B_fkey" FOREIGN KEY ("B") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;
