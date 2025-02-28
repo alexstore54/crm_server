@@ -5,6 +5,7 @@ import { CreateCustomer } from '@/modules/user/types';
 import { FullCustomer } from '@/shared/types/user';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { UsersUtil } from '@/shared/utils';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CustomersRepository {
@@ -129,15 +130,41 @@ export class CustomersRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+  async createOneWithTx(data: CreateCustomer, tx: Prisma.TransactionClient): Promise<FullCustomer> {
+    const {leadId,  ...rest } = data;
+    try {
+      const customer = await tx.customer.create({
+        data: {
+          ...rest,
+          Lead: { connect: { id: leadId } },
+        },
+        include: {
+          Email: true,
+          Lead: {
+            include: {
+              Phone: true,
+            },
+          },
+        },
+      });
+      return UsersUtil.mapCustomerToFullCustomer(
+            customer,
+            customer.Lead,
+            customer.Lead.Phone,
+            customer.Email,
+      );
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 
   async createOne(data: CreateCustomer): Promise<FullCustomer> {
-    const { agentId, leadId, ...rest } = data;
+    const { leadId, ...rest } = data;
     try {
       const customer = await this.prisma.customer.create({
         data: {
           ...rest,
           Lead: { connect: { id: leadId } },
-          ...(agentId ? { agent: { connect: { id: agentId } } } : {}),
         },
         include: {
           Email: true,
