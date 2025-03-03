@@ -11,7 +11,3 @@ export interface UpdatePermissionsInput {
   permissions: Permissions;
 }
 
-export interface ValidatePermissionsArgs {
-  agentPayload: AgentAuthPayload;
-  checkedPublicId: string;
-}

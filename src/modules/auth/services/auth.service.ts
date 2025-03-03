@@ -1,7 +1,11 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GatewayService } from '@/shared/gateway';
 import { AgentAuthPayload, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
-import { AuthenticateArgs, MakeSessionArgs, UserType } from '@/modules/auth/types/auth-args.type';
+import {
+  AuthenticateAgentArgs,
+  AuthenticateCustomerArgs,
+  MakeSessionArgs,
+} from '@/modules/auth/types/auth-args.type';
 import { BcryptHelper } from '@/shared/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from '@/modules/auth/services/tokens.service';
@@ -10,6 +14,8 @@ import { AuthGateway } from '@/modules/auth/geateway';
 import { CreateSessionInput, PayloadUUID } from '@/shared/types/redis';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
+import { Agent } from '@prisma/client';
+import { FullCustomer } from '@/shared/types/user';
 
 @Injectable()
 export class AuthService {
@@ -20,15 +26,12 @@ export class AuthService {
     private readonly tokensService: TokensService,
   ) {}
 
-  public async authenticate(userType: UserType, args: AuthenticateArgs): Promise<AuthTokens> {
-    const { user, userAgent, fingerprint } = args;
-    const { publicId } = user;
+  public async authenticateAgent(args: AuthenticateAgentArgs): Promise<AuthTokens> {
+    const { agent, userAgent, fingerprint, permissions } = args;
+    const { publicId } = agent;
     const payloadUUID: PayloadUUID = uuidv4();
 
-    const payload =
-      userType === 'agent'
-        ? this.mapAgentPayload(user, payloadUUID)
-        : this.mapCustomerPayload(user, payloadUUID);
+    const payload = this.mapAgentPayload(agent, payloadUUID, args.deskPublicId, args.teamPublicId);
 
     const tokens = await this.tokensService.getTokens({ ...payload });
 
@@ -38,31 +41,44 @@ export class AuthService {
       userAgent,
       isOnline: true,
       refreshToken: tokens.refreshToken,
-      userId: user.publicId,
+      userId: agent.publicId,
     });
 
-    if (userType === 'agent') {
-      const permissions = args.permissions;
-      if (!permissions) {
-        throw new InternalServerErrorException(ERROR_MESSAGES.PERMISSIONS_NOT_PROVIDED);
-      }
-      const permissionsInput = PermissionsUtil.mapAgentPermissionsToPayload(permissions);
-      await this.authRedisService.saveAgent({
-        agentPublicId: publicId,
-        payloadUUID,
-        sessionInput: { ...createSessionInput },
-        permissionsInput: {
-          permissions: permissionsInput,
-        },
-      });
-      await this.authGateway.logoutFromAllDevicesExceptCurrent(user.publicId, payloadUUID);
-    } else {
-      await this.authRedisService.saveCustomer({
-        customerPublicId: publicId,
-        payloadUUID,
-        sessionInput: { ...createSessionInput },
-      });
-    }
+    const permissionsInput = PermissionsUtil.mapAgentPermissionsToPayload(permissions);
+    await this.authRedisService.saveAgent({
+      agentPublicId: publicId,
+      payloadUUID,
+      sessionInput: { ...createSessionInput },
+      permissionsInput: {
+        permissions: permissionsInput,
+      },
+    });
+    await this.authGateway.logoutFromAllDevicesExceptCurrent(agent.publicId, payloadUUID);
+    return tokens;
+  }
+
+  public async authenticateCustomer(args: AuthenticateCustomerArgs): Promise<AuthTokens> {
+    const { customer, userAgent, fingerprint } = args;
+    const { publicId } = customer;
+    const payloadUUID: PayloadUUID = uuidv4();
+
+    const payload = this.mapCustomerPayload(customer, payloadUUID);
+    const tokens = await this.tokensService.getTokens({ ...payload });
+
+    const createSessionInput = await this.makeSession({
+      payloadUUID: payloadUUID,
+      fingerprint,
+      userAgent,
+      isOnline: true,
+      refreshToken: tokens.refreshToken,
+      userId: customer.publicId,
+    });
+
+    await this.authRedisService.saveCustomer({
+      customerPublicId: publicId,
+      payloadUUID,
+      sessionInput: { ...createSessionInput },
+    });
 
     return tokens;
   }
@@ -117,18 +133,27 @@ export class AuthService {
     };
   }
 
-  private mapAgentPayload(user: any, payloadUUID: PayloadUUID): AgentAuthPayload {
+  private mapAgentPayload(
+    agent: Agent,
+    payloadUUID: PayloadUUID,
+    publicDeskId: string,
+    teamPublicId?: string,
+  ): AgentAuthPayload {
     return {
-      deskPublicId: user.descId,
+      deskPublicId: publicDeskId,
+      teamPublicId: teamPublicId,
       payloadUUID,
-      sub: user.publicId,
+      sub: agent.publicId,
     };
   }
 
-  private mapCustomerPayload(user: any, payloadUUID: PayloadUUID): CustomerAuthPayload {
+  private mapCustomerPayload(
+    customer: FullCustomer,
+    payloadUUID: PayloadUUID,
+  ): CustomerAuthPayload {
     return {
       payloadUUID,
-      sub: user.publicId,
+      sub: customer.publicId,
     };
   }
 }

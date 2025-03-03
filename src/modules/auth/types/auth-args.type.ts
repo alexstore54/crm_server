@@ -8,13 +8,19 @@ export interface ConnectSocketArgs {
   payloadUUID: PayloadUUID;
 }
 
-export type UserType = 'agent' | 'customer';
-
-export interface AuthenticateArgs {
-  user: Agent | FullCustomer;
+export interface AuthenticateAgentArgs {
+  agent: Agent;
   fingerprint: string;
   userAgent: string;
-  permissions?: AgentPermission[];
+  permissions: AgentPermission[];
+  deskPublicId: string;
+  teamPublicId?: string;
+}
+
+export interface AuthenticateCustomerArgs {
+  customer: FullCustomer;
+  fingerprint: string;
+  userAgent: string;
 }
 
 export interface MakeSessionArgs {

@@ -1,33 +1,42 @@
 import { PrismaService } from '@/shared/db/prisma';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma, RolePermission } from '@prisma/client';
 
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
+import { RolePermissionWithPermission } from '@/shared/utils';
 
 @Injectable()
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRolePermissionsByRoleId(roleId: number) {
-    return this.prisma.rolePermission.findMany({
-      where: {
-        roleId,
-      },
-      include: {
-        Permission: true,
-      }
-    });
+  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithPermission[]>  {
+    try {
+      return await this.prisma.rolePermission.findMany({
+        where: {
+          roleId,
+        },
+        include: {
+          Permission: true,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`Database error: ${error.message}`);
+    }
   }
 
   async getManyByRoleIdWithTx(
     roleId: number,
     tx: Prisma.TransactionClient,
   ): Promise<RolePermission[]> {
-    return tx.rolePermission.findMany({
-      where: {
-        roleId,
-      },
-    });
+    try {
+      return await tx.rolePermission.findMany({
+        where: {
+          roleId,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`Database error: ${error.message}`);
+    }
   }
 
   async getOneByRoleIdAndPermsIdsWithTx(
@@ -35,14 +44,18 @@ export class RolePermissionRepository {
     permissions: IncomingPermission[],
     tx: Prisma.TransactionClient,
   ): Promise<RolePermission[]> {
-    return tx.rolePermission.findMany({
-      where: {
-        roleId,
-        permissionId: {
-          in: permissions.map((p) => p.permissionId),
+    try {
+      return await tx.rolePermission.findMany({
+        where: {
+          roleId,
+          permissionId: {
+            in: permissions.map((p) => p.permissionId),
+          },
         },
-      },
-    });
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`Database error: ${error.message}`);
+    }
   }
 
   // async createRolePermission(data: any) {
@@ -51,7 +64,7 @@ export class RolePermissionRepository {
   //             data,
   //         });
   //     }catch(error:any) {
-  //         throw new Error(error.message);
+  //         throw new InternalServerErrorException(`Database error: ${error.message}`);
   //     }
   //}
 }

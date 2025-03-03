@@ -3,7 +3,7 @@ import { AgentAuthPayload, CustomerAuthPayload } from '@/shared/types/auth';
 
 export const agentAuthPayloadSchema: ObjectSchema<AgentAuthPayload> = Joi.object({
   deskPublicId: Joi.string().uuid().required(),
-  teamPublicId: Joi.string().uuid().required(),
+  teamPublicId: Joi.string().uuid().optional(),
   payloadUUID: Joi.string().uuid().required(),
   sub: Joi.string().required(),
 });

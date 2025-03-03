@@ -5,7 +5,6 @@ import { Response } from 'express';
 import { AuthService } from '@/modules/auth/services';
 import { CookiesUtil } from '@/shared/utils';
 import { AuthTokens } from '@/shared/types/auth';
-import { Agent } from '@prisma/client';
 import { RequestWithAgentPayload } from '@/shared/types/auth/request-auth.type';
 import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
@@ -25,10 +24,9 @@ export class AuthAgentController {
     @Res() res: Response,
   ) {
     const result = await this.authAgentService.validate(body);
-    const {agent, permissions} = result;
 
-    const tokens: AuthTokens = await this.authService.authenticate('agent', {
-      user: agent,
+    const tokens: AuthTokens = await this.authService.authenticateAgent({
+      ...result,
       userAgent,
       fingerprint,
     });

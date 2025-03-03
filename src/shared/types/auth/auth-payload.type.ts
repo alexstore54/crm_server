@@ -1,7 +1,7 @@
 import { PayloadUUID } from '@/shared/types/redis';
 
 export type AgentAuthPayload = {
-  teamPublicId: string;
+  teamPublicId?: string;
   deskPublicId: string;
   payloadUUID: PayloadUUID;
   sub: string;
