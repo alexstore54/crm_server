@@ -1,18 +1,22 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  SetMetadata,
+} from '@nestjs/common';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
-import { AgentAuthPayload, PERMISSIONS_NEED_VALIDATE } from '@/shared/types/auth';
+import { AgentAuthPayload } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
 import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
 import { DECORATORS_METADATA } from '@/shared/constants/metadata';
 import { Permissions } from '@/shared/types/redis';
-import { ValidationService } from '@/shared/services/validation';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(
-    private readonly validationService: ValidationService,
     private readonly authRedisService: AuthRedisService,
     private readonly reflector: Reflector,
   ) {}
@@ -38,26 +42,8 @@ export class PermissionsGuard implements CanActivate {
     //достаем только те пермишны, которые есть у пользователя
     const agentPermissions = this.getAgentPermissions(requiredPermissions, permissions);
 
-    //опеределяем нужно ли валидировать пермишны (если нет пермишнов, то не нужно)
-    if (
-      agentPermissions &&
-      agentPermissions.length &&
-      agentPermissions.some((perm) => PERMISSIONS_NEED_VALIDATE.includes(perm))
-    ) {
-
-      //валидируем пермишны
-      const isPermissionsValid = await this.validationService.validatePermissions(
-        agentPermissions,
-        {
-          agentPayload: payload,
-          checkedPublicId: payload.sub,
-        },
-      );
-
-      if (!isPermissionsValid) {
-        throw new ForbiddenException(ERROR_MESSAGES.DONT_HAVE_RIGHTS);
-      }
-    }
+    //задаем их в метадату
+    SetMetadata(DECORATORS_METADATA.AGENT_PERMISSIONS, agentPermissions)(context.getHandler());
 
     return true;
   }
