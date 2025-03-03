@@ -1,2 +1,1 @@
-import { UsersUtil } from "./users.util";
-
+import { UsersUtil } from './users.util';

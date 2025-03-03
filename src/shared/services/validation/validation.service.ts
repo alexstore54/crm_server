@@ -1,14 +1,50 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import {
+  DESK_AGENT_PERMISSIONS,
+  PermissionsKeys,
+  TEAM_AGENT_PERMISSIONS,
+} from '@/shared/types/auth';
+import { ValidatePermissionsArgs } from '@/shared/types/redis';
 
 @Injectable()
 export class ValidationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async getGeneralInstuctions(publicIds: string[]): Promise<string[]> {
+  public async validatePermissions(
+    permissions: PermissionsKeys[],
+    data: ValidatePermissionsArgs,
+  ): Promise<boolean> {
+    for (const permission of permissions) {
+      const isPermissionValid = await this.validatePermission(permission, data);
+      if (!isPermissionValid) {
+        return false;
+      }
+    }
 
+    return true;
   }
+
+  private async validatePermission(
+    permission: PermissionsKeys,
+    data: ValidatePermissionsArgs,
+  ): Promise<boolean> {
+    const { agentPayload, checkedPublicId } = data;
+    const { sub, deskPublicId, teamPublicId } = agentPayload;
+    const publicIds = [checkedPublicId, sub];
+
+    if (TEAM_AGENT_PERMISSIONS.some((value) => value === permission)) {
+      return this.isAgentsInOneTeam(publicIds, teamPublicId);
+    }
+
+    if (DESK_AGENT_PERMISSIONS.some((value) => value === permission)) {
+      return this.isAgentsInOneDesk(publicIds, teamPublicId);
+    }
+
+    return false;
+  }
+
 
   public async isAgentsInOneTeam(publicIds: string[], publicTeamId: string): Promise<boolean> {
     try {

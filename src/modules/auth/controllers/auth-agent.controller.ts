@@ -6,7 +6,7 @@ import { AuthService } from '@/modules/auth/services';
 import { CookiesUtil } from '@/shared/utils';
 import { AuthTokens } from '@/shared/types/auth';
 import { Agent } from '@prisma/client';
-import { RequestWithAgentPayload } from '@/shared/types/auth/request-with-user.type';
+import { RequestWithAgentPayload } from '@/shared/types/auth/request-auth.type';
 import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
 

@@ -8,6 +8,7 @@ import { CustomerAuthPayload } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { customerAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
 import { configKeys } from '@/shared/schemas';
+import { AuthUtil } from '@/shared/utils/auth/auth.util';
 
 @Injectable()
 export class CustomerRefreshTokenStrategy extends PassportStrategy(
@@ -27,10 +28,7 @@ export class CustomerRefreshTokenStrategy extends PassportStrategy(
   }
 
   async validate(payload: CustomerAuthPayload): Promise<CustomerAuthPayload> {
-    const { error } = customerAuthPayloadSchema.validate(payload);
-    if (error) {
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
-    }
+    AuthUtil.validateCustomerAuthPayload(payload);
     return {
       ...payload,
     };

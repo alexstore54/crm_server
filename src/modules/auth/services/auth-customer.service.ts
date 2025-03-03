@@ -14,7 +14,7 @@ export class AuthCustomerService {
     private readonly customerRepository: CustomersRepository,
     private readonly leadRepository: LeadRepository,
     private readonly emailRepository: EmailRepository,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   public async validate(data: SignInCustomer): Promise<FullCustomer> {
@@ -43,7 +43,6 @@ export class AuthCustomerService {
     // Проверяем наличие лида с таким телефоном
     const existingLead = await this.leadRepository.findOneByPhone(phone);
 
-    
     if (!existingLead) {
       //Создание полноценного лида, если зарегался с улицы
       return this.makeLeadAndCustomer(data);
@@ -51,7 +50,7 @@ export class AuthCustomerService {
 
     // Если лид уже есть, то проверяем, не является ли он уже клиентом (у него мог быть указан другой email)
     const isLeadAlreadyCustomer = await this.customerRepository.findOneByLeadId(existingLead.id);
-    
+
     // Если является, то обновляем данные лида и присваиваем ему дополнительный email
     if (isLeadAlreadyCustomer) {
       // Нам не важна последовательность выполнения запросов, поэтому используем Promise.all
@@ -71,20 +70,26 @@ export class AuthCustomerService {
     return this.makeCustomerFromLead(existingLead, password);
   }
 
-  private async makeCustomerFromLead(lead: Lead, password: string, tx?: Prisma.TransactionClient): Promise<FullCustomer> {
-    
-    if(tx){ 
-        return this.customerRepository.createOneWithTx({
-            password,
-            leadId: lead.id,
-            email: lead.defaultEmail
-        }, tx);
-    }else{
-        return this.customerRepository.createOne({
-            password,
-            leadId: lead.id,
-            email: lead.defaultEmail,
-        });
+  private async makeCustomerFromLead(
+    lead: Lead,
+    password: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<FullCustomer> {
+    if (tx) {
+      return this.customerRepository.createOneWithTx(
+        {
+          password,
+          leadId: lead.id,
+          email: lead.defaultEmail,
+        },
+        tx,
+      );
+    } else {
+      return this.customerRepository.createOne({
+        password,
+        leadId: lead.id,
+        email: lead.defaultEmail,
+      });
     }
   }
 
@@ -93,11 +98,13 @@ export class AuthCustomerService {
 
     //return getMockedFullCustomer();
     return this.prisma.$transaction(async (tx) => {
-          const newLead = await this.leadRepository.createOneWithTx({firstname, lastname, phone, email}, true, tx)
-          
-          return this.makeCustomerFromLead(newLead, password);
-    })
-    
-    
+      const newLead = await this.leadRepository.createOneWithTx(
+        { firstname, lastname, phone, email },
+        true,
+        tx,
+      );
+
+      return this.makeCustomerFromLead(newLead, password);
+    });
   }
 }

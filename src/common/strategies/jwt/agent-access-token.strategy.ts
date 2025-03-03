@@ -8,6 +8,7 @@ import { STRATEGIES_NAMES } from '@/shared/constants/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { configKeys } from '@/shared/schemas';
 import { agentAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
+import { AuthUtil } from '@/shared/utils/auth/auth.util';
 
 @Injectable()
 export class AgentAccessTokenStrategy extends PassportStrategy(
@@ -27,10 +28,7 @@ export class AgentAccessTokenStrategy extends PassportStrategy(
   }
 
   async validate(payload: AgentAuthPayload): Promise<AgentAuthPayload> {
-    const { error } = agentAuthPayloadSchema.validate(payload);
-    if (error) {
-      throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
-    }
+    AuthUtil.validateAgentAuthPayload(payload);
     return {
       ...payload,
     };
