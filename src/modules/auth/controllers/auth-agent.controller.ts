@@ -24,7 +24,8 @@ export class AuthAgentController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const agent: Agent = await this.authAgentService.validate(body);
+    const result = await this.authAgentService.validate(body);
+    const {agent, permissions} = result;
 
     const tokens: AuthTokens = await this.authService.authenticate('agent', {
       user: agent,
