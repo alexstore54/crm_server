@@ -25,8 +25,8 @@ export class AuthCustomerController {
   ) {
     const customer: FullCustomer = await this.authCustomerService.validate(body);
 
-    const tokens: AuthTokens = await this.authService.authenticate('customer', {
-      user: customer,
+    const tokens: AuthTokens = await this.authService.authenticateCustomer({
+      customer,
       userAgent,
       fingerprint,
     });
@@ -44,8 +44,8 @@ export class AuthCustomerController {
     @Res() res: Response,
   ) {
     const customer: FullCustomer = await this.authCustomerService.signUp(body);
-    const tokens: AuthTokens = await this.authService.authenticate('customer', {
-      user: customer,
+    const tokens: AuthTokens = await this.authService.authenticateCustomer({
+      customer,
       userAgent,
       fingerprint,
     });

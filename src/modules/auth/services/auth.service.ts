@@ -44,13 +44,12 @@ export class AuthService {
       userId: agent.publicId,
     });
 
-    const permissionsInput = PermissionsUtil.mapAgentPermissionsToPayload(permissions);
     await this.authRedisService.saveAgent({
       agentPublicId: publicId,
       payloadUUID,
       sessionInput: { ...createSessionInput },
       permissionsInput: {
-        permissions: permissionsInput,
+        permissions,
       },
     });
     await this.authGateway.logoutFromAllDevicesExceptCurrent(agent.publicId, payloadUUID);

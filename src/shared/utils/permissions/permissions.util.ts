@@ -22,14 +22,4 @@ export class PermissionsUtil {
       })
       .filter((item) => item !== undefined);
   }
-
-  public static mapAgentPermissionsToPayload(permissions: AgentPermission[]): PermissionsTable {
-    // return permissions.reduce((acc, perm) => {
-    //   acc[perm.permissionId] = perm.allowed;
-    //   return acc;
-    // }, {} as Permissions);
-    return {
-      [PermissionsKeys.CREATE_DESK_AGENTS]: true,
-    };
-  }
 }

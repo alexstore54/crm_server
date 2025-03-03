@@ -34,8 +34,8 @@ export class AuthAgentService {
     return {
       agent,
       permissions: allowedPermissionsArray,
-      deskPublicId: agent.Desk[0]?.publicId, // Массив объектов Desk, связанных с агентом
-      teamPublicId: agent.Team[0]?.publicId  // Массив объектов Team, связанных с агентом
+      deskPublicId: agent.Desk[0].publicId,
+      teamPublicId: agent.Team[0]?.publicId
     };
   }
 
