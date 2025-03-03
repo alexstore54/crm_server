@@ -20,11 +20,11 @@ export class AuthAgentService {
   public async validate(data: SignInAgent): Promise<AuthAgentLoginInput> {
     const { email, password } = data;
 
-    const agent = await this.agentRepository.findOneByEmail(email);
+    const agent = await this.agentRepository.findOneByEmailWithDesksAndTeams(email);
     if (!agent) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
-
+    
     const isPasswordMatch = await BcryptHelper.compare(password, agent.password);
     if (!isPasswordMatch) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
@@ -34,6 +34,8 @@ export class AuthAgentService {
     return {
       agent,
       permissions: allowedPermissionsArray,
+      deskPublicId: agent.Desk[0]?.publicId, // Массив объектов Desk, связанных с агентом
+      teamPublicId: agent.Team[0]?.publicId  // Массив объектов Team, связанных с агентом
     };
   }
 
