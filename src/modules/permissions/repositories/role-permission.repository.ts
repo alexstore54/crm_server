@@ -13,6 +13,9 @@ export class RolePermissionRepository {
       where: {
         roleId,
       },
+      include: {
+        Permission: true,
+      }
     });
   }
 

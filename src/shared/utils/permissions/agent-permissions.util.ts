@@ -1,4 +1,9 @@
 import { AgentPermission } from '@/modules/permissions/types';
+import { RolePermission as PrismaRolePermission, Permission } from '@prisma/client';
+
+export type RolePermissionWithPermission = PrismaRolePermission & {
+  Permission: Permission;
+};
 
 export class AgentPermissionsUtil {
   public static filterUniquePermissions(
@@ -37,5 +42,40 @@ export class AgentPermissionsUtil {
       }
       return acc;
     }, [] as AgentPermission[]);
+  }
+
+  public static mergePermissions(defaultRoles: RolePermissionWithPermission[], agentRoles: AgentPermission[]): string[] {
+    // 1. Создаём карту: permissionId -> { allowed, key }
+    const rolesMap = new Map<number, { allowed: boolean; key: string }>();
+    
+    // Заполняем из RolePermissions
+    for (const rolePermission of defaultRoles) {
+      rolesMap.set(rolePermission.permissionId, {
+          allowed: rolePermission.allowed,
+          key: rolePermission.Permission.key, // берем key из вложенного Permission
+      });
+    }
+
+    // 2. Перезаписываем значениями из AgentPermissions
+    for (const agentPermission of agentRoles) {
+      // Если какой-то permissionId есть у агента, обновляем "allowed"
+      if (rolesMap.has(agentPermission.permissionId)) {
+        const current = rolesMap.get(agentPermission.permissionId);
+          if (current) {
+              current.allowed = agentPermission.allowed;
+              rolesMap.set(agentPermission.permissionId, current);
+          }
+      }
+    }
+
+    
+    const result: string[] = [];
+    for (const [, { allowed, key }] of rolesMap.entries()) {
+      if (allowed) {
+          result.push(key);
+      }
+    }
+
+    return result;
   }
 }
