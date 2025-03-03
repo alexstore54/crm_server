@@ -5,7 +5,6 @@ import { CustomersRepository, EmailRepository, LeadRepository } from '@/modules/
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { SignUpCustomer } from '@/modules/auth/dto/customer';
 import { Lead, Prisma } from '@prisma/client';
-import { getMockedFullCustomer } from '@/shared/mocks/customer';
 import { PrismaService } from '@/shared/db/prisma';
 
 @Injectable()

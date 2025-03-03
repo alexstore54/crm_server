@@ -1,6 +1,7 @@
 import { AgentPermission, RolePermission } from '@prisma/client';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 import { Permissions } from '@/shared/types/redis';
+import { PermissionsKeys } from '@/shared/types/auth';
 
 export class PermissionsUtil {
   public static mapPermissionsToAgentPermissions(
@@ -28,9 +29,7 @@ export class PermissionsUtil {
     //   return acc;
     // }, {} as Permissions);
     return {
-      write: true,
-      read: true,
-      delete: true,
+      [PermissionsKeys.CREATE_DESK_AGENTS]: true,
     };
   }
 }
