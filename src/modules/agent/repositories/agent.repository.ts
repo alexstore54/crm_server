@@ -52,6 +52,14 @@ export class AgentRepository {
     }
   }
 
+  async findOneByEmailWithDesksAndTeams(email: string) {
+    try {
+      return this.prisma.agent.findFirst({ where: { email }, include: { Desk: true, Team: true } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
   async createOneWithTx(
     data: CreateAgent, // данные для создания агента (email, password, roleId, ...)
     tx: Prisma.TransactionClient,
