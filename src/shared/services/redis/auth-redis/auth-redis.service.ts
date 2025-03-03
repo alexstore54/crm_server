@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import {
   PayloadId,
   PayloadUUID,
-  Permissions,
+  PermissionsTable,
   SaveAgentInput,
   SaveCustomerInput,
   Session,
@@ -108,7 +108,7 @@ export class AuthRedisService {
   public async getOnePermissions(
     userPublicId: string,
     payloadUUID: PayloadUUID,
-  ): Promise<Permissions | null> {
+  ): Promise<PermissionsTable | null> {
     const redisId = this.mapRedisId(userPublicId, payloadUUID);
 
     try {
@@ -116,20 +116,20 @@ export class AuthRedisService {
       if (!stringifyResult) {
         return null;
       }
-      return JSON.parse(stringifyResult) as Permissions;
+      return JSON.parse(stringifyResult) as PermissionsTable;
     } catch (error: any) {
       this.handleError(error);
       return null;
     }
   }
 
-  public async getOnePermissionByRedisId(redisId: PayloadId): Promise<Permissions | null> {
+  public async getOnePermissionByRedisId(redisId: PayloadId): Promise<PermissionsTable | null> {
     try {
       const stringifyResult = await this.permissionsRedis.get(redisId);
       if (!stringifyResult) {
         return null;
       }
-      return JSON.parse(stringifyResult) as Permissions;
+      return JSON.parse(stringifyResult) as PermissionsTable;
     } catch (error: any) {
       this.handleError(error);
       return null;

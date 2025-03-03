@@ -11,7 +11,7 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
 import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
 import { DECORATORS_METADATA } from '@/shared/constants/metadata';
-import { Permissions } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/redis';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class PermissionsGuard implements CanActivate {
     const requiredPermissions = this.getRequiredPermissions(context);
 
     //достаем пермишны из редиса
-    const permissions: Permissions | null = await this.getPermissions(payload);
+    const permissions: PermissionsTable | null = await this.getPermissions(payload);
 
     //проверяем есть ли у пользователя пермишны
     this.checkPermissions(requiredPermissions, permissions);
@@ -50,14 +50,14 @@ export class PermissionsGuard implements CanActivate {
 
   private getAgentPermissions(
     requiredPermissions: PermissionsKeys[],
-    permissions: Permissions | null,
+    permissions: PermissionsTable | null,
   ): PermissionsKeys[] {
     if (!permissions) {
       return [];
     }
 
     return requiredPermissions.filter(
-      (permissionKey) => permissions[permissionKey as unknown as keyof Permissions],
+      (permissionKey) => permissions[permissionKey as unknown as keyof PermissionsTable],
     );
   }
 
@@ -74,19 +74,19 @@ export class PermissionsGuard implements CanActivate {
     return requiredPermissions;
   }
 
-  private async getPermissions(payload: AgentAuthPayload): Promise<Permissions | null> {
+  private async getPermissions(payload: AgentAuthPayload): Promise<PermissionsTable | null> {
     const { payloadUUID, sub } = payload;
     return this.authRedisService.getOnePermissions(sub, payloadUUID);
   }
 
   private checkPermissions(
     requiredPermissions: PermissionsKeys[],
-    permissions: Permissions | null,
+    permissions: PermissionsTable | null,
   ): void {
     if (
       !permissions ||
       !requiredPermissions.some(
-        (permissionKey) => permissions[permissionKey as unknown as keyof Permissions],
+        (permissionKey) => permissions[permissionKey as unknown as keyof PermissionsTable],
       )
     ) {
       throw new ForbiddenException(ERROR_MESSAGES.DONT_HAVE_RIGHTS);

@@ -1,13 +1,13 @@
 import { AgentAuthPayload, PermissionsKeys } from '@/shared/types/auth';
 
-export type Permissions = {
+export type PermissionsTable = {
   [key in PermissionsKeys]?: boolean;
 };
 
 export interface CreatePermissionsInput {
-  permissions: Permissions;
+  permissions: PermissionsTable;
 }
 export interface UpdatePermissionsInput {
-  permissions: Permissions;
+  permissions: PermissionsTable;
 }
 

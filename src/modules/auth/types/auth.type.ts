@@ -1,9 +1,9 @@
 import { Agent } from '@prisma/client';
-import { Permissions } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/redis';
 
 export type AuthAgentLoginInput = {
   agent: Agent;
-  permissions: Permissions[];
+  permissions: PermissionsTable;
   deskPublicId: string;
   teamPublicId?: string;
 };

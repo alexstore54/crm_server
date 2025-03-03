@@ -1,6 +1,6 @@
 import { AgentPermission, RolePermission } from '@prisma/client';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
-import { Permissions } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/redis';
 import { PermissionsKeys } from '@/shared/types/auth';
 
 export class PermissionsUtil {
@@ -23,7 +23,7 @@ export class PermissionsUtil {
       .filter((item) => item !== undefined);
   }
 
-  public static mapAgentPermissionsToPayload(permissions: AgentPermission[]): Permissions {
+  public static mapAgentPermissionsToPayload(permissions: AgentPermission[]): PermissionsTable {
     // return permissions.reduce((acc, perm) => {
     //   acc[perm.permissionId] = perm.allowed;
     //   return acc;

@@ -3,13 +3,13 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma, RolePermission } from '@prisma/client';
 
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
-import { RolePermissionWithPermission } from '@/shared/utils';
+import { RolePermissionWithDetails } from '@/shared/utils';
 
 @Injectable()
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithPermission[]>  {
+  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithDetails[]>  {
     try {
       return await this.prisma.rolePermission.findMany({
         where: {

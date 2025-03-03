@@ -1,67 +1,30 @@
 import { AgentPermission } from '@/modules/permissions/types';
 import { Permission, RolePermission as PrismaRolePermission } from '@prisma/client';
+import { PermissionsTable } from '@/shared/types/redis';
 
-export type RolePermissionWithPermission = PrismaRolePermission & {
+export type RolePermissionWithDetails = PrismaRolePermission & {
   Permission: Permission;
 };
 
 export class AgentPermissionsUtil {
-  public static filterUniquePermissions(
-    permissions: { permissionId: number; allowed: boolean }[],
-  ): {
-    permissionId: number;
-    allowed: boolean;
-  }[] {
-    const uniquePermissions = new Map<number, boolean>();
-
-    for (const perm of permissions) {
-      uniquePermissions.set(perm.permissionId, perm.allowed);
-    }
-
-    return Array.from(uniquePermissions.entries()).map(([permissionId, allowed]) => ({
-      permissionId,
-      allowed,
-    }));
-  }
-
-  public static filterPermissionsByRoleDefaults(
-    uniquePermissions: { permissionId: number; allowed: boolean }[],
-    rolePermissions: { permissionId: number; allowed: boolean }[],
-    agentId: number,
-  ): AgentPermission[] {
-    return uniquePermissions.reduce((acc, incoming) => {
-      const rolePerm = rolePermissions.find((rp) => rp.permissionId === incoming.permissionId);
-
-      const defaultAllowed = rolePerm ? rolePerm.allowed : false;
-      if (incoming.allowed !== defaultAllowed) {
-        acc.push({
-          agentId,
-          permissionId: incoming.permissionId,
-          allowed: incoming.allowed,
-        });
-      }
-      return acc;
-    }, [] as AgentPermission[]);
-  }
-
-  public static mergePermissions(
-    defaultRoles: RolePermissionWithPermission[],
-    agentRoles: AgentPermission[],
-  ): string[] {
-    // 1. Создаём карту: permissionId -> { allowed, key }
+  private static createRolesMap(
+    defaultRoles: RolePermissionWithDetails[],
+  ): Map<number, { allowed: boolean; key: string }> {
     const rolesMap = new Map<number, { allowed: boolean; key: string }>();
-
-    // Заполняем из RolePermissions
     for (const rolePermission of defaultRoles) {
       rolesMap.set(rolePermission.permissionId, {
         allowed: rolePermission.allowed,
-        key: rolePermission.Permission.key, // берем key из вложенного Permission
+        key: rolePermission.Permission.key,
       });
     }
+    return rolesMap;
+  }
 
-    // 2. Перезаписываем значениями из AgentPermissions
+  private static updateRolesMapWithAgentPermissions(
+    rolesMap: Map<number, { allowed: boolean; key: string }>,
+    agentRoles: AgentPermission[],
+  ): void {
     for (const agentPermission of agentRoles) {
-      // Если какой-то permissionId есть у агента, обновляем "allowed"
       if (rolesMap.has(agentPermission.permissionId)) {
         const current = rolesMap.get(agentPermission.permissionId);
         if (current) {
@@ -70,14 +33,38 @@ export class AgentPermissionsUtil {
         }
       }
     }
+  }
 
-    const result: string[] = [];
+  private static convertRolesMapToPermissionsTable(
+    rolesMap: Map<number, { allowed: boolean; key: string }>,
+  ): PermissionsTable {
+    const result = {} as PermissionsTable;
     for (const [, { allowed, key }] of rolesMap.entries()) {
       if (allowed) {
-        result.push(key);
+        (result as { [key: string]: boolean })[key] = true;
       }
     }
-
     return result;
+  }
+
+  public static convertRolePermissionsToPermissionsTable(
+    rolePermissions: RolePermissionWithDetails[]
+  ): PermissionsTable {
+    const result = {} as PermissionsTable;
+    rolePermissions
+      .filter((perm) => perm.allowed)
+      .forEach((p) => {
+        (result as { [key: string]: boolean })[p.Permission.key] = true;
+      });
+    return result;
+  }
+
+  public static mergePermissions(
+    defaultRoles: RolePermissionWithDetails[],
+    agentRoles: AgentPermission[],
+  ): PermissionsTable {
+    const rolesMap = this.createRolesMap(defaultRoles);
+    this.updateRolesMapWithAgentPermissions(rolesMap, agentRoles);
+    return this.convertRolesMapToPermissionsTable(rolesMap);
   }
 }

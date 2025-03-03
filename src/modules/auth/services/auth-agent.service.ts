@@ -5,9 +5,9 @@ import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { BcryptHelper } from '@/shared/helpers';
 import { AgentPermissionRepository, RolePermissionRepository } from '@/modules/agent/repositories';
-import { AgentPermissionsUtil, RolePermissionWithPermission } from '@/shared/utils';
+import { AgentPermissionsUtil, RolePermissionWithDetails } from '@/shared/utils';
 import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
-import { Permissions } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/redis';
 
 @Injectable()
 export class AuthAgentService {
@@ -37,8 +37,8 @@ export class AuthAgentService {
     };
   }
 
-  private async getAllowedPermissions(agent: Agent): Promise<string[]> {
-    const rolePermissions: RolePermissionWithPermission[] =
+  private async getAllowedPermissions(agent: Agent): Promise<PermissionsTable> {
+    const rolePermissions: RolePermissionWithDetails[] =
       await this.rolePermissionRepository.getRolePermissionsByRoleId(agent.roleId);
 
     if (rolePermissions.length === 0) {
@@ -49,7 +49,7 @@ export class AuthAgentService {
       await this.agentPermissionsRepository.getAgentPermissionsByAgentId(agent.id);
 
     if (agentPermissions.length === 0) {
-      return rolePermissions.filter((perm) => perm.allowed).map((p) => p.Permission.key);
+      return AgentPermissionsUtil.convertRolePermissionsToPermissionsTable(rolePermissions);
     } else {
       return AgentPermissionsUtil.mergePermissions(rolePermissions, agentPermissions);
     }
