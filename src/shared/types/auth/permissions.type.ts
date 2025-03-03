@@ -46,3 +46,33 @@ export enum PermissionsKeys {
   // Himself
   UPDATE_HIMSELF = 'UPDATE_HIMSELF',
 }
+
+export const TEAM_AGENT_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.DELETE_TEAM_AGENTS,
+  PermissionsKeys.READ_TEAM_AGENTS,
+  PermissionsKeys.UPDATE_TEAM_AGENTS,
+  PermissionsKeys.CREATE_TEAM_AGENTS,
+];
+
+export const DESK_AGENT_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.CREATE_DESK_AGENTS,
+  PermissionsKeys.UPDATE_DESK_AGENTS,
+  PermissionsKeys.READ_DESK_AGENTS,
+  PermissionsKeys.DELETE_DESK_AGENTS,
+];
+
+export const CUSTOMER_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.CREATE_LEADS,
+  PermissionsKeys.UPDATE_LEADS,
+  PermissionsKeys.READ_LEADS,
+  PermissionsKeys.DELETE_LEADS,
+];
+
+export const PERMISSIONS_NEED_VALIDATE: PermissionsKeys[] = [
+  ...TEAM_AGENT_PERMISSIONS,
+  ...DESK_AGENT_PERMISSIONS,
+  ...CUSTOMER_PERMISSIONS,
+];
+
+
+

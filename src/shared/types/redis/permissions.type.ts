@@ -1,7 +1,7 @@
+import { AgentAuthPayload, PermissionsKeys } from '@/shared/types/auth';
+
 export type Permissions = {
-  read: boolean;
-  write: boolean;
-  delete: boolean;
+  [key in PermissionsKeys]?: boolean;
 };
 
 export interface CreatePermissionsInput {
@@ -9,4 +9,9 @@ export interface CreatePermissionsInput {
 }
 export interface UpdatePermissionsInput {
   permissions: Permissions;
+}
+
+export interface ValidatePermissionsArgs {
+  agentPayload: AgentAuthPayload;
+  checkedPublicId: string;
 }

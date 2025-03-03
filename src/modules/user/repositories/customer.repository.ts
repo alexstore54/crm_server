@@ -131,7 +131,7 @@ export class CustomersRepository {
     }
   }
   async createOneWithTx(data: CreateCustomer, tx: Prisma.TransactionClient): Promise<FullCustomer> {
-    const {leadId,  ...rest } = data;
+    const { leadId, ...rest } = data;
     try {
       const customer = await tx.customer.create({
         data: {
@@ -148,10 +148,10 @@ export class CustomersRepository {
         },
       });
       return UsersUtil.mapCustomerToFullCustomer(
-            customer,
-            customer.Lead,
-            customer.Lead.Phone,
-            customer.Email,
+        customer,
+        customer.Lead,
+        customer.Lead.Phone,
+        customer.Email,
       );
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

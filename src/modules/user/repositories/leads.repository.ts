@@ -66,7 +66,7 @@ export class LeadRepository {
 
   // async createOne(data: CreateLeadInput): Promise<Lead> {
   //   const { password, emails, phones, ...rest } = data;
-    
+
   //   try {
   //     return this.prisma.lead.create({
   //       data: {
@@ -127,24 +127,28 @@ export class LeadRepository {
     }
   }
 
-  public async createOneWithTx(data: CreateLeadInput, isMainPhone: boolean | null = null, tx: Prisma.TransactionClient ): Promise<Lead> {
-    const {email, ...rest} = data;
-    
-    try{
+  public async createOneWithTx(
+    data: CreateLeadInput,
+    isMainPhone: boolean | null = null,
+    tx: Prisma.TransactionClient,
+  ): Promise<Lead> {
+    const { email, ...rest } = data;
+
+    try {
       return tx.lead.create({
-        data: { 
-            ...rest,
-            defaultEmail: email,
-            Phone: {
-              create: {
-                phone: data.phone,
-                isMain: isMainPhone ?? false,
-              }
-            }
-        }
-      })
-    }catch(error: any){
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+        data: {
+          ...rest,
+          defaultEmail: email,
+          Phone: {
+            create: {
+              phone: data.phone,
+              isMain: isMainPhone ?? false,
+            },
+          },
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 

@@ -7,4 +7,3 @@ export interface CreateLeadInput {
   statusId?: number;
   phone: string;
 }
- 
