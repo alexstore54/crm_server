@@ -9,7 +9,7 @@ import { RolePermissionWithDetails } from '@/shared/utils';
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithDetails[]>  {
+  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithDetails[]> {
     try {
       return await this.prisma.rolePermission.findMany({
         where: {

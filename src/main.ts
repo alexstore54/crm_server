@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AppExceptionFilter } from '@/common/filters';
 import { AppLoggingInterceptor } from '@/common/interceptors';
@@ -13,6 +13,7 @@ async function bootstrap() {
 
   const logger = app.get(AppLoggerService);
   const config = app.get(ConfigService);
+  const reflector = app.get(Reflector);
 
   app.enableCors({
     origin: config.get<string>(configKeys.CORS_ORIGIN),

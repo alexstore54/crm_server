@@ -7,7 +7,6 @@ export type RolePermissionWithDetails = PrismaRolePermission & {
 };
 
 export class AgentPermissionsUtil {
-
   public static filterUniquePermissions(
     permissions: { permissionId: number; allowed: boolean }[],
   ): {
@@ -87,7 +86,7 @@ export class AgentPermissionsUtil {
   }
 
   public static convertRolePermissionsToPermissionsTable(
-    rolePermissions: RolePermissionWithDetails[]
+    rolePermissions: RolePermissionWithDetails[],
   ): PermissionsTable {
     const result = {} as PermissionsTable;
     rolePermissions

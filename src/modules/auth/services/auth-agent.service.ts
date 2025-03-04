@@ -24,7 +24,7 @@ export class AuthAgentService {
     if (!agent) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
-    
+
     const isPasswordMatch = await BcryptHelper.compare(password, agent.password);
     if (!isPasswordMatch) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
@@ -35,7 +35,7 @@ export class AuthAgentService {
       agent,
       permissions: allowedPermissionsArray,
       deskPublicId: agent.Desk[0].publicId,
-      teamPublicId: agent.Team[0]?.publicId
+      teamPublicId: agent.Team[0]?.publicId,
     };
   }
 
@@ -47,7 +47,7 @@ export class AuthAgentService {
       throw new BadRequestException(ERROR_MESSAGES.DB_ERROR);
     }
 
-    const agentPermissions: AgentPermission[]  =
+    const agentPermissions: AgentPermission[] =
       await this.agentPermissionsRepository.getAgentPermissionsByAgentId(agent.id);
 
     if (agentPermissions.length === 0) {
@@ -57,4 +57,3 @@ export class AuthAgentService {
     }
   }
 }
- 

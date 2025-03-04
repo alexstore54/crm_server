@@ -8,5 +8,3 @@ export interface RequestWithCustomerPayload extends Request {
 export interface RequestWithAgentPayload extends Request {
   user: AgentAuthPayload;
 }
-
-

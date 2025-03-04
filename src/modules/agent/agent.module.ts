@@ -10,9 +10,10 @@ import {
   RolePermissionRepository,
 } from '@/modules/permissions/repositories';
 import { DeskRepository } from '@/modules/agent/repositories';
+import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 
 @Module({
-  imports: [UserModule, forwardRef(() => PermissionModule)],
+  imports: [UserModule, forwardRef(() => PermissionModule), AuthRedisModule],
   providers: [
     AgentService,
     AgentRepository,
@@ -20,6 +21,7 @@ import { DeskRepository } from '@/modules/agent/repositories';
     AgentPermissionRepository,
     RolePermissionRepository,
     DeskRepository,
+    AuthRedisService,
   ],
   controllers: [AgentsController],
   exports: [AgentRepository],

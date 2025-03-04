@@ -73,6 +73,3 @@ export const PERMISSIONS_NEED_VALIDATE: PermissionsKeys[] = [
   ...DESK_AGENT_PERMISSIONS,
   ...CUSTOMER_PERMISSIONS,
 ];
-
-
-

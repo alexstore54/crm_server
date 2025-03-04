@@ -10,4 +10,3 @@ export interface CreatePermissionsInput {
 export interface UpdatePermissionsInput {
   permissions: PermissionsTable;
 }
-

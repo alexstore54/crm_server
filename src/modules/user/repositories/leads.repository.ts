@@ -105,11 +105,10 @@ export class LeadRepository {
   //   }
   // }
 
-  
-  public async createOne(data: CreateLeadInput, isMainPhone: boolean | null = null):Promise<Lead> {
+  public async createOne(data: CreateLeadInput, isMainPhone: boolean | null = null): Promise<Lead> {
     const { email, phone, ...rest } = data;
-    
-    try{
+
+    try {
       return this.prisma.lead.create({
         data: {
           ...rest,
@@ -118,12 +117,12 @@ export class LeadRepository {
             create: {
               phone: phone,
               isMain: isMainPhone ?? false,
-            }
-          }
-        }
-    })
-    }catch(error: any){
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+            },
+          },
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
@@ -166,8 +165,8 @@ export class LeadRepository {
       return await this.prisma.lead.update({
         where: { id },
         data: {
-            ...rest,
-            ...(statusId !== undefined ? { status: { connect: { id: statusId } } } : {}),
+          ...rest,
+          ...(statusId !== undefined ? { status: { connect: { id: statusId } } } : {}),
         },
       });
     } catch (error: any) {
