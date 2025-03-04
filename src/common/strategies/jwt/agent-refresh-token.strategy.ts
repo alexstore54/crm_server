@@ -1,12 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { STRATEGIES_NAMES } from '@/shared/constants/auth';
 import { AgentAuthPayload } from '@/shared/types/auth';
-import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { agentAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
 import { configKeys } from '@/shared/schemas';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 

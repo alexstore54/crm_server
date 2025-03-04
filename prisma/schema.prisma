@@ -32,10 +32,10 @@ model AgentPermission {
 }
 
 model Customer {
-  publicId   String    @unique @default(uuid())
-  id         Int       @id @default(autoincrement())
-  leadId     Int       @unique
-  
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
+  leadId   Int    @unique
+
   password   String
   lastOnline DateTime? @db.Timestamptz(0)
   Lead       Lead      @relation(fields: [leadId], references: [id])
@@ -43,21 +43,21 @@ model Customer {
 }
 
 model Desk {
-  publicId    String    @unique @default(uuid())
-  id          Int       @id @default(autoincrement())
-  name        String
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
+  name     String
 
-  Lead        Lead[] 
-  Agent       Agent[]   @relation("AgentDesks")
+  Lead  Lead[]
+  Agent Agent[] @relation("AgentDesks")
 }
 
 model Email {
-  id         Int        @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   email      String
-  isMain     Boolean    @default(false)
+  isMain     Boolean  @default(false)
   customerId Int
-  createdAt  DateTime   @default(now()) @db.Timestamptz(0)
-  Customer   Customer   @relation(fields: [customerId], references: [id])
+  createdAt  DateTime @default(now()) @db.Timestamptz(0)
+  Customer   Customer @relation(fields: [customerId], references: [id])
 }
 
 model Lead {
@@ -75,7 +75,7 @@ model Lead {
   Agent        Agent?      @relation(fields: [agentId], references: [id])
   LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
   Phone        Phone[]
-  Desk         Desk?        @relation(fields: [deskId], references: [id])
+  Desk         Desk?       @relation(fields: [deskId], references: [id])
 }
 
 model LeadStatus {
@@ -96,19 +96,16 @@ model Log {
 model Permission {
   id              Int               @id @default(autoincrement())
   key             String            @unique
-  name            String
-  description     String?
   AgentPermission AgentPermission[]
   RolePermission  RolePermission[]
 }
 
 model Team {
-  publicId   String    @unique @default(uuid())
-  id         Int       @id @default(autoincrement())
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
 
-  name       String    
-  Agents     Agent[]   @relation("AgentTeams")
-
+  name   String
+  Agents Agent[] @relation("AgentTeams")
 }
 
 model Phone {

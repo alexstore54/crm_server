@@ -9,6 +9,7 @@ import { GatewayModule } from '@/shared/gateway';
 import { validationSchema } from '@/shared/schemas';
 import { AgentModule } from '@/modules/agent/agent.module';
 import { PermissionModule } from '@/modules/permissions/permission.module';
+import { SeedModule } from '@/seeds/seed.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PermissionModule } from '@/modules/permissions/permission.module';
     UserModule,
     AgentModule,
     PermissionModule,
+    SeedModule,
   ],
   controllers: [],
   providers: [],
