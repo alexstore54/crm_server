@@ -42,7 +42,7 @@ export class PermissionsGuard implements CanActivate {
     //достаем только те пермишны, которые есть у пользователя
     const agentPermissions = this.getAgentPermissions(requiredPermissions, permissions);
 
-    //задаем их в метадату
+    //задаем их в реквест
     request.permissions = permissions;
 
     return true;
