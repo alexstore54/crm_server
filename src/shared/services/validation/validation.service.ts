@@ -3,7 +3,7 @@ import { PrismaService } from '@/shared/db/prisma';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import {
   AgentPermissionValidation,
-  GeneralEntities,
+  AgentGeneralConnects,
   ValidationOperation,
 } from '@/shared/types/validation';
 import { PermissionsKeys } from '@/shared/types/auth';
@@ -23,7 +23,7 @@ export class ValidationService {
     }
 
     //общие связи между агентами
-    const general: GeneralEntities[] = await this.getAgentGeneralConnects(currentAgentId, agentId);
+    const general: AgentGeneralConnects[] = await this.getAgentGeneralConnects(currentAgentId, agentId);
 
     return this.validateAgentPermissions(general, permissions, operation);
   }
@@ -33,8 +33,8 @@ export class ValidationService {
   public async getAgentGeneralConnects(
     currentAgentPublicId: string,
     agentPublicId: string,
-  ): Promise<GeneralEntities[]> {
-    const entities: GeneralEntities[] = [];
+  ): Promise<AgentGeneralConnects[]> {
+    const entities: AgentGeneralConnects[] = [];
 
     const isAgentInOneTeam = await this.isAgentsInOneTeam(
       [currentAgentPublicId, agentPublicId],
@@ -46,10 +46,10 @@ export class ValidationService {
     );
 
     if (isAgentInOneTeam) {
-      entities.push(GeneralEntities.TEAM);
+      entities.push(AgentGeneralConnects.TEAM);
     }
     if (isAgentInOneDesk) {
-      entities.push(GeneralEntities.DESK);
+      entities.push(AgentGeneralConnects.DESK);
     }
 
     return entities;
@@ -92,7 +92,7 @@ export class ValidationService {
   }
 
   private validateAgentPermissions(
-    general: GeneralEntities[],
+    general: AgentGeneralConnects[],
     permissions: PermissionsKeys[],
     operation: ValidationOperation,
   ): boolean {
@@ -103,7 +103,7 @@ export class ValidationService {
 
     // если есть общий деск, но нет общей команды
     //(разные команды) тогда нам нужно разрешение на desk
-    if (general.includes(GeneralEntities.DESK) && !general.includes(GeneralEntities.TEAM)) {
+    if (general.includes(AgentGeneralConnects.DESK) && !general.includes(AgentGeneralConnects.TEAM)) {
       const neededPermissionByDesk: PermissionsKeys =
         this.getNeedDeskPermissionByOperation(operation);
 
@@ -111,7 +111,7 @@ export class ValidationService {
     }
 
     // если общая команда (деск всегда один для команды)
-    if (general.includes(GeneralEntities.TEAM) && !general.includes(GeneralEntities.DESK)) {
+    if (general.includes(AgentGeneralConnects.TEAM) && general.includes(AgentGeneralConnects.DESK)) {
       const neededPermissionByLead: PermissionsKeys =
         this.getNeedTeamPermissionByOperation(operation);
 

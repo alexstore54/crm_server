@@ -2,7 +2,7 @@ import { PermissionsKeys } from '@/shared/types/auth';
 
 export type ValidationOperation = 'create' | 'update' | 'delete' | 'read';
 
-export enum GeneralEntities {
+export enum AgentGeneralConnects {
   TEAM = 'team',
   DESK = 'desk',
 }
