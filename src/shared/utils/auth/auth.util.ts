@@ -1,8 +1,5 @@
 import { AgentAuthPayload, CustomerAuthPayload } from '@/shared/types/auth';
-import {
-  agentAuthPayloadSchema,
-  customerAuthPayloadSchema,
-} from '@/shared/schemas';
+import { agentAuthPayloadSchema, customerAuthPayloadSchema } from '@/shared/schemas';
 import { UnauthorizedException } from '@nestjs/common';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 

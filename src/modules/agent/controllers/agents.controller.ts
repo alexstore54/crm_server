@@ -1,16 +1,27 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsKeys, RequestWithAgentPayload } from '@/shared/types/auth';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, GetAgentLeadsParams, UpdateAgent } from '../dto';
 import { PermissionsGuard } from '@/common/guards/permissions';
 import { SomePermissionRequired } from '@/common/decorators/validation';
+import { METADATA } from '@/shared/constants/metadata';
 
 @Controller('agents')
 export class AgentsController {
   constructor(private readonly agentService: AgentService) {}
 
-  @SomePermissionRequired([PermissionsKeys.READ_TEAMS, PermissionsKeys.READ_DESKS])
+  @SomePermissionRequired([PermissionsKeys.READ_DESK_LEADS, PermissionsKeys.READ_TEAM_LEADS])
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Get(':publicId/leads')
   async getLeadsByAgentId(
@@ -18,7 +29,7 @@ export class AgentsController {
     @Req() request: RequestWithAgentPayload,
   ) {
     const { publicId } = params;
-
+    SetMetadata(METADATA.AGENT_PERMISSIONS, request.permissions);
     return this.agentService.getLeadsByPublicId(publicId);
   }
 

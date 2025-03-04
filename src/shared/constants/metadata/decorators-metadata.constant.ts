@@ -1,4 +1,4 @@
-export const DECORATORS_METADATA = {
+export const METADATA = {
   REQUIRED_PERMISSIONS: 'requiredPermissions',
   AGENT_PERMISSIONS: 'agentPermissions',
 };

@@ -11,6 +11,7 @@ export class PrismaTransport extends Transport {
   }
 
   async log(info: CreateLog, callback: () => void): Promise<void> {
+    //#TODO: PROD FIX
     if (!info || !info.context) {
       return callback();
     }

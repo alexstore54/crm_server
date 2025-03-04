@@ -10,7 +10,7 @@ import { AgentAuthPayload } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
 import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
-import { DECORATORS_METADATA } from '@/shared/constants/metadata';
+import { METADATA } from '@/shared/constants/metadata';
 import { PermissionsTable } from '@/shared/types/redis';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 
@@ -43,7 +43,7 @@ export class PermissionsGuard implements CanActivate {
     const agentPermissions = this.getAgentPermissions(requiredPermissions, permissions);
 
     //задаем их в метадату
-    SetMetadata(DECORATORS_METADATA.AGENT_PERMISSIONS, agentPermissions)(context.getHandler());
+    request.permissions = permissions;
 
     return true;
   }
@@ -63,7 +63,7 @@ export class PermissionsGuard implements CanActivate {
 
   private getRequiredPermissions(context: ExecutionContext): PermissionsKeys[] {
     const requiredPermissions = this.reflector.get<PermissionsKeys[]>(
-      DECORATORS_METADATA.REQUIRED_PERMISSIONS,
+      METADATA.REQUIRED_PERMISSIONS,
       context.getHandler(),
     );
 

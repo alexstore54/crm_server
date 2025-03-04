@@ -13,8 +13,6 @@ import {
 } from '@/common/strategies/jwt';
 import { REDIS_CONFIG } from '@/shared/constants/config';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
-import { Reflector } from '@nestjs/core';
-import { PermissionsGuard } from '@/common/guards/permissions';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;

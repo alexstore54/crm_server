@@ -1,9 +1,16 @@
 export enum PermissionsKeys {
-  // All-agents
+  // Moderator | Admin permissions
+  //agents
   READ_ALL_AGENTS = 'READ_ALL_AGENTS',
   CREATE_AGENTS = 'CREATE_ALL_AGENTS',
   UPDATE_ALL_AGENTS = 'UPDATE_ALL_AGENTS',
   DELETE_ALL_AGENTS = 'DELETE_ALL_AGENTS',
+
+  //leads
+  READ_ALL_LEADS = 'READ_ALL_LEADS',
+  UPDATE_ALL_LEADS = 'READ_TEAM_LEADS',
+  DELETE_ALL_LEADS = 'DELETE_ALL_LEADS',
+  CREATE_ALL_LEADS = 'CREATE_ALL_LEADS',
 
   // Team-agents
   READ_TEAM_AGENTS = 'READ_TEAM_AGENTS',
@@ -18,11 +25,15 @@ export enum PermissionsKeys {
   DELETE_DESK_AGENTS = 'DELETE_DESK_AGENTS',
 
   // Leads / Customers
-  READ_LEADS = 'READ_LEADS',
-  CREATE_LEADS = 'CREATE_LEADS',
-  UPDATE_LEADS = 'UPDATE_LEADS',
-  DELETE_LEADS = 'DELETE_LEADS',
-  ASSIGN_LEADS = 'ASSIGN_LEADS',
+  READ_TEAM_LEADS = 'READ_TEAM_LEADS',
+  CREATE_TEAM_LEADS = 'CREATE_TEAM_LEADS',
+  UPDATE_TEAM_LEADS = 'UPDATE_TEAM_LEADS',
+  DELETE_TEAM_LEADS = 'DELETE_TEAM_LEADS',
+
+  READ_DESK_LEADS = 'READ_DESK_LEADS',
+  CREATE_DESK_LEADS = 'CREATE_DESK_LEADS',
+  UPDATE_DESK_LEADS = 'UPDATE_DESK_LEADS',
+  DELETE_DESK_LEADS = 'DELETE_DESK_LEADS',
 
   // Roles
   READ_ROLES = 'READ_ROLES',
@@ -47,6 +58,36 @@ export enum PermissionsKeys {
   UPDATE_HIMSELF = 'UPDATE_HIMSELF',
 }
 
+export const READ_AGENTS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.READ_TEAM_AGENTS,
+  PermissionsKeys.READ_DESK_AGENTS,
+];
+
+export const UPDATE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.UPDATE_TEAM_AGENTS,
+  PermissionsKeys.UPDATE_DESK_AGENTS,
+];
+
+export const DELETE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.DELETE_TEAM_AGENTS,
+  PermissionsKeys.DELETE_DESK_AGENTS,
+];
+
+export const READ_LEADS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.READ_TEAM_LEADS,
+  PermissionsKeys.READ_DESK_LEADS,
+];
+
+export const UPDATE_LEADS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.UPDATE_TEAM_LEADS,
+  PermissionsKeys.UPDATE_DESK_LEADS,
+];
+
+export const DELETE_LEADS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.DELETE_TEAM_LEADS,
+  PermissionsKeys.DELETE_DESK_LEADS,
+];
+
 export const TEAM_AGENT_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.DELETE_TEAM_AGENTS,
   PermissionsKeys.READ_TEAM_AGENTS,
@@ -61,15 +102,23 @@ export const DESK_AGENT_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.DELETE_DESK_AGENTS,
 ];
 
-export const CUSTOMER_PERMISSIONS: PermissionsKeys[] = [
-  PermissionsKeys.CREATE_LEADS,
-  PermissionsKeys.UPDATE_LEADS,
-  PermissionsKeys.READ_LEADS,
-  PermissionsKeys.DELETE_LEADS,
+export const TEAM_LEADS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.DELETE_TEAM_LEADS,
+  PermissionsKeys.CREATE_TEAM_LEADS,
+  PermissionsKeys.UPDATE_TEAM_LEADS,
+  PermissionsKeys.READ_TEAM_LEADS,
+];
+
+export const TEAM_DESK_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.DELETE_DESK_LEADS,
+  PermissionsKeys.CREATE_DESK_LEADS,
+  PermissionsKeys.UPDATE_DESK_LEADS,
+  PermissionsKeys.READ_DESK_LEADS,
 ];
 
 export const PERMISSIONS_NEED_VALIDATE: PermissionsKeys[] = [
   ...TEAM_AGENT_PERMISSIONS,
   ...DESK_AGENT_PERMISSIONS,
-  ...CUSTOMER_PERMISSIONS,
+  ...TEAM_LEADS_PERMISSIONS,
+  ...TEAM_DESK_PERMISSIONS,
 ];

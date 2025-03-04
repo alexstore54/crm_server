@@ -12,6 +12,7 @@ import {
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
 import { AgentPermission } from '@/modules/permissions/types/agent-perms.type';
 import { AgentPermissionsUtil, ArrayUtil } from '@/shared/utils';
+import { PermissionsKeys } from '@/shared/types/auth';
 
 @Injectable()
 export class AgentService {
