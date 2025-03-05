@@ -70,12 +70,14 @@ model Lead {
   defaultEmail String
   agentId      Int?
   deskId       Int?
+  teamId       Int?
   isVerified   Boolean     @default(false)
   Customer     Customer?
   Agent        Agent?      @relation(fields: [agentId], references: [id])
   LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
   Phone        Phone[]
   Desk         Desk?       @relation(fields: [deskId], references: [id])
+  Team         Team?        @relation(fields: [teamId], references: [id])
 }
 
 model LeadStatus {
@@ -101,11 +103,12 @@ model Permission {
 }
 
 model Team {
-  publicId String @unique @default(uuid())
-  id       Int    @id @default(autoincrement())
+  publicId String  @unique @default(uuid())
+  id       Int     @id @default(autoincrement())
 
   name   String
-  Agents Agent[] @relation("AgentTeams")
+  Agents Agent[]   @relation("AgentTeams")
+  Leads  Lead[]   
 }
 
 model Phone {
