@@ -1,12 +1,6 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  SetMetadata,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
-import { AgentAuthPayload } from '@/shared/types/auth';
+import { string } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
 import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
@@ -23,7 +17,7 @@ export class PermissionsGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const payload: AgentAuthPayload = request.user;
+    const payload: string = request.user;
 
     //Валидируем пэйлоад
     AuthUtil.validateAgentAuthPayload(payload);
@@ -74,7 +68,7 @@ export class PermissionsGuard implements CanActivate {
     return requiredPermissions;
   }
 
-  private async getPermissions(payload: AgentAuthPayload): Promise<PermissionsTable | null> {
+  private async getPermissions(payload: string): Promise<PermissionsTable | null> {
     const { payloadUUID, sub } = payload;
     return this.authRedisService.getOnePermissions(sub, payloadUUID);
   }

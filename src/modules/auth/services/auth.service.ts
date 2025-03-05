@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GatewayService } from '@/shared/gateway';
-import { AgentAuthPayload, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
+import { string, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
 import {
   AuthenticateAgentArgs,
   AuthenticateCustomerArgs,
@@ -88,7 +88,7 @@ export class AuthService {
   }
 
   public async refreshTokens(
-    payload: AgentAuthPayload | CustomerAuthPayload,
+    payload: string | CustomerAuthPayload,
     refreshToken: string,
   ): Promise<AuthTokens> {
     const { sub: userPublicId, payloadUUID } = payload;
@@ -137,7 +137,7 @@ export class AuthService {
     payloadUUID: PayloadUUID,
     publicDeskId: string,
     teamPublicId?: string,
-  ): AgentAuthPayload {
+  ): string {
     return {
       deskPublicId: publicDeskId,
       teamPublicId: teamPublicId,

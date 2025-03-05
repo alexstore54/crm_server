@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { AgentAuthPayload } from '@/shared/types/auth';
+import { string } from '@/shared/types/auth';
 import { Request } from 'express';
 import { STRATEGIES_NAMES } from '@/shared/constants/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
@@ -27,7 +27,7 @@ export class AgentAccessTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: AgentAuthPayload): Promise<AgentAuthPayload> {
+  async validate(payload: string): Promise<string> {
     AuthUtil.validateAgentAuthPayload(payload);
     return {
       ...payload,

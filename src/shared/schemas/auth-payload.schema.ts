@@ -1,7 +1,7 @@
 import Joi, { ObjectSchema } from 'joi';
-import { AgentAuthPayload, CustomerAuthPayload } from '@/shared/types/auth';
+import { string, CustomerAuthPayload } from '@/shared/types/auth';
 
-export const agentAuthPayloadSchema: ObjectSchema<AgentAuthPayload> = Joi.object({
+export const agentAuthPayloadSchema: ObjectSchema<string> = Joi.object({
   deskPublicId: Joi.string().uuid().required(),
   teamPublicId: Joi.string().uuid().optional(),
   payloadUUID: Joi.string().uuid().required(),

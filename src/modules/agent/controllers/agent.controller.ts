@@ -5,7 +5,7 @@ import { Agent, Lead } from '@prisma/client';
 import { UpdateAgent } from '@/modules/agent/dto';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsGuard } from '@/common/guards/permissions';
-import { SomePermissionRequired } from '@/common/decorators/validation';
+import { UsePermissions } from '@/common/decorators/validation';
 
 @Controller('agent')
 export class AgentController {
@@ -18,7 +18,7 @@ export class AgentController {
     return this.agentService.getLeadsByPublicId(user.sub);
   }
 
-  @SomePermissionRequired([PermissionsKeys.UPDATE_HIMSELF])
+  @UsePermissions([PermissionsKeys.UPDATE_HIMSELF])
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Get('update')
   async updateMe(@Req() req: RequestWithAgentPayload, @Body() body: UpdateAgent): Promise<Agent> {

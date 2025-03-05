@@ -1,4 +1,4 @@
-import { AgentAuthPayload, PermissionsKeys } from '@/shared/types/auth';
+import { string, PermissionsKeys } from '@/shared/types/auth';
 
 export type PermissionsTable = {
   [key in PermissionsKeys]?: boolean;
