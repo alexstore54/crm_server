@@ -1,0 +1,12 @@
+export * from './validate-permission.constant';
+export { PERMISSIONS_NEED_VALIDATE } from '@/shared/constants/permissions/permissions.constant';
+export { TEAM_DESK_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { TEAM_LEADS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { DESK_AGENT_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { TEAM_AGENT_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { DELETE_LEADS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { UPDATE_LEADS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { READ_LEADS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { DELETE_AGENTS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { UPDATE_AGENTS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';
+export { READ_AGENTS_PERMISSIONS } from '@/shared/constants/permissions/permissions.constant';

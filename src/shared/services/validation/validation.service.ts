@@ -5,303 +5,177 @@ import {
   AgentPermissionValidation,
   GeneralConnects,
   LeadPermissionValidation,
-  ValidationOperation,
+  PermissionOperation,
 } from '@/shared/types/validation';
-import { AgentAuthPayload, PermissionsKeys } from '@/shared/types/auth';
+import { PermissionsKeys } from '@/shared/types/auth';
+import { PERMISSION_CONFIG } from '@/shared/constants/permissions';
 
 @Injectable()
 export class ValidationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async validateAgentOperationPermissions(
-    args: AgentPermissionValidation,
-  ): Promise<boolean> {
-    const { permissions, agentId, currentAgentPayload, operation } = args;
-    const { sub } = currentAgentPayload;
-    //проверяем есть ли админский пермишн в зависимости от типа операции
-    const moderatorPermission = this.getModeratorPermissionByAgentOperation(operation);
-    if (permissions.includes(moderatorPermission)) {
-      return true;
-    }
-    //общие связи между агентами
-    const general: GeneralConnects[] = await this.getAgentGeneralConnects(sub, agentId);
+  // Main validation methods
+  async validateAgentOperationPermissions(args: AgentPermissionValidation): Promise<boolean> {
+    const { permissions, currentAgentPayload, operation } = args;
 
-    return this.validateAgentPermissions(general, permissions, operation);
-  }
+    const moderatorPermission = PERMISSION_CONFIG.agent.moderator[operation];
 
-  public async validateLeadOperationPermissions(args: LeadPermissionValidation): Promise<boolean> {
-    const { permissions, leadPublicId, currentAgentPayload, operation } = args;
-    //проверяем есть ли админский пермишн
-    const moderatorPermission = this.getModeratorPermissionByLeadOperation(operation);
     if (permissions.includes(moderatorPermission)) {
       return true;
     }
 
-    const general = await this.getLeadGeneralConnects(currentAgentPayload, leadPublicId);
-
-    return this.validateLeadPermissions(general, currentAgentPayload, permissions, operation);
+    const connections = await this.getAgentConnections(args);
+    return this.checkAgentPermissions(connections, permissions, operation);
   }
 
-  public async getAgentGeneralConnects(
-    currentAgentPublicId: string,
-    agentPublicId: string,
-  ): Promise<GeneralConnects[]> {
-    const general: GeneralConnects[] = [];
+  async validateLeadOperationPermissions(args: LeadPermissionValidation): Promise<boolean> {
+    const { permissions, currentAgentPayload, operation } = args;
+    const moderatorPermission = PERMISSION_CONFIG.lead.moderator[operation];
 
-    const isAgentInOneTeam = await this.isAgentsInOneTeam(
-      [currentAgentPublicId, agentPublicId],
-      agentPublicId,
-    );
-    const isAgentInOneDesk = await this.isAgentsInOneDesk(
-      [currentAgentPublicId, agentPublicId],
-      agentPublicId,
-    );
-
-    if (isAgentInOneTeam) {
-      general.push(GeneralConnects.TEAM);
-    }
-    if (isAgentInOneDesk) {
-      general.push(GeneralConnects.DESK);
+    if (permissions.includes(moderatorPermission)) {
+      return true;
     }
 
-    return general;
+    const connections = await this.getLeadConnections(args);
+    return this.checkLeadPermissions(connections, permissions, operation);
   }
 
-  public async getLeadGeneralConnects(
-    agentPayload: AgentAuthPayload,
-    leadPublicId: string,
-  ): Promise<GeneralConnects[]> {
-    const general: GeneralConnects[] = [];
-    const isLeadInDesk = await this.isLeadInDesk(leadPublicId, agentPayload.deskPublicId);
-    if (isLeadInDesk) {
-      general.push(GeneralConnects.DESK);
-    }
-    //#TODO: IMPLEMENT  IS LEAD IN TEAM
+  private async getAgentConnections(args: AgentPermissionValidation): Promise<GeneralConnects[]> {
+    const { currentAgentPayload, agentId } = args;
+    const { sub: currentAgentId } = currentAgentPayload;
+    const agentIds = [currentAgentId, agentId];
+    const connections: GeneralConnects[] = [];
 
-    return general;
+    if (await this.areAgentsInSameTeam(agentIds, agentId)) {
+      connections.push(GeneralConnects.TEAM);
+    }
+    if (await this.areAgentsInSameDesk(agentIds, agentId)) {
+      connections.push(GeneralConnects.DESK);
+    }
+
+    return connections;
   }
 
-  public async isAgentsInOneTeam(publicIds: string[], publicTeamId: string): Promise<boolean> {
+  private async getLeadConnections(args: LeadPermissionValidation): Promise<GeneralConnects[]> {
+    const { currentAgentPayload, leadPublicId } = args;
+    const connections: GeneralConnects[] = [];
+
+    if (await this.isLeadInAgentDesk(leadPublicId, currentAgentPayload.deskPublicId)) {
+      connections.push(GeneralConnects.DESK);
+    }
+
+    return connections;
+  }
+
+  // Database query methods
+  private async areAgentsInSameTeam(agentIds: string[], teamId: string): Promise<boolean> {
     try {
-      const agents = await this.prisma.agent.findMany({
+      const matchingAgents = await this.prisma.agent.count({
         where: {
-          publicId: { in: publicIds },
-          Team: {
-            some: {
-              publicId: publicTeamId,
-            },
-          },
+          publicId: { in: agentIds },
+          Team: { some: { publicId: teamId } },
         },
       });
-      return agents.length === publicIds.length;
-    } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      return matchingAgents === agentIds.length;
+    } catch (error) {
+      throw this.createDbError(error);
     }
   }
 
-  public async isAgentsInOneDesk(publicIds: string[], deskPublicId: string): Promise<boolean> {
+  private async areAgentsInSameDesk(agentIds: string[], deskId: string): Promise<boolean> {
     try {
-      const agents = await this.prisma.agent.findMany({
+      const matchingAgents = await this.prisma.agent.count({
         where: {
-          publicId: { in: publicIds },
-          Desk: {
-            some: {
-              publicId: deskPublicId,
-            },
-          },
+          publicId: { in: agentIds },
+          Desk: { some: { publicId: deskId } },
         },
       });
-      return agents.length === publicIds.length;
-    } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      return matchingAgents === agentIds.length;
+    } catch (error) {
+      throw this.createDbError(error);
     }
   }
 
-  public async isLeadPassedToAgent(leadPublicId: string, agentPublicId: string): Promise<boolean> {
+  async isLeadAssignedToAgent(leadId: string, agentId: string): Promise<boolean> {
     try {
       const agent = await this.prisma.agent.findUnique({
-        where: {
-          publicId: agentPublicId,
-        },
-        include: {
+        where: { publicId: agentId },
+        select: {
           Lead: {
             select: {
-              Customer: {
-                where: {
-                  publicId: leadPublicId,
-                },
-              },
+              Customer: { where: { publicId: leadId } },
             },
           },
         },
       });
-
-      return agent !== null;
-    } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      return !!agent?.Lead?.length;
+    } catch (error) {
+      throw this.createDbError(error);
     }
   }
 
-  public async isLeadInDesk(leadPublicId: string, deskPublicId: string): Promise<boolean> {
+  private async isLeadInAgentDesk(leadId: string, deskId: string): Promise<boolean> {
     try {
       const desk = await this.prisma.desk.findUnique({
-        where: {
-          publicId: deskPublicId,
-        },
-        include: {
+        where: { publicId: deskId },
+        select: {
           Lead: {
             select: {
-              Customer: {
-                where: {
-                  publicId: leadPublicId,
-                },
-              },
+              Customer: { where: { publicId: leadId } },
             },
           },
         },
       });
-
-      return desk !== null;
-    } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      return !!desk?.Lead?.length;
+    } catch (error) {
+      throw this.createDbError(error);
     }
   }
 
-  private validateAgentPermissions(
-    general: GeneralConnects[],
+  private checkAgentPermissions(
+    connections: GeneralConnects[],
     permissions: PermissionsKeys[],
-    operation: ValidationOperation,
+    operation: PermissionOperation,
   ): boolean {
-    //если нет общих связей, то нет и доступа
-    if (general.length === 0) {
-      return false;
+    if (!connections.length) return false;
+
+    const hasDeskOnly =
+      connections.includes(GeneralConnects.DESK) && !connections.includes(GeneralConnects.TEAM);
+    const hasBoth =
+      connections.includes(GeneralConnects.TEAM) && connections.includes(GeneralConnects.DESK);
+
+    if (hasDeskOnly) {
+      return permissions.includes(PERMISSION_CONFIG.agent.desk[operation]);
     }
-
-    // если есть общий деск, но нет общей команды
-    //(разные команды) тогда нам нужно разрешение на desk
-    if (general.includes(GeneralConnects.DESK) && !general.includes(GeneralConnects.TEAM)) {
-      const neededPermissionByDesk: PermissionsKeys =
-        this.getAgentNeedDeskPermissionByOperation(operation);
-
-      return permissions.includes(neededPermissionByDesk);
+    if (hasBoth) {
+      return permissions.includes(PERMISSION_CONFIG.agent.team[operation]);
     }
-
-    // если общая команда (деск всегда один для команды)
-    if (general.includes(GeneralConnects.TEAM) && general.includes(GeneralConnects.DESK)) {
-      const neededPermissionByLead: PermissionsKeys =
-        this.getAgentNeedTeamPermissionByOperation(operation);
-
-      return permissions.includes(neededPermissionByLead);
-    }
-
-    //в других случаях false
     return false;
   }
 
-  private validateLeadPermissions(
-    general: GeneralConnects[],
-    agentPayload: AgentAuthPayload,
+  private checkLeadPermissions(
+    connections: GeneralConnects[],
     permissions: PermissionsKeys[],
-    operation: ValidationOperation,
+    operation: PermissionOperation,
   ): boolean {
-    const { sub: agentPublicId, deskPublicId, teamPublicId } = agentPayload;
+    if (!connections.length) return false;
 
-    if (general.length === 0) {
-      return false;
+    const hasDeskOnly =
+      connections.includes(GeneralConnects.DESK) && !connections.includes(GeneralConnects.TEAM);
+    const hasBoth =
+      connections.includes(GeneralConnects.TEAM) && connections.includes(GeneralConnects.DESK);
+
+    if (hasDeskOnly) {
+      return permissions.includes(PERMISSION_CONFIG.lead.desk[operation]);
     }
-
-    if (general.includes(GeneralConnects.DESK) && !general.includes(GeneralConnects.TEAM)) {
-      const neededPermissionByDesk: PermissionsKeys =
-        this.getLeadNeedDeskPermissionByOperation(operation);
-      return permissions.includes(neededPermissionByDesk);
+    if (hasBoth) {
+      return permissions.includes(PERMISSION_CONFIG.lead.team[operation]);
     }
-
-    if (general.includes(GeneralConnects.TEAM) && general.includes(GeneralConnects.DESK)) {
-      const neededPermissionByLead: PermissionsKeys =
-        this.getLeadNeedTeamPermissionByOperation(operation);
-      return permissions.includes(neededPermissionByLead);
-    }
-
     return true;
   }
 
-  private getModeratorPermissionByAgentOperation = (
-    operation: ValidationOperation,
-  ): PermissionsKeys => {
-    switch (operation) {
-      case 'create':
-        return PermissionsKeys.CREATE_AGENTS;
-      case 'update':
-        return PermissionsKeys.UPDATE_ALL_AGENTS;
-      case 'delete':
-        return PermissionsKeys.DELETE_ALL_AGENTS;
-      case 'read':
-        return PermissionsKeys.READ_ALL_AGENTS;
-    }
-  };
-
-  private getAgentNeedDeskPermissionByOperation = (operation: ValidationOperation) => {
-    switch (operation) {
-      case 'create':
-        return PermissionsKeys.CREATE_DESK_AGENTS;
-      case 'update':
-        return PermissionsKeys.UPDATE_DESK_AGENTS;
-      case 'delete':
-        return PermissionsKeys.DELETE_DESK_AGENTS;
-      case 'read':
-        return PermissionsKeys.READ_DESK_AGENTS;
-    }
-  };
-
-  private getAgentNeedTeamPermissionByOperation = (operation: ValidationOperation) => {
-    switch (operation) {
-      case 'create':
-        return PermissionsKeys.CREATE_TEAM_AGENTS;
-      case 'update':
-        return PermissionsKeys.UPDATE_TEAM_AGENTS;
-      case 'delete':
-        return PermissionsKeys.DELETE_TEAM_AGENTS;
-      case 'read':
-        return PermissionsKeys.READ_TEAM_AGENTS;
-    }
-  };
-
-  private getLeadNeedDeskPermissionByOperation = (operation: ValidationOperation) => {
-    switch (operation) {
-      case 'create':
-        return PermissionsKeys.CREATE_DESK_LEADS;
-      case 'update':
-        return PermissionsKeys.UPDATE_DESK_LEADS;
-      case 'delete':
-        return PermissionsKeys.DELETE_DESK_LEADS;
-      case 'read':
-        return PermissionsKeys.READ_DESK_LEADS;
-    }
-  };
-
-  private getLeadNeedTeamPermissionByOperation = (operation: ValidationOperation) => {
-    switch (operation) {
-      case 'create':
-        return PermissionsKeys.CREATE_TEAM_LEADS;
-      case 'update':
-        return PermissionsKeys.UPDATE_TEAM_LEADS;
-      case 'delete':
-        return PermissionsKeys.DELETE_TEAM_LEADS;
-      case 'read':
-        return PermissionsKeys.READ_TEAM_LEADS;
-    }
-  };
-
-  private getModeratorPermissionByLeadOperation = (operation: ValidationOperation) => {
-    switch (operation) {
-      case 'create':
-        return PermissionsKeys.CREATE_ALL_LEADS;
-      case 'update':
-        return PermissionsKeys.UPDATE_ALL_LEADS;
-      case 'delete':
-        return PermissionsKeys.DELETE_ALL_LEADS;
-      case 'read':
-        return PermissionsKeys.READ_ALL_LEADS;
-    }
-  };
+  private createDbError(error: unknown): InternalServerErrorException {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${message}`);
+  }
 }

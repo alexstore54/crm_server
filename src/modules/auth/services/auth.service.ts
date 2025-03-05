@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GatewayService } from '@/shared/gateway';
-import { string, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
+import { AgentAuthPayload, AuthTokens, CustomerAuthPayload } from '@/shared/types/auth';
 import {
   AuthenticateAgentArgs,
   AuthenticateCustomerArgs,
@@ -13,7 +13,6 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { AuthGateway } from '@/modules/auth/geateway';
 import { CreateSessionInput, PayloadUUID } from '@/shared/types/redis';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
-import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
 import { Agent } from '@prisma/client';
 import { FullCustomer } from '@/shared/types/user';
 
@@ -88,7 +87,7 @@ export class AuthService {
   }
 
   public async refreshTokens(
-    payload: string | CustomerAuthPayload,
+    payload: AgentAuthPayload | CustomerAuthPayload,
     refreshToken: string,
   ): Promise<AuthTokens> {
     const { sub: userPublicId, payloadUUID } = payload;
@@ -137,7 +136,7 @@ export class AuthService {
     payloadUUID: PayloadUUID,
     publicDeskId: string,
     teamPublicId?: string,
-  ): string {
+  ): AgentAuthPayload {
     return {
       deskPublicId: publicDeskId,
       teamPublicId: teamPublicId,

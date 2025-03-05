@@ -1,14 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { string } from '@/shared/types/auth';
 import { Request } from 'express';
 import { STRATEGIES_NAMES } from '@/shared/constants/auth';
-import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { configKeys } from '@/shared/schemas';
-import { agentAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
+import { AgentAuthPayload } from '@/shared/types/auth';
 
 @Injectable()
 export class AgentAccessTokenStrategy extends PassportStrategy(
@@ -27,7 +25,7 @@ export class AgentAccessTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: string): Promise<string> {
+  async validate(payload: AgentAuthPayload): Promise<AgentAuthPayload> {
     AuthUtil.validateAgentAuthPayload(payload);
     return {
       ...payload,

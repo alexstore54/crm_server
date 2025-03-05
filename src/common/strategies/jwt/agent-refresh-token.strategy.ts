@@ -4,9 +4,9 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { STRATEGIES_NAMES } from '@/shared/constants/auth';
-import { string } from '@/shared/types/auth';
 import { configKeys } from '@/shared/schemas';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
+import { AgentAuthPayload } from '@/shared/types/auth';
 
 @Injectable()
 export class AgentRefreshTokenStrategy extends PassportStrategy(
@@ -25,7 +25,7 @@ export class AgentRefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: string): Promise<string> {
+  async validate(payload: AgentAuthPayload): Promise<AgentAuthPayload> {
     AuthUtil.validateAgentAuthPayload(payload);
     return { ...payload };
   }

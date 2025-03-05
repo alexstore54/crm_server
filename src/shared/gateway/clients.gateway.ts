@@ -4,7 +4,7 @@ import { GatewayService } from '@/shared/gateway/gateway.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CookiesUtil } from '@/shared/utils';
 import { JwtService } from '@nestjs/jwt';
-import { string } from '@/shared/types/auth';
+import { AgentAuthPayload } from '@/shared/types/auth';
 import { UnauthorizedException } from '@nestjs/common';
 import { PayloadId, Session } from '@/shared/types/redis';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
@@ -24,7 +24,7 @@ export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const accessToken = CookiesUtil.getAccessTokenFromCookiesString(cookies);
     if (!accessToken) throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_TOKEN_NOT_FOUND);
 
-    const payload = this.jwtService.verify<string>(accessToken);
+    const payload = this.jwtService.verify<AgentAuthPayload>(accessToken);
     if (!payload) throw new UnauthorizedException(ERROR_MESSAGES.SESSION_NOT_FOUND);
     const { sub, payloadUUID } = payload;
 

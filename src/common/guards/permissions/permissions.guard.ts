@@ -1,12 +1,13 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
-import { string } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
 import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
 import { METADATA } from '@/shared/constants/metadata';
 import { PermissionsTable } from '@/shared/types/redis';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
+import { PermissionOperation } from '@/shared/types/validation';
+import { AgentAuthPayload } from '@/shared/types/auth';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -17,7 +18,7 @@ export class PermissionsGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const payload: string = request.user;
+    const payload: AgentAuthPayload = request.user;
 
     //Валидируем пэйлоад
     AuthUtil.validateAgentAuthPayload(payload);
@@ -33,12 +34,11 @@ export class PermissionsGuard implements CanActivate {
     //проверяем есть ли у пользователя пермишны
     this.checkPermissions(requiredPermissions, permissions);
 
-    //достаем только те пермишны, которые есть у пользователя
-    const agentPermissions = this.getAgentPermissions(requiredPermissions, permissions);
+    //достаем только те пермишны, которые есть у пользователя и задаем их в реквест
+    request.permissions = this.getAgentPermissions(requiredPermissions, permissions);
 
-    //задаем их в реквест
-    request.permissions = permissions;
-
+    //закидываем тип операции
+    request.operation = this.getOperation(request);
     return true;
   }
 
@@ -68,7 +68,7 @@ export class PermissionsGuard implements CanActivate {
     return requiredPermissions;
   }
 
-  private async getPermissions(payload: string): Promise<PermissionsTable | null> {
+  private async getPermissions(payload: AgentAuthPayload): Promise<PermissionsTable | null> {
     const { payloadUUID, sub } = payload;
     return this.authRedisService.getOnePermissions(sub, payloadUUID);
   }
@@ -85,5 +85,12 @@ export class PermissionsGuard implements CanActivate {
     ) {
       throw new ForbiddenException(ERROR_MESSAGES.DONT_HAVE_RIGHTS);
     }
+  }
+
+  private getOperation(handlerName: string): PermissionOperation {
+    if (handlerName.includes('create')) return 'create';
+    if (handlerName.includes('update')) return 'update';
+    if (handlerName.includes('delete')) return 'delete';
+    return 'read';
   }
 }

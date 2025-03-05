@@ -1,4 +1,4 @@
-import { string, PermissionsKeys } from '@/shared/types/auth';
+import { PermissionsKeys } from '@/shared/types/auth';
 
 export type PermissionsTable = {
   [key in PermissionsKeys]?: boolean;
