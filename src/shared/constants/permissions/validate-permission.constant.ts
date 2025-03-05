@@ -41,4 +41,4 @@ export const PERMISSION_CONFIG = {
       read: PermissionsKeys.READ_TEAM_LEADS,
     },
   },
-}
+};

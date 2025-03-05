@@ -33,5 +33,4 @@ export class LeadPermissionGuard implements CanActivate {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
 }

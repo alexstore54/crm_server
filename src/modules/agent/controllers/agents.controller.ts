@@ -13,7 +13,7 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsKeys, RequestWithAgentPayload } from '@/shared/types/auth';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, GetAgentLeadsParams, UpdateAgent } from '../dto';
-import { PermissionsGuard } from '@/common/guards/permissions';
+import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
 import { METADATA } from '@/shared/constants/metadata';
 
@@ -21,8 +21,12 @@ import { METADATA } from '@/shared/constants/metadata';
 export class AgentsController {
   constructor(private readonly agentService: AgentService) {}
 
-  @UsePermissions([PermissionsKeys.READ_DESK_LEADS, PermissionsKeys.READ_TEAM_LEADS])
-  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @UsePermissions([
+    PermissionsKeys.READ_DESK_LEADS,
+    PermissionsKeys.READ_TEAM_LEADS,
+    PermissionsKeys.READ_ALL_LEADS,
+  ])
+  @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
   @Get(':publicId/leads')
   async getLeadsByAgentId(
     @Param() params: GetAgentLeadsParams,

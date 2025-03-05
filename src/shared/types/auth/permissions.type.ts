@@ -57,4 +57,3 @@ export enum PermissionsKeys {
   // Himself
   UPDATE_HIMSELF = 'UPDATE_HIMSELF',
 }
-
