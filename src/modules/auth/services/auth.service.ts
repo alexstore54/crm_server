@@ -32,7 +32,9 @@ export class AuthService {
 
     const payload = this.mapAgentPayload(agent, payloadUUID, args.deskPublicId, args.teamPublicId);
 
+
     const tokens = await this.tokensService.getTokens({ ...payload });
+
 
     const createSessionInput = await this.makeSession({
       payloadUUID: payloadUUID,
@@ -42,6 +44,7 @@ export class AuthService {
       refreshToken: tokens.refreshToken,
       userId: agent.publicId,
     });
+
 
     await this.authRedisService.saveAgent({
       agentPublicId: publicId,
@@ -121,7 +124,6 @@ export class AuthService {
   private async makeSession(args: MakeSessionArgs): Promise<CreateSessionInput> {
     const { refreshToken, payloadUUID, isOnline, userId, userAgent, fingerprint } = args;
     const hashedRefreshToken = await BcryptHelper.hash(refreshToken);
-
     return {
       fingerprint,
       hashedRefreshToken,

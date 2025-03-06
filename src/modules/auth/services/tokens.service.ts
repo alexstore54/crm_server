@@ -20,8 +20,8 @@ export class TokensService {
           ...payload,
         },
         {
-          secret: process.env.JWT_SECRET_KEY,
-          expiresIn: this.configService.get(configKeys.ACCESS_TOKEN_EXPIRES_IN),
+          secret: this.configService.get<string>(configKeys.JWT_SECRET),
+          expiresIn: this.configService.get<number>(configKeys.ACCESS_TOKEN_EXPIRES_IN),
         },
       ),
       this.jwtService.signAsync(
@@ -29,11 +29,12 @@ export class TokensService {
           ...payload,
         },
         {
-          secret: process.env.JWT_SECRET_KEY,
-          expiresIn: this.configService.get(configKeys.REFRESH_TOKEN_EXPIRES_IN),
+          secret: this.configService.get<string>(configKeys.JWT_SECRET),
+          expiresIn: this.configService.get<number>(configKeys.REFRESH_TOKEN_EXPIRES_IN),
         },
       ),
     ]);
+
 
     return {
       accessToken,

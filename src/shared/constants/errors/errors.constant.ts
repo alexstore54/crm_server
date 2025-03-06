@@ -18,4 +18,5 @@ export const ERROR_MESSAGES = {
   PERMISSIONS_NOT_PROVIDED: 'Permissions not provided',
   REQUIRED_PERMISSIONS: 'Required permissions must me provided',
   DONT_HAVE_RIGHTS: 'You dont have rights for this action',
+  BCRYPT: 'BCRYPT ERROR',
 };

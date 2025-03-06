@@ -31,16 +31,16 @@ export class AuthAgentService {
     }
     const allowedPermissionsArray = await this.getAllowedPermissions(agent);
 
+    //#TODO FIX (fixed deskPublicId and teamPublicId)
     return {
       agent,
       permissions: allowedPermissionsArray,
-      deskPublicId: agent.Desk[0].publicId,
-      teamPublicId: agent.Team[0]?.publicId,
+      deskPublicId: '1',
+      teamPublicId: '1',
     };
   }
 
   private async getAllowedPermissions(agent: Agent): Promise<PermissionsTable> {
-
     const rolePermissions: RolePermissionWithDetails[] =
       await this.rolePermissionRepository.getRolePermissionsByRoleId(agent.roleId);
 
@@ -48,9 +48,11 @@ export class AuthAgentService {
       throw new BadRequestException(ERROR_MESSAGES.DB_ERROR);
     }
 
-
     const agentPermissions: AgentPermission[] =
       await this.agentPermissionsRepository.getAgentPermissionsByAgentId(agent.id);
+
+    //#TODO FIX (if permission.allowed === false, then it should be removed from the list)
+
 
     if (agentPermissions.length === 0) {
       return AgentPermissionsUtil.convertRolePermissionsToPermissionsTable(rolePermissions);
