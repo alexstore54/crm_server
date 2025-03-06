@@ -1,0 +1,20 @@
+import { PermissionsKeys } from '@/shared/types/auth';
+import {
+  CREATE_AGENTS_PERMISSIONS,
+  READ_AGENTS_PERMISSIONS,
+  UPDATE_AGENTS_PERMISSIONS,
+} from '@/shared/constants/permissions';
+
+export const ENDPOINTS_PERMISSIONS = {
+  AGENTS: {
+    GET_AGENT_LEADS: [...READ_AGENTS_PERMISSIONS, PermissionsKeys.READ_ALL_LEADS],
+    CREATE_AGENT: [...CREATE_AGENTS_PERMISSIONS, PermissionsKeys.CREATE_ALL_LEADS],
+    UPDATE_AGENT: [...UPDATE_AGENTS_PERMISSIONS, PermissionsKeys.UPDATE_ALL_AGENTS],
+  },
+  AGENT: {
+    UPDATE_ME: [PermissionsKeys.UPDATE_HIMSELF],
+  },
+  AGENT_PERMISSIONS: {
+    UPDATE_AGENTS_PERMISSIONS: [PermissionsKeys.UPDATE_ALL_AGENTS_PERMISSIONS],
+  }
+};

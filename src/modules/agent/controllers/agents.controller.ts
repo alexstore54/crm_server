@@ -1,50 +1,31 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Req,
-  SetMetadata,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
-import { PermissionsKeys, RequestWithAgentPayload } from '@/shared/types/auth';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, GetAgentLeadsParams, UpdateAgent } from '../dto';
 import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
-import { METADATA } from '@/shared/constants/metadata';
+import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 
 @Controller('agents')
 export class AgentsController {
   constructor(private readonly agentService: AgentService) {}
 
-  @UsePermissions([
-    PermissionsKeys.READ_DESK_LEADS,
-    PermissionsKeys.READ_TEAM_LEADS,
-    PermissionsKeys.READ_ALL_LEADS,
-  ])
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
   @Get(':publicId/leads')
-  async getLeadsByAgentId(
-    @Param() params: GetAgentLeadsParams,
-    @Req() request: RequestWithAgentPayload,
-  ) {
+  async getLeadsByAgentId(@Param() params: GetAgentLeadsParams) {
     const { publicId } = params;
-    SetMetadata(METADATA.AGENT_PERMISSIONS, request.permissions);
     return this.agentService.getLeadsByPublicId(publicId);
   }
 
-  @UsePermissions([PermissionsKeys.CREATE_AGENTS])
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post('create')
   async createAgent(@Body() body: CreateAgent) {
     return this.agentService.createAgent(body);
   }
 
-  @UsePermissions([PermissionsKeys.UPDATE_ALL_AGENTS])
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch(':publicId/update')
   async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {

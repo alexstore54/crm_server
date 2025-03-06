@@ -64,6 +64,8 @@ export class ValidationService {
       connections.push(GeneralConnects.DESK);
     }
 
+    //#TODO: IMPLEMENT IN THE TEAM LOGIC
+
     return connections;
   }
 

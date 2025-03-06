@@ -8,6 +8,12 @@ export const UPDATE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.UPDATE_TEAM_AGENTS,
   PermissionsKeys.UPDATE_DESK_AGENTS,
 ];
+
+export const CREATE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.CREATE_TEAM_AGENTS,
+  PermissionsKeys.CREATE_DESK_AGENTS,
+];
+
 export const DELETE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.DELETE_TEAM_AGENTS,
   PermissionsKeys.DELETE_DESK_AGENTS,

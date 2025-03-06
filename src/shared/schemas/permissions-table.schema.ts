@@ -33,4 +33,5 @@ export const permissionsTableSchema: ObjectSchema<PermissionsTable> = Joi.object
   DELETE_TEAMS: Joi.boolean().optional(),
   ASSIGN_AGENTS_TO_TEAMS: Joi.boolean().optional(),
   UPDATE_HIMSELF: Joi.boolean().optional(),
+  UPDATE_ALL_AGENTS_PERMISSIONS: Joi.boolean().optional()
 });

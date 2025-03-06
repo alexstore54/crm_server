@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AgentService } from '@/modules/agent/services/agent.service';
-import { PermissionsKeys, RequestWithAgentPayload } from '@/shared/types/auth';
+import { RequestWithAgentPayload } from '@/shared/types/auth';
 import { Agent, Lead } from '@prisma/client';
 import { UpdateAgent } from '@/modules/agent/dto';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsGuard } from '@/common/guards/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
+import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 
 @Controller('agent')
 export class AgentController {
@@ -18,7 +19,7 @@ export class AgentController {
     return this.agentService.getLeadsByPublicId(user.sub);
   }
 
-  @UsePermissions([PermissionsKeys.UPDATE_HIMSELF])
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENT.UPDATE_ME)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Get('update')
   async updateMe(@Req() req: RequestWithAgentPayload, @Body() body: UpdateAgent): Promise<Agent> {
