@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
-import { Agent, AgentPermission, RolePermission } from '@prisma/client';
+import { Agent, AgentPermission } from '@prisma/client';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { BcryptHelper } from '@/shared/helpers';
@@ -40,12 +40,14 @@ export class AuthAgentService {
   }
 
   private async getAllowedPermissions(agent: Agent): Promise<PermissionsTable> {
+
     const rolePermissions: RolePermissionWithDetails[] =
       await this.rolePermissionRepository.getRolePermissionsByRoleId(agent.roleId);
 
     if (rolePermissions.length === 0) {
       throw new BadRequestException(ERROR_MESSAGES.DB_ERROR);
     }
+
 
     const agentPermissions: AgentPermission[] =
       await this.agentPermissionsRepository.getAgentPermissionsByAgentId(agent.id);

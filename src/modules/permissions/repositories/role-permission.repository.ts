@@ -4,6 +4,7 @@ import { Prisma, RolePermission } from '@prisma/client';
 
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 import { RolePermissionWithDetails } from '@/shared/utils';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
 export class RolePermissionRepository {
@@ -20,7 +21,8 @@ export class RolePermissionRepository {
         },
       });
     } catch (error: any) {
-      throw new InternalServerErrorException(`Database error: ${error.message}`);
+      console.log(error);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
@@ -35,7 +37,7 @@ export class RolePermissionRepository {
         },
       });
     } catch (error: any) {
-      throw new InternalServerErrorException(`Database error: ${error.message}`);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
@@ -54,17 +56,8 @@ export class RolePermissionRepository {
         },
       });
     } catch (error: any) {
-      throw new InternalServerErrorException(`Database error: ${error.message}`);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  // async createRolePermission(data: any) {
-  //     try{
-  //         return this.prisma.rolePermission.createMany({
-  //             data,
-  //         });
-  //     }catch(error:any) {
-  //         throw new InternalServerErrorException(`Database error: ${error.message}`);
-  //     }
-  //}
 }

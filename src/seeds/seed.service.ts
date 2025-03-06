@@ -22,6 +22,7 @@ export class SeedService {
       await this.prisma.$transaction(async (tx) => {
         const permissions: Permission[] = await this.seedPermissions();
         const moderatorRole: Role = await this.seedRoles();
+        await this.seedModeratorRolePermissions(moderatorRole.id, permissions);
         const moderator: Agent = await this.seedModerator();
         await this.seedModeratorPermissions(moderator.id, permissions);
         this.logger.log(SEEDS_MESSAGES.SEEDS_SUCCESS, {
@@ -82,6 +83,22 @@ export class SeedService {
       await this.prisma.agentPermission.createMany({
         data: permissions.map((permission) => ({
           agentId: moderatorId,
+          permissionId: permission.id,
+        })),
+      });
+    } catch (error: any) {
+      this.logError(error);
+    }
+  }
+
+  private async seedModeratorRolePermissions(
+    roleId: number,
+    permissions: Permission[],
+  ): Promise<void> {
+    try {
+      await this.prisma.rolePermission.createMany({
+        data: permissions.map((permission) => ({
+          roleId,
           permissionId: permission.id,
         })),
       });
