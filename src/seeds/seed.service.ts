@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/shared/schemas';
 import { getModeratorSeedRole, getPermissions } from '@/seeds/seed.data';
 import { AppLoggerService } from '@/modules/logger/services';
-import { Agent, LogLevel, Permission, Role } from '@prisma/client';
+import { Agent, AgentPermission, LogLevel, Permission, Role } from '@prisma/client';
 import { SEEDS_MESSAGES } from '@/shared/constants/errors';
 
 export * from './seed.data';
@@ -81,8 +81,9 @@ export class SeedService {
   ): Promise<void> {
     try {
       await this.prisma.agentPermission.createMany({
-        data: permissions.map((permission) => ({
+        data: permissions.map<AgentPermission>((permission) => ({
           agentId: moderatorId,
+          allowed: true,
           permissionId: permission.id,
         })),
       });
@@ -99,6 +100,7 @@ export class SeedService {
       await this.prisma.rolePermission.createMany({
         data: permissions.map((permission) => ({
           roleId,
+          allowed: true,
           permissionId: permission.id,
         })),
       });
