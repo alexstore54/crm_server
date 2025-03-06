@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { AgentService } from '@/modules/agent/services/agent.service';
 import { RequestWithAgentPayload } from '@/shared/types/auth';
 import { Agent, Lead } from '@prisma/client';
@@ -21,7 +21,7 @@ export class AgentController {
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENT.UPDATE_ME)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
-  @Get('update-me')
+  @Put('update-me')
   async updateMe(@Req() req: RequestWithAgentPayload, @Body() body: UpdateAgent): Promise<Agent> {
     const user = req.user;
     return this.agentService.updateByPublicId(user.sub, body);
