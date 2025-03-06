@@ -21,7 +21,7 @@ export class AgentController {
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENT.UPDATE_ME)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
-  @Get('update')
+  @Get('update-me')
   async updateMe(@Req() req: RequestWithAgentPayload, @Body() body: UpdateAgent): Promise<Agent> {
     const user = req.user;
     return this.agentService.updateByPublicId(user.sub, body);
