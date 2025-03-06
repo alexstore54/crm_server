@@ -27,7 +27,7 @@ export class AgentsController {
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
-  @Put(':publicId/update')
+  @Patch(':publicId/update')
   async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {
     return this.agentService.updateByPublicId(publicId, body);
   }
