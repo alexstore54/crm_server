@@ -4,6 +4,7 @@ import { PermissionsTable } from '@/shared/types/redis';
 export type AuthAgentLoginInput = {
   agent: Agent;
   permissions: PermissionsTable;
-  deskPublicId: string;
-  teamPublicId?: string;
+  deskPublicId: string[];
+  teamPublicId: string[] | null;
 };
+ 

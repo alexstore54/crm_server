@@ -53,11 +53,11 @@ export class AuthRedisService {
       const stringifyPermissionsInput = JSON.stringify(permissionsInput);
 
       await this.sessionsRedis.set(redisId, stringifySessionInput);
-      await this.permissionsRedis.set(redisId, stringifySessionInput);
+      await this.permissionsRedis.set(redisId, stringifyPermissionsInput);
     } catch (error: any) {
       this.handleError(error);
     }
-  }
+  } 
 
   public async updateSession(
     userPublicId: string,

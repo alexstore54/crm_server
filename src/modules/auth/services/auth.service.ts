@@ -20,7 +20,7 @@ import { FullCustomer } from '@/shared/types/user';
 export class AuthService {
   constructor(
     private readonly authRedisService: AuthRedisService,
-    private readonly gatewayService: GatewayService,
+    private readonly gatewayService: GatewayService, 
     private readonly authGateway: AuthGateway,
     private readonly tokensService: TokensService,
   ) {}
@@ -136,8 +136,8 @@ export class AuthService {
   private mapAgentPayload(
     agent: Agent,
     payloadUUID: PayloadUUID,
-    publicDeskId: string,
-    teamPublicId?: string,
+    publicDeskId: string[],
+    teamPublicId: string[] | null,
   ): AgentAuthPayload {
     return {
       deskPublicId: publicDeskId,

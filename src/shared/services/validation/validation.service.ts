@@ -116,28 +116,34 @@ export class ValidationService {
     }
   }
 
-  private async isLeadInAgentDesk(leadId: string, deskId: string): Promise<boolean> {
+  private async isLeadInAgentDesk(leadId: string, deskIds: string[]): Promise<boolean> {
     try {
-      const desk = await this.prisma.desk.findUnique({
-        where: { publicId: deskId },
+      
+      const desks = await this.prisma.desk.findMany({
+        where: {
+          publicId: { in: deskIds },
+        },
         select: {
           Lead: {
             select: {
-              Customer: { where: { publicId: leadId } },
+              Customer: {
+                where: { publicId: leadId },
+              },
             },
           },
         },
       });
-      return !!desk?.Lead?.length;
+      
+      return desks.some(d => d.Lead && d.Lead.length > 0);
     } catch (error) {
       throw this.createDbError(error);
     }
   }
 
   private checkAgentPermissions(
-    connections: GeneralConnects[],
-    permissions: PermissionsKeys[],
-    operation: PermissionOperation,
+          connections: GeneralConnects[],
+          permissions: PermissionsKeys[],
+          operation: PermissionOperation,
   ): boolean {
     if (!connections.length) return false;
 
@@ -156,9 +162,9 @@ export class ValidationService {
   }
 
   private checkLeadPermissions(
-    connections: GeneralConnects[],
-    permissions: PermissionsKeys[],
-    operation: PermissionOperation,
+          connections: GeneralConnects[],
+          permissions: PermissionsKeys[],
+          operation: PermissionOperation,
   ): boolean {
     if (!connections.length) return false;
 
@@ -177,7 +183,7 @@ export class ValidationService {
   }
 
   private createDbError(error: unknown): InternalServerErrorException {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${message}`);
   }
 }

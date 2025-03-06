@@ -8,7 +8,7 @@ import { AgentPermissionRepository, RolePermissionRepository } from '@/modules/a
 import { AgentPermissionsUtil, RolePermissionWithDetails } from '@/shared/utils';
 import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
 import { PermissionsTable } from '@/shared/types/redis';
-
+ 
 @Injectable()
 export class AuthAgentService {
   constructor(
@@ -26,17 +26,21 @@ export class AuthAgentService {
     }
 
     const isPasswordMatch = await BcryptHelper.compare(password, agent.password);
+    
+    console.log('isPasswordMatch', isPasswordMatch);
     if (!isPasswordMatch) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
+    
+
     const allowedPermissionsArray = await this.getAllowedPermissions(agent);
 
     //#TODO FIX (fixed deskPublicId and teamPublicId)
     return {
       agent,
       permissions: allowedPermissionsArray,
-      deskPublicId: '1',
-      teamPublicId: '1',
+      deskPublicId: agent.Desk.map((desk) => desk.publicId),
+      teamPublicId: agent.Team.length > 0 ? agent.Team.map((team) => team.publicId) : null,
     };
   }
 

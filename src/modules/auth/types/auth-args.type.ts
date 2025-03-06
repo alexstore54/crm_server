@@ -12,9 +12,9 @@ export interface AuthenticateAgentArgs {
   agent: Agent;
   fingerprint: string;
   userAgent: string;
-  permissions: PermissionsTable;
-  deskPublicId: string;
-  teamPublicId?: string;
+  permissions: PermissionsTable; 
+  deskPublicId: string[];
+  teamPublicId: string[] | null;
 }
 
 export interface AuthenticateCustomerArgs {

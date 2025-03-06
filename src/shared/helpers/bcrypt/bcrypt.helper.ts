@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import * as dotenv from 'dotenv';
 import * as process from 'node:process';
 import { configKeys } from '@/shared/schemas';
