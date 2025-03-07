@@ -26,4 +26,12 @@ export class AgentController {
     const user = req.user;
     return this.agentService.updateByPublicId(user.sub, body);
   }
+
+  @UseGuards(AgentAccessGuard)
+  @Get("/me")
+  async getMe(@Req() req: RequestWithAgentPayload) {
+    const user = req.user;
+    console.log(user.sub)
+    return this.agentService.getOneByPublicId(user.sub);
+  }
 }

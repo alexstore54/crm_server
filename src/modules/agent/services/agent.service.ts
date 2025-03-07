@@ -115,10 +115,18 @@ export class AgentService {
         );
       });
     } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
   }
+  public async getOneByPublicId(publicId: string){
+      try{
+          return this.agentRepository.findOneByPublicIdWithDesks(publicId);
+      }catch(error: any){
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
+      }
+  }
 
+  
   private async getDesksByIds(deskIds: number[] | undefined, tx: Prisma.TransactionClient) {
     return deskIds && deskIds.length > 0
       ? this.deskRepository.findManyByIdsWithTx(deskIds, tx)

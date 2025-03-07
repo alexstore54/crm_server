@@ -27,7 +27,7 @@ export class AuthAgentService {
 
     const isPasswordMatch = await BcryptHelper.compare(password, agent.password);
     
-    console.log('isPasswordMatch', isPasswordMatch);
+    
     if (!isPasswordMatch) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }

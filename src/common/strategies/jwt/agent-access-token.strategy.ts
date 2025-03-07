@@ -25,7 +25,9 @@ export class AgentAccessTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: AgentAuthPayload): Promise<AgentAuthPayload> {
+  async validate(data: any): Promise<AgentAuthPayload> {
+    const payload = data[0] as AgentAuthPayload;
+    
     AuthUtil.validateAgentAuthPayload(payload);
     return {
       ...payload,

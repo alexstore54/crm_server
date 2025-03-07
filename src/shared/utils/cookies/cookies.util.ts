@@ -13,6 +13,7 @@ export class CookiesUtil {
     this.setCookies(res, 'refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+
     });
   }
 
