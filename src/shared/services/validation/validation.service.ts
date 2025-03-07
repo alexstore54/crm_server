@@ -61,7 +61,12 @@ export class ValidationService {
     const connections: GeneralConnects[] = [];
 
     if (await this.isLeadInAgentDesk(leadPublicId, currentAgentPayload.deskPublicId)) {
-      connections.push(GeneralConnects.DESK);
+        connections.push(GeneralConnects.DESK);
+    }
+    if(currentAgentPayload.teamPublicId && 
+       await this.isLeadInAgentTeam(leadPublicId, currentAgentPayload.teamPublicId))
+    {
+        connections.push(GeneralConnects.TEAM)
     }
 
     //#TODO: IMPLEMENT IN THE TEAM LOGIC
@@ -136,6 +141,29 @@ export class ValidationService {
       
       return desks.some(d => d.Lead && d.Lead.length > 0);
     } catch (error) {
+      throw this.createDbError(error);
+    }
+  }
+
+  private async isLeadInAgentTeam(leadId: string, teamIds: string[]): Promise<boolean> {
+    try {
+      const teams = await this.prisma.team.findMany({
+        where: {
+          publicId: { in: teamIds },
+        },
+        select: {
+          Leads: {
+            select: {
+              Customer: {
+                where: { publicId: leadId },
+              },
+            },
+          },
+        },
+      });
+  
+      return teams.some(t => t.Leads && t.Leads.length > 0);
+    }catch (error) {
       throw this.createDbError(error);
     }
   }
