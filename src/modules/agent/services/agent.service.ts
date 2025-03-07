@@ -45,6 +45,7 @@ export class AgentService {
     if (isExistAgent) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.USER_EXISTS}`);
     }
+    
 
     try {
       return this.prisma.$transaction(async (tx) => {
@@ -53,7 +54,6 @@ export class AgentService {
 
         // Создаем агента, передавая desks (если они есть, иначе null)
         const newAgent = await this.agentRepository.createOneWithTx(data, tx, desks);
-
         // Если переданы разрешения – выполняем их обработку
         if (permissions && permissions.length > 0) {
           // Фильтруем входящие разрешения на уникальность permissionId

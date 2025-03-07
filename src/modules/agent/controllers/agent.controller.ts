@@ -31,7 +31,7 @@ export class AgentController {
   @Get("/me")
   async getMe(@Req() req: RequestWithAgentPayload) {
     const user = req.user;
-    console.log(user.sub)
+    
     return this.agentService.getOneByPublicId(user.sub);
   }
 }

@@ -70,13 +70,16 @@ export class PermissionsGuard implements CanActivate {
 
   private async getPermissions(payload: AgentAuthPayload): Promise<PermissionsTable | null> {
     const { payloadUUID, sub } = payload;
-    return this.authRedisService.getOnePermissions(sub, payloadUUID);
+    const perms = this.authRedisService.getOnePermissions(sub, payloadUUID);
+    
+    return perms;
   }
 
   private checkPermissions(
     requiredPermissions: PermissionsKeys[],
     permissions: PermissionsTable | null,
   ): void {
+    
     if (
       !permissions ||
       !requiredPermissions.some(

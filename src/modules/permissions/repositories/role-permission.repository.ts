@@ -21,7 +21,7 @@ export class RolePermissionRepository {
         },
       });
     } catch (error: any) {
-      console.log(error);
+      
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
