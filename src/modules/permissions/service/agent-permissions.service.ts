@@ -48,7 +48,7 @@ export class AgentPermissionsService {
   private async updateRoleOnly(agentId: number, roleId: number, tx: Prisma.TransactionClient) {
     const updatedAgent = await this.agentRepository.updateOneWithTx(agentId, { roleId }, tx, null);
 
-    const rolePermissions = await this.rolePermissionRepository.getManyByRoleIdWithTx(roleId, tx);
+    const rolePermissions = await this.rolePermissionRepository.getManyByIdWithTx(roleId, tx);
 
     const agentPermissions: AgentPermission[] =
       await this.agentPermissionRepository.getManyByAgentIdWithTx(agentId, tx);
@@ -76,7 +76,7 @@ export class AgentPermissionsService {
     tx: Prisma.TransactionClient,
   ) {
     const rolePermissions: RolePermission[] =
-      await this.rolePermissionRepository.getOneByRoleIdAndPermsIdsWithTx(
+      await this.rolePermissionRepository.getOneByIdAndPermsIdsWithTx(
         agent.roleId,
         permissions,
         tx,
@@ -110,7 +110,7 @@ export class AgentPermissionsService {
     tx: Prisma.TransactionClient,
   ) {
     const updatedAgent = await this.agentRepository.updateOneWithTx(agentId, { roleId }, tx, null);
-    const rolePermissions = await this.rolePermissionRepository.getOneByRoleIdAndPermsIdsWithTx(
+    const rolePermissions = await this.rolePermissionRepository.getOneByIdAndPermsIdsWithTx(
       updatedAgent.roleId,
       permissions,
       tx,

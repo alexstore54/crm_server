@@ -7,7 +7,7 @@ import { Desk, Prisma } from '@prisma/client';
 export class DeskRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findManyByIdsWithTx(deskIds: number[], tx: Prisma.TransactionClient): Promise<Desk[]> {
+  public async findManyByIdsWithTx(deskIds: number[], tx: Prisma.TransactionClient): Promise<Desk[]> {
     try {
       return tx.desk.findMany({
         where: {
@@ -21,7 +21,39 @@ export class DeskRepository {
     }
   }
 
-  async findManyWithTx(tx: Prisma.TransactionClient): Promise<Desk[]> {
+  public async findManyByAgentId(agentId: number): Promise<Desk[]> {
+    try {
+      return this.prisma.desk.findMany({
+        where: {
+          Agent: {
+            some: {
+              id: agentId,
+            },
+          },
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  async findManyByAgentPublicId(agentPublicId: string): Promise<Desk[]> {
+    try {
+      return this.prisma.desk.findMany({
+        where: {
+          Agent: {
+            some: {
+              publicId: agentPublicId,
+            },
+          },
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async findManyWithTx(tx: Prisma.TransactionClient): Promise<Desk[]> {
     try {
       return tx.desk.findMany();
     } catch (error: any) {
@@ -29,7 +61,7 @@ export class DeskRepository {
     }
   }
 
-  async findManyByIds(deskIds: number[]) {
+  public async findManyByIds(deskIds: number[]) {
     try {
       return this.prisma.desk.findMany({
         where: {

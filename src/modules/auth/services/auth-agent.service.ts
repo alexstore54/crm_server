@@ -8,7 +8,7 @@ import { AgentPermissionRepository, RolePermissionRepository } from '@/modules/a
 import { AgentPermissionsUtil, RolePermissionWithDetails } from '@/shared/utils';
 import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
 import { PermissionsTable } from '@/shared/types/redis';
- 
+
 @Injectable()
 export class AuthAgentService {
   constructor(
@@ -26,12 +26,10 @@ export class AuthAgentService {
     }
 
     const isPasswordMatch = await BcryptHelper.compare(password, agent.password);
-    
-    
+
     if (!isPasswordMatch) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
-    
 
     const allowedPermissionsArray = await this.getAllowedPermissions(agent);
 
@@ -46,7 +44,7 @@ export class AuthAgentService {
 
   private async getAllowedPermissions(agent: Agent): Promise<PermissionsTable> {
     const rolePermissions: RolePermissionWithDetails[] =
-      await this.rolePermissionRepository.getRolePermissionsByRoleId(agent.roleId);
+      await this.rolePermissionRepository.getManyById(agent.roleId);
 
     if (rolePermissions.length === 0) {
       throw new BadRequestException(ERROR_MESSAGES.DB_ERROR);
@@ -58,8 +56,7 @@ export class AuthAgentService {
     //#TODO FIX (if permission.allowed === false, then it should be removed from the list)
     // 1) convertRolePermissionsToPermissionsTable method returns only ALLOWED permissions
     // 2) mergePermissions method needs allowed and disalloed permissions cause it compare both permissions and then return only allowed
-    // There is nothing to fix here 
-
+    // There is nothing to fix here
 
     if (agentPermissions.length === 0) {
       return AgentPermissionsUtil.convertRolePermissionsToPermissionsTable(rolePermissions);

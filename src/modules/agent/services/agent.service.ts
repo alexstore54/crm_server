@@ -1,6 +1,6 @@
 import { LeadRepository } from '@/modules/user/repositories';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Lead, Prisma } from '@prisma/client';
+import { Desk, Lead, Prisma, Team } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
 import {
@@ -10,15 +10,17 @@ import {
   RolePermissionRepository,
 } from '@/modules/agent/repositories';
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
-import { AgentPermission } from '@/modules/permissions/types/agent-perms.type';
+import { PermissionWithKey } from '@/modules/permissions/types/agent-perms.type';
 import { AgentPermissionsUtil, ArrayUtil } from '@/shared/utils';
-import { PermissionsKeys } from '@/shared/types/auth';
+import { TeamRepository } from '@/modules/team/repositories/team.repository';
+import { FullAgent } from '@/shared/types/agent';
 
 @Injectable()
 export class AgentService {
   constructor(
     private readonly leadRepository: LeadRepository,
     private readonly agentRepository: AgentRepository,
+    private readonly teamRepository: TeamRepository,
     private readonly deskRepository: DeskRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly agentPermissionRepository: AgentPermissionRepository,
@@ -59,12 +61,12 @@ export class AgentService {
           // Фильтруем входящие разрешения на уникальность permissionId
           const uniqueIncoming = AgentPermissionsUtil.filterUniquePermissions(permissions);
 
-          const rolePermissions = await this.rolePermissionRepository.getRolePermissionsByRoleId(
+          const rolePermissions = await this.rolePermissionRepository.getManyById(
             newAgent.roleId,
           );
 
           // Выбираем только те разрешения, где значение отличается от дефолтного
-          const result: AgentPermission[] = AgentPermissionsUtil.filterPermissionsByRoleDefaults(
+          const result: PermissionWithKey[] = AgentPermissionsUtil.filterPermissionsByRoleDefaults(
             uniqueIncoming,
             rolePermissions,
             newAgent.id,
@@ -76,6 +78,39 @@ export class AgentService {
           }
         }
         return newAgent;
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
+    }
+  }
+
+  public async getOneFullByPublicId(publicId: string): Promise<FullAgent> {
+    try {
+      this.prisma.$transaction(async (tx) => {
+        const agent = await this.agentRepository.findOneByPublicId(publicId);
+        if (!agent) {
+          throw new NotFoundException(ERROR_MESSAGES.AGENT_NOT_FOUND);
+        }
+
+        const rolePermissions = await this.rolePermissionRepository.getManyById(
+          agent.roleId,
+        );
+
+        const agentPermissions = await this.agentPermissionRepository.getAgentPermissionsByAgentId(
+          agent.id,
+        );
+
+        const desks: Desk[] = await this.deskRepository.findManyByAgentId(agent.id);
+
+        const teams: Team[] = await this.teamRepository.findManyByAgentId(agent.id);
+
+        const permissions =
+
+        return {
+          agent,
+          desks,
+          teams,
+        };
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
@@ -115,18 +150,18 @@ export class AgentService {
         );
       });
     } catch (error: any) {
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
   }
-  public async getOneByPublicId(publicId: string){
-      try{
-          return this.agentRepository.findOneByPublicIdWithDesks(publicId);
-      }catch(error: any){
-        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
-      }
+
+  public async getOneByPublicId(publicId: string) {
+    try {
+      return this.agentRepository.findOneByPublicIdWithDesks(publicId);
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
+    }
   }
 
-  
   private async getDesksByIds(deskIds: number[] | undefined, tx: Prisma.TransactionClient) {
     return deskIds && deskIds.length > 0
       ? this.deskRepository.findManyByIdsWithTx(deskIds, tx)

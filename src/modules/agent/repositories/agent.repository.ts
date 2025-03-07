@@ -1,15 +1,14 @@
 import { PrismaService } from '@/shared/db/prisma';
-import { CreateAgent } from '@/modules/agent/dto';
+import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Agent, Desk, Prisma } from '@prisma/client';
-import { UpdateAgent } from '@/modules/agent/dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
 export class AgentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAll(): Promise<Agent[]> {
+  public async getAll(): Promise<Agent[]> {
     try {
       return this.prisma.agent.findMany();
     } catch (error: any) {
@@ -17,7 +16,7 @@ export class AgentRepository {
     }
   }
 
-  async findOneById(id: number): Promise<Agent | null> {
+  public async findOneById(id: number): Promise<Agent | null> {
     try {
       return this.prisma.agent.findFirst({ where: { id } });
     } catch (error: any) {
@@ -25,7 +24,7 @@ export class AgentRepository {
     }
   }
 
-  async findOneByPublicId(publicId: string): Promise<Agent | null> {
+  public async findOneByPublicId(publicId: string): Promise<Agent | null> {
     try {
       return this.prisma.agent.findFirst({ where: { publicId } });
     } catch (error: any) {
@@ -33,7 +32,7 @@ export class AgentRepository {
     }
   }
 
-  async findOneByPublicIdWithDesks(publicId: string) {
+  public async findOneByPublicIdWithDesks(publicId: string) {
     try {
       return this.prisma.agent.findFirst({
         where: { publicId },
@@ -44,7 +43,7 @@ export class AgentRepository {
     }
   }
 
-  async findOneByEmail(email: string): Promise<Agent | null> {
+  public async findOneByEmail(email: string): Promise<Agent | null> {
     try {
       return this.prisma.agent.findFirst({ where: { email } });
     } catch (error: any) {
@@ -52,7 +51,7 @@ export class AgentRepository {
     }
   }
 
-  async findOneByEmailWithDesksAndTeams(email: string) {
+  public async findOneByEmailWithDesksAndTeams(email: string) {
     try {
       return this.prisma.agent.findFirst({ where: { email }, include: { Desk: true, Team: true } });
     } catch (error: any) {
@@ -60,7 +59,8 @@ export class AgentRepository {
     }
   }
 
-  async createOneWithTx(
+
+  public async createOneWithTx(
     data: CreateAgent, // данные для создания агента (email, password, roleId, ...)
     tx: Prisma.TransactionClient,
     desks: Desk[] | null,
@@ -85,7 +85,7 @@ export class AgentRepository {
     }
   }
 
-  async updateOneWithTx(
+  public async updateOneWithTx(
     id: number,
     data: UpdateAgent,
     tx: Prisma.TransactionClient,
@@ -108,55 +108,19 @@ export class AgentRepository {
     }
   }
 
-  async deleteOneById(id: number): Promise<Agent | null> {
+  public async deleteOneById(id: number): Promise<Agent | null> {
     try {
       return await this.prisma.agent.delete({ where: { id } });
     } catch (error: any) {
-      // Handle error appropriately
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  async deleteByPublicId(publicId: string): Promise<Agent | null> {
+  public async deleteByPublicId(publicId: string): Promise<Agent | null> {
     try {
       return await this.prisma.agent.delete({ where: { publicId } });
     } catch (error: any) {
-      // Handle error appropriately
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
-  // async updateOneById(id: number, data: UpdateAgent): Promise<Agent | null> {
-  //   const { deskIds, roleId, ...rest } = data;
-  //   try {
-  //     return await this.prisma.agent.update({
-  //       where: { id },
-  //       data: {
-  //         ...rest,
-  //         ...(roleId !== undefined ? { role: { connect: { id: roleId } } } : {}),
-  //         ...(deskIds ? { desks: { set: deskIds.map((id: number) => ({ id })) } } : {}),
-  //       },
-  //     });
-  //   } catch (error: any) {
-  //     // Handle error appropriately
-  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-  //   }
-  // }
-
-  // async updateByPublicId(publicId: string, data: UpdateAgent): Promise<Agent | null> {
-  //   const { deskIds, roleId, ...rest } = data;
-  //   try {
-  //     return await this.prisma.agent.update({
-  //       where: { publicId },
-  //       data: {
-  //         ...rest,
-  //         ...(roleId !== undefined ? { role: { connect: { id: roleId } } } : {}),
-  //         ...(deskIds ? { desks: { set: deskIds.map((id: number) => ({ id })) } } : {}),
-  //       },
-  //     });
-  //   } catch (error: any) {
-  //     // Handle error appropriately
-  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-  //   }
-  // }
 }

@@ -1,5 +1,5 @@
-export type AgentPermission = {
+export type PermissionWithKey = {
   agentId: number;
-  permissionId: number;
   allowed: boolean;
+  key: string;
 };

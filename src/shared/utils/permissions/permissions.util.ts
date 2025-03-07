@@ -1,7 +1,5 @@
 import { AgentPermission, RolePermission } from '@prisma/client';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
-import { PermissionsTable } from '@/shared/types/redis';
-import { PermissionsKeys } from '@/shared/types/auth';
 
 export class PermissionsUtil {
   public static mapPermissionsToAgentPermissions(
@@ -21,5 +19,26 @@ export class PermissionsUtil {
         return { ...perm, allowed: perm.allowed, agentId };
       })
       .filter((item) => item !== undefined);
+  }
+
+  public async mapAgentAndRolePermissionsToAllowedPermissions(
+    agentPermissions: AgentPermission[],
+    rolePermissions: RolePermission[],
+  ): Promise<Permissions[]> {
+    const permissionsMap = new Map<number, boolean>();
+
+    for (const rolePerm of rolePermissions) {
+      permissionsMap.set(rolePerm.permissionId, rolePerm.allowed);
+    }
+
+    for (const agentPerm of agentPermissions) {
+      if (permissionsMap.has(agentPerm.permissionId)) {
+        permissionsMap.set(agentPerm.permissionId, agentPerm.allowed);
+      }
+    }
+
+
+
+    return permissions;
   }
 }

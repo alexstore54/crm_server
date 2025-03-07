@@ -1,4 +1,4 @@
-import { AgentPermission } from '@/modules/permissions/types';
+import { PermissionWithKey } from '@/modules/permissions/types';
 import { Permission, RolePermission as PrismaRolePermission } from '@prisma/client';
 import { PermissionsTable } from '@/shared/types/redis';
 
@@ -29,7 +29,7 @@ export class AgentPermissionsUtil {
     uniquePermissions: { permissionId: number; allowed: boolean }[],
     rolePermissions: { permissionId: number; allowed: boolean }[],
     agentId: number,
-  ): AgentPermission[] {
+  ): PermissionWithKey[] {
     return uniquePermissions.reduce((acc, incoming) => {
       const rolePerm = rolePermissions.find((rp) => rp.permissionId === incoming.permissionId);
 
@@ -42,7 +42,7 @@ export class AgentPermissionsUtil {
         });
       }
       return acc;
-    }, [] as AgentPermission[]);
+    }, [] as PermissionWithKey[]);
   }
 
   private static createRolesMap(
@@ -60,7 +60,7 @@ export class AgentPermissionsUtil {
 
   private static updateRolesMapWithAgentPermissions(
     rolesMap: Map<number, { allowed: boolean; key: string }>,
-    agentRoles: AgentPermission[],
+    agentRoles: PermissionWithKey[],
   ): void {
     for (const agentPermission of agentRoles) {
       if (rolesMap.has(agentPermission.permissionId)) {
@@ -99,7 +99,7 @@ export class AgentPermissionsUtil {
 
   public static mergePermissions(
     defaultRoles: RolePermissionWithDetails[],
-    agentRoles: AgentPermission[],
+    agentRoles: PermissionWithKey[],
   ): PermissionsTable {
     const rolesMap = this.createRolesMap(defaultRoles);
     this.updateRolesMapWithAgentPermissions(rolesMap, agentRoles);

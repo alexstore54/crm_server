@@ -10,7 +10,7 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithDetails[]> {
+  async getManyById(roleId: number): Promise<RolePermissionWithDetails[]> {
     try {
       return await this.prisma.rolePermission.findMany({
         where: {
@@ -26,7 +26,7 @@ export class RolePermissionRepository {
     }
   }
 
-  async getManyByRoleIdWithTx(
+  async getManyByIdWithTx(
     roleId: number,
     tx: Prisma.TransactionClient,
   ): Promise<RolePermission[]> {
@@ -41,7 +41,7 @@ export class RolePermissionRepository {
     }
   }
 
-  async getOneByRoleIdAndPermsIdsWithTx(
+  async getOneByIdAndPermsIdsWithTx(
     roleId: number,
     permissions: IncomingPermission[],
     tx: Prisma.TransactionClient,
