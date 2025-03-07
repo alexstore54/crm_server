@@ -56,6 +56,9 @@ export class AuthAgentService {
       await this.agentPermissionsRepository.getAgentPermissionsByAgentId(agent.id);
 
     //#TODO FIX (if permission.allowed === false, then it should be removed from the list)
+    // 1) convertRolePermissionsToPermissionsTable method returns only ALLOWED permissions
+    // 2) mergePermissions method needs allowed and disalloed permissions cause it compare both permissions and then return only allowed
+    // There is nothing to fix here 
 
 
     if (agentPermissions.length === 0) {
