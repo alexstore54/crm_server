@@ -1,4 +1,4 @@
-import { PermissionsKeys } from '@/shared/types/auth';
+import { PermissionsKeys } from '@/shared/types/permissions';
 
 export const PERMISSION_CONFIG = {
   agent: {

@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { UpdateAgentPerms } from '@/modules/agent/dto/update-agent-perms.dto';
+import { UpdateAgentPermissions } from '@/modules/agent/dto/update-agent-perms.dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
 import {
@@ -8,98 +8,122 @@ import {
   RolePermissionRepository,
 } from '@/modules/agent/repositories';
 import { Agent, AgentPermission, Prisma, RolePermission } from '@prisma/client';
-import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
+import {
+  CreateAgentPermissions,
+  IncomingPermission,
+} from '@/modules/permissions/dto/agent-permissions';
 import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
+import { IncomingPermissionsUtil } from '@/shared/utils/permissions/incoming-permissions.util';
+import { AllowedPermission } from '@/modules/permissions/types';
 
 @Injectable()
 export class AgentPermissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly agentRepository: AgentRepository,
-    private readonly rolePermissionRepository: RolePermissionRepository,
-    private readonly agentPermissionRepository: AgentPermissionRepository,
+    private readonly rolePermissionsRepository: RolePermissionRepository,
+    private readonly agentPermissionsRepository: AgentPermissionRepository,
   ) {}
 
-  public async updateOneByAgentPublicId(publicId: string, data: UpdateAgentPerms) {
-    const { roleId, permissions } = data;
+  public async updateOneByAgentId(publicId: string, data: UpdateAgentPermissions) {
+    const { permissions } = data;
 
     const agent: Agent | null = await this.agentRepository.findOneByPublicId(publicId);
     if (!agent) {
       throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
     }
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const rolePermissions = await this.getRolePermissions(agent, permissions, tx);
+
+        const filteredIncomingPermissions =
+          IncomingPermissionsUtil.mapPermissionsToAgentPermissions(
+            agent.id,
+            rolePermissions,
+            permissions,
+          );
+
+        // if (filteredIncomingPermissions.length === 0) {
+        //   await this.agentPermissionsRepository.txDeleteManyByAgentId(agent.id, tx);
+        //   return agent;
+        // }
+        //
+        // await this.agentPermissionsRepository.txDeleteManyByAgentId(agent.id, tx);
+        // await this.agentPermissionsRepository.txCreateMany(filteredIncomingPermissions, tx);
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async createOne(input: CreateAgentPermissions): Promise<void> {
+    const { agentId, roleId, permissions } = input;
+    // Фильтруем входящие разрешения на уникальность permissionId
+    const uniqueIncoming = IncomingPermissionsUtil.filterUniquePermissions(permissions);
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        if (roleId && !permissions) {
-          return this.updateRoleOnly(agent.id, roleId, tx);
-        } else if (!roleId && permissions) {
-          return this.updatePermissionsOnly(agent, permissions, tx);
-        } else if (roleId && permissions) {
-          return this.updateRoleAndPermissions(agent.id, roleId, permissions, tx);
-        } else {
-          throw new InternalServerErrorException(`${ERROR_MESSAGES.INVALID_DATA}`);
+      await this.prisma.$transaction(async (tx) => {
+        const rolePermissions: RolePermission[] =
+          await this.rolePermissionsRepository.txGetManyById(roleId, tx);
+
+        // Выбираем только те разрешения, где значение отличается от дефолтного
+        const result: AllowedPermission[] = IncomingPermissionsUtil.filterPermissionsByRoleDefaults(
+          uniqueIncoming,
+          rolePermissions,
+          agentId,
+        );
+
+        // Создаем записи в agentPermission, если есть расхождения
+        if (result.length > 0) {
+          await this.agentPermissionsRepository.txCreateMany(result, tx);
         }
       });
     } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR + error.message}`);
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  private async updateRoleOnly(agentId: number, roleId: number, tx: Prisma.TransactionClient) {
-    const updatedAgent = await this.agentRepository.updateOneWithTx(agentId, { roleId }, tx, null);
+  // private async updateRoleOnly(agentId: number, roleId: number, tx: Prisma.TransactionClient) {
+  //   const updatedAgent = await this.agentRepository.txUpdateOne(agentId, { roleId }, tx, null);
+  //
+  //   const rolePermissions = await this.rolePermissionsRepository.getManyByIdWithTx(roleId, tx);
+  //
+  //   const agentPermissions: AgentPermission[] =
+  //     await this.agentPermissionsRepository.getManyByAgentIdWithTx(agentId, tx);
+  //
+  //   if (agentPermissions.length === 0) {
+  //     return updatedAgent;
+  //   }
+  //
+  //   const permsToDel = this.getPermissionsToDelete(agentPermissions, rolePermissions);
+  //
+  //   if (permsToDel.length > 0) {
+  //     await this.agentPermissionsRepository.txDeleteManyByAgentIdAndPermsIds(
+  //       updatedAgent.id,
+  //       permsToDel,
+  //       tx,
+  //     );
+  //   }
+  //
+  //   return updatedAgent;
+  // }
 
-    const rolePermissions = await this.rolePermissionRepository.getManyByIdWithTx(roleId, tx);
-
-    const agentPermissions: AgentPermission[] =
-      await this.agentPermissionRepository.getManyByAgentIdWithTx(agentId, tx);
-
-    if (agentPermissions.length === 0) {
-      return updatedAgent;
-    }
-
-    const permsToDel = this.getPermissionsToDelete(agentPermissions, rolePermissions);
-
-    if (permsToDel.length > 0) {
-      await this.agentPermissionRepository.deleteManyByAgentIdAndPermsIdsWithTx(
-        updatedAgent.id,
-        permsToDel,
-        tx,
-      );
-    }
-
-    return updatedAgent;
-  }
-
-  private async updatePermissionsOnly(
+  private async getRolePermissions(
     agent: Agent,
     permissions: IncomingPermission[],
     tx: Prisma.TransactionClient,
   ) {
     const rolePermissions: RolePermission[] =
-      await this.rolePermissionRepository.getOneByIdAndPermsIdsWithTx(
-        agent.roleId,
-        permissions,
-        tx,
-      );
+      await this.rolePermissionsRepository.txGetOneByIdAndPermsIds(agent.roleId, permissions, tx);
 
     if (rolePermissions.length === 0) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.INVALID_DATA}`);
     }
 
-    const filteredIncomingPermissions = PermissionsUtil.mapPermissionsToAgentPermissions(
-      agent.id,
-      rolePermissions,
-      permissions,
-    );
+    return rolePermissions;
+  }
 
-    if (filteredIncomingPermissions.length === 0) {
-      await this.agentPermissionRepository.deleteManyByAgentIdWithTx(agent.id, tx);
-      return agent;
-    }
-
-    await this.agentPermissionRepository.deleteManyByAgentIdWithTx(agent.id, tx);
-    await this.agentPermissionRepository.createManyWithTx(filteredIncomingPermissions, tx);
-
+  private async updatePermissionsOnly(agent: Agent, permissions: IncomingPermission[]) {
     return agent;
   }
 
@@ -109,8 +133,8 @@ export class AgentPermissionsService {
     permissions: IncomingPermission[],
     tx: Prisma.TransactionClient,
   ) {
-    const updatedAgent = await this.agentRepository.updateOneWithTx(agentId, { roleId }, tx, null);
-    const rolePermissions = await this.rolePermissionRepository.getOneByIdAndPermsIdsWithTx(
+    const updatedAgent = await this.agentRepository.txUpdateOne(agentId, { roleId }, tx, null);
+    const rolePermissions = await this.rolePermissionsRepository.txGetOneByIdAndPermsIds(
       updatedAgent.roleId,
       permissions,
       tx,
@@ -120,16 +144,16 @@ export class AgentPermissionsService {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.INVALID_DATA}`);
     }
 
-    const filteredIncomingPermissions: AgentPermission[] =
-      PermissionsUtil.mapPermissionsToAgentPermissions(agentId, rolePermissions, permissions);
+    const filteredIncomingPermissions: AgentPermission[] = [];
+    // PermissionsUtil.mapPermissionsToAgentPermissions(agentId, rolePermissions, permissions);
 
     if (filteredIncomingPermissions.length === 0) {
-      await this.agentPermissionRepository.deleteManyByAgentIdWithTx(updatedAgent.id, tx);
+      await this.agentPermissionsRepository.txDeleteManyByAgentId(updatedAgent.id, tx);
       return updatedAgent;
     }
 
-    await this.agentPermissionRepository.deleteManyByAgentIdWithTx(updatedAgent.id, tx);
-    await this.agentPermissionRepository.createManyWithTx(filteredIncomingPermissions, tx);
+    await this.agentPermissionsRepository.txDeleteManyByAgentId(updatedAgent.id, tx);
+    await this.agentPermissionsRepository.txCreateMany(filteredIncomingPermissions, tx);
 
     return updatedAgent;
   }

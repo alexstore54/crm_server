@@ -1,5 +1,5 @@
 import { Agent } from '@prisma/client';
-import { PermissionsTable } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/permissions';
 
 export type AuthAgentLoginInput = {
   agent: Agent;
@@ -7,4 +7,3 @@ export type AuthAgentLoginInput = {
   deskPublicId: string[];
   teamPublicId: string[] | null;
 };
- 

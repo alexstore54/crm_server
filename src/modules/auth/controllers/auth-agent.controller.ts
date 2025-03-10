@@ -8,6 +8,7 @@ import { AuthTokens } from '@/shared/types/auth';
 import { RequestWithAgentPayload } from '@/shared/types/auth/request-auth.type';
 import { RESPONSE_STATUS } from '@/shared/constants/response';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
+import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
 
 @Controller('auth/agent')
 export class AuthAgentController {
@@ -23,9 +24,7 @@ export class AuthAgentController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    console.log(body)
-    const result = await this.authAgentService.validate(body);
-    console.log(result)
+    const result: AuthAgentLoginInput = await this.authAgentService.validate(body);
     const tokens: AuthTokens = await this.authService.authenticateAgent({
       ...result,
       userAgent,

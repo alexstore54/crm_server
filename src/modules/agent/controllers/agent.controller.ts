@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { AgentService } from '@/modules/agent/services/agent.service';
 import { RequestWithAgentPayload } from '@/shared/types/auth';
 import { Agent, Lead } from '@prisma/client';
@@ -31,6 +31,6 @@ export class AgentController {
   @Get('me')
   async getMe(@Req() req: RequestWithAgentPayload) {
     const user = req.user;
-    return this.agentService.getOneByPublicId(user.sub);
+    return this.agentService.getOneFullByPublicId(user.sub);
   }
 }

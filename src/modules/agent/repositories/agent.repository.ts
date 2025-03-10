@@ -1,8 +1,9 @@
 import { PrismaService } from '@/shared/db/prisma';
-import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
+import { UpdateAgent } from '@/modules/agent/dto';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Agent, Desk, Prisma } from '@prisma/client';
+import { Agent, Prisma } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { CreateAgentInput } from '@/modules/agent/types/repositories.type';
 
 @Injectable()
 export class AgentRepository {
@@ -27,6 +28,17 @@ export class AgentRepository {
   public async findOneByPublicId(publicId: string): Promise<Agent | null> {
     try {
       return this.prisma.agent.findFirst({ where: { publicId } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async txFindOneByPublicId(
+    publicId: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<Agent | null> {
+    try {
+      return tx.agent.findFirst({ where: { publicId } });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -59,19 +71,12 @@ export class AgentRepository {
     }
   }
 
-
-  public async createOneWithTx(
-    data: CreateAgent, // данные для создания агента (email, password, roleId, ...)
-    tx: Prisma.TransactionClient,
-    desks: Desk[] | null,
-  ) {
+  public async txCreateOne(data: CreateAgentInput, tx: Prisma.TransactionClient) {
+    const { input, desks } = data;
     try {
       return tx.agent.create({
         data: {
-          email: data.email,
-          password: data.password,
-          roleId: data.roleId,
-
+          ...input,
           Desk:
             desks && desks.length
               ? {
@@ -85,7 +90,7 @@ export class AgentRepository {
     }
   }
 
-  public async updateOneWithTx(
+  public async txUpdateOne(
     id: number,
     data: UpdateAgent,
     tx: Prisma.TransactionClient,

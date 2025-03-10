@@ -5,6 +5,7 @@ import {
 } from '@/modules/permissions/controllers';
 import {
   AgentPermissionsService,
+  PermissionsService,
   RolePermissionsService,
   ValidationService,
 } from '@/modules/permissions/service';
@@ -21,14 +22,21 @@ import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-
   imports: [forwardRef(() => AgentModule), ValidationModule, AuthRedisModule],
   controllers: [AgentPermissionsController, RolePermissionsController],
   providers: [
-    AgentRepository,
     AgentPermissionsService,
     RolePermissionsService,
-    AgentPermissionRepository,
-    RolePermissionRepository,
     AuthRedisService,
     ValidationService,
+    PermissionsService,
+
+    AgentRepository,
+    AgentPermissionRepository,
+    RolePermissionRepository,
   ],
-  exports: [RolePermissionRepository, AgentPermissionRepository],
+  exports: [
+    RolePermissionRepository,
+    AgentPermissionRepository,
+    PermissionsService,
+    AgentPermissionsService,
+  ],
 })
 export class PermissionModule {}

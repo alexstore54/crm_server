@@ -15,6 +15,7 @@ import { ValidationModule, ValidationService } from '@/shared/services/validatio
 import { AgentController } from '@/modules/agent/controllers/agent.controller';
 import { TeamModule } from '@/modules/team/team.module';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
+import { AgentPermissionsService, PermissionsService } from '@/modules/permissions/service';
 
 @Module({
   imports: [
@@ -32,12 +33,12 @@ import { TeamRepository } from '@/modules/team/repositories/team.repository';
     AuthRedisService,
     AgentService,
     ValidationService,
+    PermissionsService,
+    AgentPermissionsService,
     //repositories
     AgentRepository,
     TeamRepository,
     DeskRepository,
-    AgentPermissionRepository,
-    RolePermissionRepository,
   ],
   exports: [AgentRepository],
 })

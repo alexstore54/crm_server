@@ -1,4 +1,5 @@
-import { AgentAuthPayload, PermissionsKeys } from '@/shared/types/auth';
+import { AgentAuthPayload } from '@/shared/types/auth';
+import { PermissionsKeys } from '@/shared/types/permissions';
 
 export type PermissionOperation = 'create' | 'update' | 'delete' | 'read';
 

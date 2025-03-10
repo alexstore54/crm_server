@@ -1,3 +1,9 @@
+import { AgentPermission, Permission, RolePermission } from '@prisma/client';
+
+export type PermissionsTable = {
+  [key in PermissionsKeys]?: boolean;
+};
+
 export enum PermissionsKeys {
   // Moderator | Admin permissions
   //agents
@@ -58,3 +64,16 @@ export enum PermissionsKeys {
   // Himself
   UPDATE_HIMSELF = 'UPDATE_HIMSELF',
 }
+
+type PermissionWithDetails = {
+  Permission: Permission;
+};
+export type PrismaPermissionWithDetails =
+  | (AgentPermission & PermissionWithDetails)
+  | (RolePermission & PermissionWithDetails);
+
+export type PermissionDetail = {
+  id: number;
+  key: PermissionsKeys;
+  allowed: boolean;
+};

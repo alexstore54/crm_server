@@ -7,8 +7,8 @@ import {
   LeadPermissionValidation,
   PermissionOperation,
 } from '@/shared/types/validation';
-import { PermissionsKeys } from '@/shared/types/auth';
 import { PERMISSION_CONFIG } from '@/shared/constants/permissions';
+import { PermissionsKeys } from '@/shared/types/permissions';
 
 @Injectable()
 export class ValidationService {
@@ -61,12 +61,13 @@ export class ValidationService {
     const connections: GeneralConnects[] = [];
 
     if (await this.isLeadInAgentDesk(leadPublicId, currentAgentPayload.deskPublicId)) {
-        connections.push(GeneralConnects.DESK);
+      connections.push(GeneralConnects.DESK);
     }
-    if(currentAgentPayload.teamPublicId && 
-       await this.isLeadInAgentTeam(leadPublicId, currentAgentPayload.teamPublicId))
-    {
-        connections.push(GeneralConnects.TEAM)
+    if (
+      currentAgentPayload.teamPublicId &&
+      (await this.isLeadInAgentTeam(leadPublicId, currentAgentPayload.teamPublicId))
+    ) {
+      connections.push(GeneralConnects.TEAM);
     }
 
     //#TODO: IMPLEMENT IN THE TEAM LOGIC
@@ -123,7 +124,6 @@ export class ValidationService {
 
   private async isLeadInAgentDesk(leadId: string, deskIds: string[]): Promise<boolean> {
     try {
-      
       const desks = await this.prisma.desk.findMany({
         where: {
           publicId: { in: deskIds },
@@ -138,8 +138,8 @@ export class ValidationService {
           },
         },
       });
-      
-      return desks.some(d => d.Lead && d.Lead.length > 0);
+
+      return desks.some((d) => d.Lead && d.Lead.length > 0);
     } catch (error) {
       throw this.createDbError(error);
     }
@@ -161,17 +161,17 @@ export class ValidationService {
           },
         },
       });
-  
-      return teams.some(t => t.Leads && t.Leads.length > 0);
-    }catch (error) {
+
+      return teams.some((t) => t.Leads && t.Leads.length > 0);
+    } catch (error) {
       throw this.createDbError(error);
     }
   }
 
   private checkAgentPermissions(
-          connections: GeneralConnects[],
-          permissions: PermissionsKeys[],
-          operation: PermissionOperation,
+    connections: GeneralConnects[],
+    permissions: PermissionsKeys[],
+    operation: PermissionOperation,
   ): boolean {
     if (!connections.length) return false;
 
@@ -190,9 +190,9 @@ export class ValidationService {
   }
 
   private checkLeadPermissions(
-          connections: GeneralConnects[],
-          permissions: PermissionsKeys[],
-          operation: PermissionOperation,
+    connections: GeneralConnects[],
+    permissions: PermissionsKeys[],
+    operation: PermissionOperation,
   ): boolean {
     if (!connections.length) return false;
 
@@ -211,7 +211,7 @@ export class ValidationService {
   }
 
   private createDbError(error: unknown): InternalServerErrorException {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      return new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${message}`);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${message}`);
   }
 }

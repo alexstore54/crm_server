@@ -1,44 +1,55 @@
-import { AgentPermission, RolePermission } from '@prisma/client';
-import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
+import {
+  PermissionDetail,
+  PermissionsKeys,
+  PermissionsTable,
+  PrismaPermissionWithDetails,
+} from '@/shared/types/permissions';
 
 export class PermissionsUtil {
-  public static mapPermissionsToAgentPermissions(
-    agentId: number,
-    rolePermissions: RolePermission[],
-    agentPermissions: IncomingPermission[],
-  ): AgentPermission[] {
-    const rolePermissionIds = new Set(rolePermissions.map((rp) => rp.permissionId));
+  public static mapClearPermissionToPermissionTable(
+    mergedPermissions: PermissionDetail[],
+  ): PermissionsTable {
+    const permissionsTable: PermissionsTable = {};
 
-    return agentPermissions
-      .filter((perm) => rolePermissionIds.has(perm.permissionId))
-      .map((perm) => {
-        const rolePerm = rolePermissions.find((rp) => rp.permissionId === perm.permissionId);
-        if (!rolePerm || rolePerm.allowed === perm.allowed) {
-          return undefined;
-        }
-        return { ...perm, allowed: perm.allowed, agentId };
-      })
-      .filter((item) => item !== undefined);
-  }
-
-  public async mapAgentAndRolePermissionsToAllowedPermissions(
-    agentPermissions: AgentPermission[],
-    rolePermissions: RolePermission[],
-  ): Promise<Permissions[]> {
-    const permissionsMap = new Map<number, boolean>();
-
-    for (const rolePerm of rolePermissions) {
-      permissionsMap.set(rolePerm.permissionId, rolePerm.allowed);
-    }
-
-    for (const agentPerm of agentPermissions) {
-      if (permissionsMap.has(agentPerm.permissionId)) {
-        permissionsMap.set(agentPerm.permissionId, agentPerm.allowed);
+    for (const mergedPermission of mergedPermissions) {
+      if (mergedPermission.allowed) {
+        permissionsTable[mergedPermission.key] = mergedPermission.allowed;
       }
     }
 
+    return permissionsTable;
+  }
 
+  public static mapPrismaPermissionToPermissionDetail(
+    permissions: PrismaPermissionWithDetails[],
+  ): PermissionDetail[] {
+    return permissions.map((permission) => {
+      return {
+        id: permission.Permission.id,
+        key: permission.Permission.key as PermissionsKeys,
+        allowed: permission.allowed,
+      };
+    });
+  }
 
-    return permissions;
+  public static mergePermissions(
+    agentPermissions: PermissionDetail[],
+    rolePermissions: PermissionDetail[],
+  ): PermissionDetail[] {
+    const mergedPermissionsMap: { [key: string]: PermissionDetail } = {};
+
+    for (const rolePermission of rolePermissions) {
+      mergedPermissionsMap[rolePermission.key] = rolePermission;
+    }
+
+    for (const agentPermission of agentPermissions) {
+      mergedPermissionsMap[agentPermission.key] = agentPermission;
+    }
+
+    return Object.values(mergedPermissionsMap);
+  }
+
+  public static filterPermissionsDetail(permissions: PermissionDetail[]): PermissionDetail[] {
+    return permissions.filter((permission) => permission.allowed);
   }
 }

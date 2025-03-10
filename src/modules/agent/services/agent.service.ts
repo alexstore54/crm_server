@@ -1,19 +1,21 @@
 import { LeadRepository } from '@/modules/user/repositories';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Desk, Lead, Prisma, Team } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Agent, Desk, Lead, Prisma, Team } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
-import {
-  AgentPermissionRepository,
-  AgentRepository,
-  DeskRepository,
-  RolePermissionRepository,
-} from '@/modules/agent/repositories';
+import { AgentRepository, DeskRepository } from '@/modules/agent/repositories';
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
-import { PermissionWithKey } from '@/modules/permissions/types/agent-perms.type';
-import { AgentPermissionsUtil, ArrayUtil } from '@/shared/utils';
+import { ArrayUtil } from '@/shared/utils';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { FullAgent } from '@/shared/types/agent';
+import { AgentPermissionsService, PermissionsService } from '@/modules/permissions/service';
+import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
+import { PermissionsTable } from '@/shared/types/permissions';
 
 @Injectable()
 export class AgentService {
@@ -22,8 +24,8 @@ export class AgentService {
     private readonly agentRepository: AgentRepository,
     private readonly teamRepository: TeamRepository,
     private readonly deskRepository: DeskRepository,
-    private readonly rolePermissionRepository: RolePermissionRepository,
-    private readonly agentPermissionRepository: AgentPermissionRepository,
+    private readonly permissionsService: PermissionsService,
+    private readonly agentPermissionsService: AgentPermissionsService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -45,40 +47,33 @@ export class AgentService {
 
     const isExistAgent = await this.agentRepository.findOneByEmail(data.email);
     if (isExistAgent) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.USER_EXISTS}`);
+      throw new BadRequestException(`${ERROR_MESSAGES.USER_EXISTS}`);
     }
 
     try {
-      return this.prisma.$transaction(async (tx) => {
+      const newAgent: Agent = await this.prisma.$transaction(async (tx) => {
         // Если deskIds переданы – получаем связанные записи, иначе оставляем null
         const desks = await this.getDesksByIds(deskIds, tx);
 
         // Создаем агента, передавая desks (если они есть, иначе null)
-        const newAgent = await this.agentRepository.createOneWithTx(data, tx, desks);
-
-        // Если переданы разрешения – выполняем их обработку
-        if (permissions && permissions.length > 0) {
-          // Фильтруем входящие разрешения на уникальность permissionId
-          const uniqueIncoming = AgentPermissionsUtil.filterUniquePermissions(permissions);
-
-          const rolePermissions = await this.rolePermissionRepository.getManyById(
-            newAgent.roleId,
-          );
-
-          // Выбираем только те разрешения, где значение отличается от дефолтного
-          const result: PermissionWithKey[] = AgentPermissionsUtil.filterPermissionsByRoleDefaults(
-            uniqueIncoming,
-            rolePermissions,
-            newAgent.id,
-          );
-
-          // Создаем записи в agentPermission, если есть расхождения
-          if (result.length > 0) {
-            await this.agentPermissionRepository.createManyWithTx(result, tx);
-          }
-        }
-        return newAgent;
+        return await this.agentRepository.txCreateOne(
+          {
+            input: data,
+            desks,
+          },
+          tx,
+        );
       });
+      // Если переданы разрешения – выполняем их обработку
+      if (permissions && permissions.length > 0) {
+        await this.agentPermissionsService.createOne({
+          agentId: newAgent.id,
+          roleId: newAgent.roleId,
+          permissions,
+        });
+      }
+
+      return newAgent;
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
@@ -86,32 +81,23 @@ export class AgentService {
 
   public async getOneFullByPublicId(publicId: string): Promise<FullAgent> {
     try {
-      this.prisma.$transaction(async (tx) => {
-        const agent = await this.agentRepository.findOneByPublicId(publicId);
-        if (!agent) {
-          throw new NotFoundException(ERROR_MESSAGES.AGENT_NOT_FOUND);
-        }
+      const result = await this.prisma.$transaction(async (tx) => {
+        const agent: Agent = await this.fetchAgentByPublicId(publicId, tx);
+        const desks: Desk[] = await this.fetchDesksByAgentId(agent.id, tx);
+        const teams: Team[] = await this.fetchTeamsByAgentId(agent.id, tx);
 
-        const rolePermissions = await this.rolePermissionRepository.getManyById(
-          agent.roleId,
-        );
-
-        const agentPermissions = await this.agentPermissionRepository.getAgentPermissionsByAgentId(
-          agent.id,
-        );
-
-        const desks: Desk[] = await this.deskRepository.findManyByAgentId(agent.id);
-
-        const teams: Team[] = await this.teamRepository.findManyByAgentId(agent.id);
-
-        const permissions =
-
-        return {
-          agent,
-          desks,
-          teams,
-        };
+        return { agent, desks, teams };
       });
+
+      const { agent, desks, teams } = result;
+      const permissionsTable = await this.fetchPermissions(agent.id, agent.roleId);
+
+      return {
+        agent,
+        permissions: permissionsTable,
+        desks,
+        teams,
+      };
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
@@ -127,27 +113,8 @@ export class AgentService {
 
     try {
       return this.prisma.$transaction(async (tx) => {
-        let newDeskIds: number[] | null = null;
-
-        if (deskIds) {
-          // Получаем валидные записи по переданным deskIds
-          const validDesks = await this.deskRepository.findManyByIdsWithTx(deskIds, tx);
-          const validDeskIds = validDesks.map((desk) => desk.id);
-          // Всегда получаем текущие deskIds как массив (даже если пустой)
-          const currentDeskIds = currentAgent.Desk.map((desk) => desk.id);
-
-          // Если наборы отличаются, обновляем связь
-          if (!ArrayUtil.isArraysEqual(currentDeskIds, validDeskIds)) {
-            newDeskIds = validDeskIds;
-          }
-        }
-
-        return await this.agentRepository.updateOneWithTx(
-          currentAgent.id,
-          { ...rest },
-          tx,
-          newDeskIds,
-        );
+        const newDeskIds = deskIds ? await this.getValidDeskIds(deskIds, currentAgent, tx) : null;
+        return await this.agentRepository.txUpdateOne(currentAgent.id, { ...rest }, tx, newDeskIds);
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
@@ -162,9 +129,46 @@ export class AgentService {
     }
   }
 
+  private async fetchAgentByPublicId(publicId: string, tx: Prisma.TransactionClient) {
+    const agent = await this.agentRepository.txFindOneByPublicId(publicId, tx);
+    if (!agent) {
+      throw new NotFoundException(ERROR_MESSAGES.AGENT_NOT_FOUND);
+    }
+    return agent;
+  }
+
+  private async fetchDesksByAgentId(
+    agentId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<Desk[]> {
+    return this.deskRepository.txFindManyByAgentId(agentId, tx);
+  }
+
+  private async getValidDeskIds(
+    deskIds: number[],
+    currentAgent: Agent & { Desk: Desk[] },
+    tx: Prisma.TransactionClient,
+  ): Promise<number[] | null> {
+    const validDesks = await this.deskRepository.txFindManyByIds(deskIds, tx);
+    const validDeskIds = validDesks.map((desk) => desk.id);
+    const currentDeskIds = currentAgent.Desk.map((desk) => desk.id);
+
+    return !ArrayUtil.isArraysEqual(currentDeskIds, validDeskIds) ? validDeskIds : null;
+  }
+
+  private async fetchTeamsByAgentId(
+    agentId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<Team[]> {
+    return this.teamRepository.txFindManyByAgentId(agentId, tx);
+  }
+
+  private async fetchPermissions(agentId: number, roleId: number): Promise<PermissionsTable> {
+    const permissions = await this.permissionsService.getProcessedAgentPermissions(agentId, roleId);
+    return PermissionsUtil.mapClearPermissionToPermissionTable(permissions);
+  }
+
   private async getDesksByIds(deskIds: number[] | undefined, tx: Prisma.TransactionClient) {
-    return deskIds && deskIds.length > 0
-      ? this.deskRepository.findManyByIdsWithTx(deskIds, tx)
-      : null;
+    return deskIds && deskIds.length > 0 ? this.deskRepository.txFindManyByIds(deskIds, tx) : null;
   }
 }

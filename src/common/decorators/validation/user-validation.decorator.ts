@@ -14,7 +14,7 @@ import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 
-export class UserValidation {
+export class UseValidator {
   public static validateName() {
     return applyDecorators(
       IsString(),

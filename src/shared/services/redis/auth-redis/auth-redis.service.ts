@@ -2,10 +2,8 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import {
   PayloadId,
   PayloadUUID,
-  PermissionsTable,
   SaveAgentInput,
   SaveCustomerInput,
-  Session,
   UpdatePermissionsInput,
   UpdateSessionInput,
 } from '@/shared/types/redis';
@@ -17,6 +15,8 @@ import { configKeys } from '@/shared/schemas';
 import { AppLoggerService } from '@/modules/logger/services';
 import { LogLevel } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { Session } from '@/shared/types/sessions';
+import { PermissionsTable } from '@/shared/types/permissions';
 
 @Injectable()
 export class AuthRedisService {
@@ -57,7 +57,7 @@ export class AuthRedisService {
     } catch (error: any) {
       this.handleError(error);
     }
-  } 
+  }
 
   public async updateSession(
     userPublicId: string,

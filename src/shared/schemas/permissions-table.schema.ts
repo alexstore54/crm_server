@@ -1,5 +1,5 @@
 import Joi, { ObjectSchema } from 'joi';
-import { PermissionsTable } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/permissions';
 
 export const permissionsTableSchema: ObjectSchema<PermissionsTable> = Joi.object({
   READ_ALL_AGENTS: Joi.boolean().optional(),
@@ -33,5 +33,5 @@ export const permissionsTableSchema: ObjectSchema<PermissionsTable> = Joi.object
   DELETE_TEAMS: Joi.boolean().optional(),
   ASSIGN_AGENTS_TO_TEAMS: Joi.boolean().optional(),
   UPDATE_HIMSELF: Joi.boolean().optional(),
-  UPDATE_ALL_AGENTS_PERMISSIONS: Joi.boolean().optional()
+  UPDATE_ALL_AGENTS_PERMISSIONS: Joi.boolean().optional(),
 });

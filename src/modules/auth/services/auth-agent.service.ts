@@ -1,20 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SignInAgent } from '@/modules/auth/dto/agent/sign-in.dto';
-import { Agent, AgentPermission } from '@prisma/client';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { BcryptHelper } from '@/shared/helpers';
-import { AgentPermissionRepository, RolePermissionRepository } from '@/modules/agent/repositories';
-import { AgentPermissionsUtil, RolePermissionWithDetails } from '@/shared/utils';
 import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
-import { PermissionsTable } from '@/shared/types/redis';
+import { PermissionsService } from '@/modules/permissions/service';
+import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
 
 @Injectable()
 export class AuthAgentService {
   constructor(
     private readonly agentRepository: AgentRepository,
-    private readonly agentPermissionsRepository: AgentPermissionRepository,
-    private readonly rolePermissionRepository: RolePermissionRepository,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   public async validate(data: SignInAgent): Promise<AuthAgentLoginInput> {
@@ -31,37 +28,18 @@ export class AuthAgentService {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
 
-    const allowedPermissionsArray = await this.getAllowedPermissions(agent);
+    const allowedPermissions = await this.permissionsService.getProcessedAgentPermissions(
+      agent.id,
+      agent.roleId,
+    );
+    const permissionsTable =
+      PermissionsUtil.mapClearPermissionToPermissionTable(allowedPermissions);
 
-    //#TODO FIX (fixed deskPublicId and teamPublicId)
     return {
       agent,
-      permissions: allowedPermissionsArray,
+      permissions: permissionsTable,
       deskPublicId: agent.Desk.map((desk) => desk.publicId),
       teamPublicId: agent.Team.length > 0 ? agent.Team.map((team) => team.publicId) : null,
     };
-  }
-
-  private async getAllowedPermissions(agent: Agent): Promise<PermissionsTable> {
-    const rolePermissions: RolePermissionWithDetails[] =
-      await this.rolePermissionRepository.getManyById(agent.roleId);
-
-    if (rolePermissions.length === 0) {
-      throw new BadRequestException(ERROR_MESSAGES.DB_ERROR);
-    }
-
-    const agentPermissions: AgentPermission[] =
-      await this.agentPermissionsRepository.getAgentPermissionsByAgentId(agent.id);
-
-    //#TODO FIX (if permission.allowed === false, then it should be removed from the list)
-    // 1) convertRolePermissionsToPermissionsTable method returns only ALLOWED permissions
-    // 2) mergePermissions method needs allowed and disalloed permissions cause it compare both permissions and then return only allowed
-    // There is nothing to fix here
-
-    if (agentPermissions.length === 0) {
-      return AgentPermissionsUtil.convertRolePermissionsToPermissionsTable(rolePermissions);
-    } else {
-      return AgentPermissionsUtil.mergePermissions(rolePermissions, agentPermissions);
-    }
   }
 }

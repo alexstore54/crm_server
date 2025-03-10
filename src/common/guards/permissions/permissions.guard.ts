@@ -2,12 +2,11 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Reflector } from '@nestjs/core';
-import { PermissionsKeys } from '@/shared/types/auth/permissions.type';
 import { METADATA } from '@/shared/constants/metadata';
-import { PermissionsTable } from '@/shared/types/redis';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 import { PermissionOperation } from '@/shared/types/validation';
 import { AgentAuthPayload } from '@/shared/types/auth';
+import { PermissionsKeys, PermissionsTable } from '@/shared/types/permissions';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {

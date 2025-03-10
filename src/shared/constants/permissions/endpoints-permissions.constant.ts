@@ -1,9 +1,9 @@
-import { PermissionsKeys } from '@/shared/types/auth';
 import {
   CREATE_AGENTS_PERMISSIONS,
   READ_AGENTS_PERMISSIONS,
   UPDATE_AGENTS_PERMISSIONS,
 } from '@/shared/constants/permissions';
+import { PermissionsKeys } from '@/shared/types/permissions';
 
 export const ENDPOINTS_PERMISSIONS = {
   AGENTS: {
@@ -16,5 +16,8 @@ export const ENDPOINTS_PERMISSIONS = {
   },
   AGENT_PERMISSIONS: {
     UPDATE_AGENTS_PERMISSIONS: [PermissionsKeys.UPDATE_ALL_AGENTS_PERMISSIONS],
-  }
+  },
+  ROLE_PERMISSIONS: {
+    UPDATE_ROLES_PERMISSIONS: [PermissionsKeys.UPDATE_ROLES],
+  },
 };

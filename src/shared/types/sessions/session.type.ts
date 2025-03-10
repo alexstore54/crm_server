@@ -14,18 +14,3 @@ export type Session = {
   isOnline: boolean;
   role: SessionRoles;
 };
-
-export interface CreateSessionInput {
-  fingerprint: string;
-  userAgent: string;
-  isOnline: boolean;
-  payloadUUID: PayloadUUID;
-  hashedRefreshToken?: string;
-}
-
-export interface UpdateSessionInput {
-  refreshToken?: string;
-  fingerprint?: string;
-  userAgent?: string;
-  isOnline?: boolean;
-}
