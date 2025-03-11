@@ -6,9 +6,6 @@ export class CreateAgentPermissions {
   @IsNumber()
   agentId: number;
 
-  @IsNumber()
-  roleId: number;
-
   @UseValidator.validatePermissionsArray()
   permissions: IncomingPermission[];
 }

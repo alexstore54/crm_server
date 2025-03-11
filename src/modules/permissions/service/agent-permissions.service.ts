@@ -2,68 +2,71 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { UpdateAgentPermissions } from '@/modules/agent/dto/update-agent-perms.dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
-import {
-  AgentPermissionRepository,
-  AgentRepository,
-  RolePermissionRepository,
-} from '@/modules/agent/repositories';
-import { Agent, AgentPermission, Prisma, RolePermission } from '@prisma/client';
-import {
-  CreateAgentPermissions,
-  IncomingPermission,
-} from '@/modules/permissions/dto/agent-permissions';
-import { IncomingPermissionsUtil } from '@/shared/utils/permissions/incoming-permissions.util';
-import { AllowedPermission } from '@/modules/permissions/types';
+import { AgentPermissionRepository, AgentRepository } from '@/modules/agent/repositories';
+import { Agent, AgentPermission } from '@prisma/client';
+import { CreateAgentPermissions } from '@/modules/permissions/dto/agent-permissions';
+import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
 
 @Injectable()
 export class AgentPermissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly agentRepository: AgentRepository,
-    private readonly rolePermissionsRepository: RolePermissionRepository,
     private readonly agentPermissionsRepository: AgentPermissionRepository,
   ) {}
 
-  public async updateByAgentId(publicId: string, data: UpdateAgentPermissions) {
+  public async getPermissionsByAgentPublicId(publicId: string) {
+    const agent: Agent | null = await this.agentRepository.findOneByPublicId(publicId);
+    if (!agent) {
+      throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
+    }
+    try {
+      return this.agentPermissionsRepository.getManyByAgentId(agent.id);
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async updateManyByAgentId(publicId: string, data: UpdateAgentPermissions) {
     const { permissions } = data;
 
     const agent: Agent | null = await this.agentRepository.findOneByPublicId(publicId);
     if (!agent) {
       throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
     }
-    try {
 
+    try {
+      return this.agentPermissionsRepository.updateMany(agent.id, permissions);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  public async create(input: CreateAgentPermissions): Promise<void> {
-    const { agentId, roleId, permissions } = input;
-    // Фильтруем входящие разрешения на уникальность permissionId
-    const uniqueIncoming = IncomingPermissionsUtil.filterUniquePermissions(permissions);
-
+  public async getAgentPermissionsByAgentId(agentId: number): Promise<AgentPermission[]> {
     try {
-      await this.prisma.$transaction(async (tx) => {
-        const rolePermissions: RolePermission[] =
-          await this.rolePermissionsRepository.txGetManyById(roleId, tx);
-
-        // Выбираем только те разрешения, где значение отличается от дефолтного
-        const result: AllowedPermission[] = IncomingPermissionsUtil.filterPermissionsByRoleDefaults(
-          uniqueIncoming,
-          rolePermissions,
-          agentId,
-        );
-
-        // Создаем записи в agentPermission, если есть расхождения
-        if (result.length > 0) {
-          await this.agentPermissionsRepository.txCreateMany(result, tx);
-        }
-      });
+      return this.agentPermissionsRepository.getManyByAgentId(agentId);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
+  public async getManyWithDetailsByAgentId(
+    agentId: number,
+  ): Promise<PrismaPermissionWithDetails[]> {
+    try {
+      return this.agentPermissionsRepository.getManyWithDetailsByAgentId(agentId);
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 
+  public async createMany(input: CreateAgentPermissions): Promise<AgentPermission[]> {
+    const { agentId, permissions } = input;
+
+    try {
+      return this.agentPermissionsRepository.createMany(agentId, permissions);
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 }
