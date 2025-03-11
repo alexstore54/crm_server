@@ -20,7 +20,7 @@ import { FullCustomer } from '@/shared/types/user';
 export class AuthService {
   constructor(
     private readonly authRedisService: AuthRedisService,
-    private readonly gatewayService: GatewayService, 
+    private readonly gatewayService: GatewayService,
     private readonly authGateway: AuthGateway,
     private readonly tokensService: TokensService,
   ) {}
@@ -32,9 +32,7 @@ export class AuthService {
 
     const payload = this.mapAgentPayload(agent, payloadUUID, args.deskPublicId, args.teamPublicId);
 
-
     const tokens = await this.tokensService.getTokens({ ...payload });
-
 
     const createSessionInput = await this.makeSession({
       payloadUUID: payloadUUID,
@@ -44,7 +42,6 @@ export class AuthService {
       refreshToken: tokens.refreshToken,
       userId: agent.publicId,
     });
-
 
     await this.authRedisService.saveAgent({
       agentPublicId: publicId,

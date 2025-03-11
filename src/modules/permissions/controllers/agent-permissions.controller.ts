@@ -1,6 +1,6 @@
-import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Put, UseGuards } from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
-import { UpdateAgentPerms } from '@/modules/agent/dto/update-agent-perms.dto';
+import { UpdateAgentPermissions } from '@/modules/agent/dto/update-agent-perms.dto';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
@@ -12,11 +12,11 @@ export class AgentPermissionsController {
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENT_PERMISSIONS.UPDATE_AGENTS_PERMISSIONS)
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
-  @Patch(':publicId/update')
+  @Put(':publicId/update')
   async updateAgentPermissions(
     @Param('publicId') publicId: string,
-    @Body() body: UpdateAgentPerms,
+    @Body() body: UpdateAgentPermissions,
   ) {
-    return this.agentPermissionsService.updateOneByAgentPublicId(publicId, body);
+    // return this.agentPermissionsService.updateOneByAgentPublicId(publicId, body);
   }
 }

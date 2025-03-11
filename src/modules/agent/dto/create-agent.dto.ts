@@ -1,6 +1,6 @@
 import { IsEmail, IsNumber, IsOptional } from 'class-validator';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
-import { UserValidation } from '@/common/decorators/validation';
+import { UseValidator } from '@/common/decorators/validation';
 
 export class CreateAgent {
   @IsNumber()
@@ -10,14 +10,14 @@ export class CreateAgent {
   @IsEmail()
   email: string;
 
-  @UserValidation.validatePassword()
+  @UseValidator.validatePassword()
   password: string;
 
   @IsOptional()
-  @UserValidation.validateDesksIdArray()
+  @UseValidator.validateDesksIdArray()
   deskIds?: number[];
 
   @IsOptional()
-  @UserValidation.validatePermissionsArray()
+  @UseValidator.validatePermissionsArray()
   permissions?: IncomingPermission[];
 }

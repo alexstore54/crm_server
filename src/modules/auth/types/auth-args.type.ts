@@ -1,7 +1,8 @@
 import { Socket } from 'socket.io';
-import { Agent, AgentPermission } from '@prisma/client';
+import { Agent } from '@prisma/client';
 import { FullCustomer } from '@/shared/types/user';
-import { PayloadUUID, PermissionsTable } from '@/shared/types/redis';
+import { PayloadUUID } from '@/shared/types/redis';
+import { PermissionsTable } from '@/shared/types/permissions';
 
 export interface ConnectSocketArgs {
   client: Socket;
@@ -12,7 +13,7 @@ export interface AuthenticateAgentArgs {
   agent: Agent;
   fingerprint: string;
   userAgent: string;
-  permissions: PermissionsTable; 
+  permissions: PermissionsTable;
   deskPublicId: string[];
   teamPublicId: string[] | null;
 }

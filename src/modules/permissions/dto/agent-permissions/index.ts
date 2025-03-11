@@ -1,1 +1,2 @@
-export { IncomingPermission } from '@/modules/permissions/dto/agent-permissions/agent-permission.dto';
+export * from './create-agent-permissions.dto';
+export * from './incoming-permission.dto';

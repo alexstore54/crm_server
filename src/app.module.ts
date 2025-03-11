@@ -10,6 +10,7 @@ import { validationSchema } from '@/shared/schemas';
 import { AgentModule } from '@/modules/agent/agent.module';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import { SeedModule } from '@/seeds/seed.module';
+import { TeamModule } from '@/modules/team/team.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SeedModule } from '@/seeds/seed.module';
     AgentModule,
     PermissionModule,
     SeedModule,
+    TeamModule,
   ],
   controllers: [],
   providers: [],

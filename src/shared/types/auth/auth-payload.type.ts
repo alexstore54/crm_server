@@ -5,7 +5,7 @@ export type AgentAuthPayload = {
   deskPublicId: string[];
   payloadUUID: PayloadUUID;
   sub: string;
-}; 
+};
 
 export type CustomerAuthPayload = {
   payloadUUID: PayloadUUID;

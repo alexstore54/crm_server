@@ -4,4 +4,4 @@ export * from './users/users.util';
 export * from '@/shared/utils/schema/schema.util';
 export * from './array/array.util';
 export * from './agent/agent.util';
-export * from './permissions/agent-permissions.util';
+export * from './permissions/permissions.util';

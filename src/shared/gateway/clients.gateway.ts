@@ -6,8 +6,9 @@ import { CookiesUtil } from '@/shared/utils';
 import { JwtService } from '@nestjs/jwt';
 import { AgentAuthPayload } from '@/shared/types/auth';
 import { UnauthorizedException } from '@nestjs/common';
-import { PayloadId, Session } from '@/shared/types/redis';
+import { PayloadId } from '@/shared/types/redis';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
+import { Session } from '@/shared/types/sessions';
 
 @WebSocketGateway({ cors: true })
 export class ClientsGateway implements OnGatewayConnection, OnGatewayDisconnect {

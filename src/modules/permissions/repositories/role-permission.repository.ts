@@ -3,30 +3,26 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma, RolePermission } from '@prisma/client';
 
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
-import { RolePermissionWithDetails } from '@/shared/utils';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
 
 @Injectable()
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRolePermissionsByRoleId(roleId: number): Promise<RolePermissionWithDetails[]> {
+  public async getManyById(roleId: number): Promise<RolePermission[]> {
     try {
       return await this.prisma.rolePermission.findMany({
         where: {
           roleId,
         },
-        include: {
-          Permission: true,
-        },
       });
     } catch (error: any) {
-      
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  async getManyByRoleIdWithTx(
+  public async txGetManyById(
     roleId: number,
     tx: Prisma.TransactionClient,
   ): Promise<RolePermission[]> {
@@ -41,7 +37,40 @@ export class RolePermissionRepository {
     }
   }
 
-  async getOneByRoleIdAndPermsIdsWithTx(
+  public async txGetManyWithDetailsById(
+    roleId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<PrismaPermissionWithDetails[]> {
+    try {
+      return await tx.rolePermission.findMany({
+        where: {
+          roleId,
+        },
+        include: {
+          Permission: true,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async getManyByIdWithTx(
+    roleId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<RolePermission[]> {
+    try {
+      return await tx.rolePermission.findMany({
+        where: {
+          roleId,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async txGetOneByIdAndPermsIds(
     roleId: number,
     permissions: IncomingPermission[],
     tx: Prisma.TransactionClient,
@@ -59,5 +88,4 @@ export class RolePermissionRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
 }

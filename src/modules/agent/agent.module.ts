@@ -13,19 +13,32 @@ import { DeskRepository } from '@/modules/agent/repositories';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
 import { AgentController } from '@/modules/agent/controllers/agent.controller';
+import { TeamModule } from '@/modules/team/team.module';
+import { TeamRepository } from '@/modules/team/repositories/team.repository';
+import { AgentPermissionsService, PermissionsService } from '@/modules/permissions/service';
 
 @Module({
-  imports: [UserModule, forwardRef(() => PermissionModule), AuthRedisModule, ValidationModule],
+  imports: [
+    UserModule,
+    forwardRef(() => PermissionModule),
+    AuthRedisModule,
+    ValidationModule,
+    TeamModule,
+  ],
   controllers: [AgentsController, AgentController],
   providers: [
-    AgentService,
-    AgentRepository,
+    //guards
     AgentAccessGuard,
-    AgentPermissionRepository,
-    RolePermissionRepository,
-    DeskRepository,
+    //services
     AuthRedisService,
+    AgentService,
     ValidationService,
+    PermissionsService,
+    AgentPermissionsService,
+    //repositories
+    AgentRepository,
+    TeamRepository,
+    DeskRepository,
   ],
   exports: [AgentRepository],
 })
