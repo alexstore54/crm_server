@@ -9,21 +9,6 @@ import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions'
 export class AgentPermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async getManyByAgentIdWithTx(
-    agentId: number,
-    tx: Prisma.TransactionClient,
-  ): Promise<AgentPermission[]> {
-    try {
-      return tx.agentPermission.findMany({
-        where: {
-          agentId,
-        },
-      });
-    } catch (error: any) {
-      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
-    }
-  }
-
   public async txGetManyWithDetailsByAgentId(
     agentId: number,
     tx: Prisma.TransactionClient,
@@ -54,27 +39,68 @@ export class AgentPermissionRepository {
     }
   }
 
-  public async txCreateMany(data: AgentPermission[], tx: Prisma.TransactionClient) {
+  public async getManyWithDetailsByAgentId(
+    agentId: number,
+  ): Promise<PrismaPermissionWithDetails[]> {
     try {
-      return tx.agentPermission.createMany({ data });
+      return this.prisma.agentPermission.findMany({
+        where: {
+          agentId,
+        },
+        include: {
+          Permission: true,
+        },
+      });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  public async updateManyByAgentPublicId(
-    agentPublicId: string,
-    incomingPermissions: IncomingPermission[],
-  ) {
+  public async createMany(
+    agentId: number,
+    input: IncomingPermission[],
+  ): Promise<AgentPermission[]> {
     try {
-      return await this.prisma.agentPermission.updateMany({
-        where: {
-          Agent: {
-            publicId: agentPublicId,
+      return this.prisma.$transaction((tx) => {
+        const createManyPromises = input.map((permission) => {
+          return tx.agentPermission.create({
+            data: {
+              agentId,
+              permissionId: permission.permissionId,
+            },
+          });
+        });
+        return Promise.all(createManyPromises);
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async updateMany(
+    agentId: number,
+    permissions: IncomingPermission[],
+  ): Promise<AgentPermission[]> {
+    try {
+      return this.prisma.$transaction(async (tx) => {
+        await tx.agentPermission.deleteMany({
+          where: {
+            agentId,
           },
-          permissionId
-        }
-      })
+        });
+
+        const createManyPromises = permissions.map((permission) => {
+          return tx.agentPermission.create({
+            data: {
+              agentId,
+              permissionId: permission.permissionId,
+            },
+          });
+        });
+
+        const createdPermissions = await Promise.all(createManyPromises);
+        return createdPermissions as AgentPermission[];
+      });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }

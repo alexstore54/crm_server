@@ -1,10 +1,11 @@
-import { Body, Controller, Param, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { UpdateAgentPermissions } from '@/modules/agent/dto/update-agent-perms.dto';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
+import { UUIDValidationPipe } from '@/common/pipes';
 
 @Controller('permissions/agent')
 export class AgentPermissionsController {
@@ -14,9 +15,16 @@ export class AgentPermissionsController {
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
   @Put(':publicId/update')
   async updateAgentPermissions(
-    @Param('publicId') publicId: string,
+    @Param('publicId', UUIDValidationPipe) publicId: string,
     @Body() body: UpdateAgentPermissions,
   ) {
-    // return this.agentPermissionsService.updateOneByAgentPublicId(publicId, body);
+    return this.agentPermissionsService.updateManyByAgentId(publicId, body);
+  }
+
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENT_PERMISSIONS.GET_AGENTS_PERMISSIONS)
+  @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
+  @Get(':publicId')
+  async getAgentPermissions(@Param('publicId', UUIDValidationPipe) publicId: string) {
+    return this.agentPermissionsService.getPermissionsByAgentPublicId(publicId);
   }
 }

@@ -33,7 +33,7 @@ export class AuthAgentService {
       agent.roleId,
     );
     const permissionsTable =
-      PermissionsUtil.mapClearPermissionToPermissionTable(allowedPermissions);
+      PermissionsUtil.mapPermissionDetailToPermissionTable(allowedPermissions);
 
     return {
       agent,

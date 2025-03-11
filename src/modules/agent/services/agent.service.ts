@@ -10,11 +10,10 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
 import { AgentRepository, DeskRepository } from '@/modules/agent/repositories';
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
-import { ArrayUtil } from '@/shared/utils';
+import { ArrayUtil, PermissionsUtil } from '@/shared/utils';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { FullAgent } from '@/shared/types/agent';
-import { AgentPermissionsService, PermissionsService } from '@/modules/permissions/service';
-import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
+import { AgentPermissionsService } from '@/modules/permissions/service';
 import { PermissionsTable } from '@/shared/types/permissions';
 
 @Injectable()
@@ -24,7 +23,6 @@ export class AgentService {
     private readonly agentRepository: AgentRepository,
     private readonly teamRepository: TeamRepository,
     private readonly deskRepository: DeskRepository,
-    private readonly permissionsService: PermissionsService,
     private readonly agentPermissionsService: AgentPermissionsService,
     private readonly prisma: PrismaService,
   ) {}
@@ -64,12 +62,13 @@ export class AgentService {
           tx,
         );
       });
-      // Если переданы разрешения – выполняем их обработку
+
       if (permissions && permissions.length > 0) {
-        await this.agentPermissionsService.create({
-          agentId: newAgent.id,
-          roleId: newAgent.roleId,
-          permissions,
+        await this.prisma.$transaction(async (tx) => {
+          await this.agentPermissionsService.createMany({
+            agentId: newAgent.id,
+            permissions,
+          });
         });
       }
 
@@ -90,8 +89,7 @@ export class AgentService {
       });
 
       const { agent, desks, teams } = result;
-      const permissionsTable = await this.fetchPermissions(agent.id, agent.roleId);
-
+      const permissionsTable = await this.fetchPermissionsTable(agent.id);
       return {
         agent,
         permissions: permissionsTable,
@@ -137,6 +135,15 @@ export class AgentService {
     return agent;
   }
 
+  private async fetchPermissionsTable(agentId: number): Promise<PermissionsTable> {
+    const agentPermissions =
+      await this.agentPermissionsService.getManyWithDetailsByAgentId(agentId);
+    const mappedPermissions =
+      PermissionsUtil.mapPrismaPermissionToPermissionDetail(agentPermissions);
+
+    return PermissionsUtil.mapPermissionDetailToPermissionTable(mappedPermissions);
+  }
+
   private async fetchDesksByAgentId(
     agentId: number,
     tx: Prisma.TransactionClient,
@@ -161,11 +168,6 @@ export class AgentService {
     tx: Prisma.TransactionClient,
   ): Promise<Team[]> {
     return this.teamRepository.txFindManyByAgentId(agentId, tx);
-  }
-
-  private async fetchPermissions(agentId: number, roleId: number): Promise<PermissionsTable> {
-    const permissions = await this.permissionsService.getProcessedAgentPermissions(agentId, roleId);
-    return PermissionsUtil.mapClearPermissionToPermissionTable(permissions);
   }
 
   private async getDesksByIds(deskIds: number[] | undefined, tx: Prisma.TransactionClient) {

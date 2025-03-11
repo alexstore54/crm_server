@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { AgentService } from '../services/agent.service';
-import { CreateAgent, GetAgentLeadsParams, UpdateAgent } from '../dto';
+import { CreateAgent, UpdateAgent } from '../dto';
 import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
+import { UUIDValidationPipe } from '@/common/pipes';
 
 @Controller('agents')
 export class AgentsController {
@@ -13,19 +14,15 @@ export class AgentsController {
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
   @Get(':publicId/leads')
-  async getLeadsByAgentId(@Param() params: GetAgentLeadsParams) {
-    const { publicId } = params;
+  async getLeadsByAgentId(@Param('publicId', UUIDValidationPipe) publicId: string) {
     return this.agentService.getLeadsByPublicId(publicId);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
-  @UseGuards(AgentAccessGuard, PermissionsGuard) 
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post('create')
-  async createAgent(
-    @Body() body: CreateAgent, 
-  ) {
-    
-    return "Okay"
+  async createAgent(@Body() body: CreateAgent) {
+    return 'Okay';
     //return this.agentService.createAgent(body);
   }
 

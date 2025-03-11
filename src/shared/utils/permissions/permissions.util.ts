@@ -6,7 +6,7 @@ import {
 } from '@/shared/types/permissions';
 
 export class PermissionsUtil {
-  public static mapClearPermissionToPermissionTable(
+  public static mapPermissionDetailToPermissionTable(
     mergedPermissions: PermissionDetail[],
   ): PermissionsTable {
     const permissionsTable: PermissionsTable = {};
@@ -31,6 +31,7 @@ export class PermissionsUtil {
       };
     });
   }
+
 
   public static mergePermissions(
     agentPermissions: PermissionDetail[],

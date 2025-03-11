@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppLoggerService } from '@/modules/logger/services';
 import cookieParser from 'cookie-parser';
 import { configKeys } from '@/shared/schemas';
+import { UUIDValidationPipe } from '@/common/pipes';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
