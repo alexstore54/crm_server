@@ -19,9 +19,10 @@ export class AgentsController {
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
-  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  //@UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post('create')
   async createAgent(@Body() body: CreateAgent) {
+    console.log(body);
     return this.agentService.createAgent(body);
   }
 

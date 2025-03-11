@@ -14,7 +14,7 @@ export class BcryptHelper {
     try {
       return bcrypt.hash(str, Number(this.saltRounds));
     } catch (error: any) {
-      console.log(error);
+      
       throw new InternalServerErrorException(ERROR_MESSAGES.BCRYPT);
     }
   }
