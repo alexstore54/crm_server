@@ -17,7 +17,6 @@ CREATE TABLE "Agent" (
 CREATE TABLE "AgentPermission" (
     "agentId" INTEGER NOT NULL,
     "permissionId" INTEGER NOT NULL,
-    "allowed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "AgentPermission_pkey" PRIMARY KEY ("agentId","permissionId")
 );
@@ -64,6 +63,7 @@ CREATE TABLE "Lead" (
     "defaultEmail" TEXT NOT NULL,
     "agentId" INTEGER,
     "deskId" INTEGER,
+    "teamId" INTEGER,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Lead_pkey" PRIMARY KEY ("id")
@@ -93,8 +93,6 @@ CREATE TABLE "Log" (
 CREATE TABLE "Permission" (
     "id" SERIAL NOT NULL,
     "key" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
 
     CONSTRAINT "Permission_pkey" PRIMARY KEY ("id")
 );
@@ -131,7 +129,6 @@ CREATE TABLE "Role" (
 CREATE TABLE "RolePermission" (
     "roleId" INTEGER NOT NULL,
     "permissionId" INTEGER NOT NULL,
-    "allowed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "RolePermission_pkey" PRIMARY KEY ("roleId","permissionId")
 );
@@ -199,6 +196,9 @@ ALTER TABLE "Lead" ADD CONSTRAINT "Lead_statusId_fkey" FOREIGN KEY ("statusId") 
 
 -- AddForeignKey
 ALTER TABLE "Lead" ADD CONSTRAINT "Lead_deskId_fkey" FOREIGN KEY ("deskId") REFERENCES "Desk"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Lead" ADD CONSTRAINT "Lead_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Phone" ADD CONSTRAINT "Phone_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "Lead"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

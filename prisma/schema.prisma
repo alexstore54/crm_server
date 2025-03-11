@@ -24,7 +24,6 @@ model Agent {
 model AgentPermission {
   agentId      Int
   permissionId Int
-  allowed      Boolean    @default(false)
   Agent        Agent      @relation(fields: [agentId], references: [id])
   Permission   Permission @relation(fields: [permissionId], references: [id])
 
@@ -130,7 +129,6 @@ model Role {
 model RolePermission {
   roleId       Int
   permissionId Int
-  allowed      Boolean    @default(false)
   Permission   Permission @relation(fields: [permissionId], references: [id])
   Role         Role       @relation(fields: [roleId], references: [id])
 
