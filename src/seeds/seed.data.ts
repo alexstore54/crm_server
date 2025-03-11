@@ -27,7 +27,7 @@ export const getPermissions = (): string[] => {
 };
 
 
-export const lowAccessPermissions = (): string[] => {
+export const lowAccessPermissions = ():string[] => {
     return [
            "READ_TEAM_AGENTS" ,
            "CREATE_TEAM_AGENTS" ,

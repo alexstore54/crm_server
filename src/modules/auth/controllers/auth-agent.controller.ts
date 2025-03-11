@@ -24,14 +24,10 @@ export class AuthAgentController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-<<<<<<< HEAD
     
     
     const result = await this.authAgentService.validate(body);
     console.log("Here")
-=======
-    const result: AuthAgentLoginInput = await this.authAgentService.validate(body);
->>>>>>> bb48a17fbe59cf5dcc7ad4daa807d93defd73fed
     const tokens: AuthTokens = await this.authService.authenticateAgent({
       ...result,
       userAgent,
