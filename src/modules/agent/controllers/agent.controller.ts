@@ -19,7 +19,7 @@ export class AgentController {
     return this.agentService.getLeadsByPublicId(user.sub);
   }
 
-  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENT.UPDATE_ME)
+  @UsePermissions(ENDPOINTS_PERMISSIONS.CURRENT_AGENT.UPDATE_ME)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch('update-me')
   async updateMe(@Req() req: RequestWithAgentPayload, @Body() body: UpdateAgent): Promise<Agent> {
