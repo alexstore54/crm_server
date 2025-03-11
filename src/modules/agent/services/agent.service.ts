@@ -66,7 +66,7 @@ export class AgentService {
       });
       // Если переданы разрешения – выполняем их обработку
       if (permissions && permissions.length > 0) {
-        await this.agentPermissionsService.createOne({
+        await this.agentPermissionsService.create({
           agentId: newAgent.id,
           roleId: newAgent.roleId,
           permissions,
