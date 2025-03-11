@@ -53,6 +53,7 @@ export class AgentService {
         const desks = await this.getDesksByIds(deskIds, tx);
 
         // Создаем агента, передавая desks (если они есть, иначе null)
+        
         const newAgent = await this.agentRepository.createOneWithTx(data, tx, desks);
         // Если переданы разрешения – выполняем их обработку
         if (permissions && permissions.length > 0) {

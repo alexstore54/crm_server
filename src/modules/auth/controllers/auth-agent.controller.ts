@@ -24,8 +24,9 @@ export class AuthAgentController {
     @Res() res: Response,
   ) {
     
-    const result = await this.authAgentService.validate(body);
     
+    const result = await this.authAgentService.validate(body);
+    console.log("Here")
     const tokens: AuthTokens = await this.authService.authenticateAgent({
       ...result,
       userAgent,

@@ -13,11 +13,11 @@ import { AgentAuthPayload } from '@/shared/types/auth';
 export class PermissionsGuard implements CanActivate {
   constructor(
     private readonly authRedisService: AuthRedisService,
-    private readonly reflector: Reflector,
+    private readonly reflector: Reflector, 
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest(); 
     const payload: AgentAuthPayload = request.user;
 
     //Валидируем пэйлоад
@@ -27,18 +27,20 @@ export class PermissionsGuard implements CanActivate {
     //(сделано для того чтобы не делать большого количества эндроинтов)
     //(update_team_agent, update_desk_agent)
     const requiredPermissions = this.getRequiredPermissions(context);
-
+    
     //достаем пермишны из редиса
     const permissions: PermissionsTable | null = await this.getPermissions(payload);
-
+   
     //проверяем есть ли у пользователя пермишны
     this.checkPermissions(requiredPermissions, permissions);
-
+    
     //достаем только те пермишны, которые есть у пользователя и задаем их в реквест
     request.permissions = this.getAgentPermissions(requiredPermissions, permissions);
 
+   
     //закидываем тип операции
-    request.operation = this.getOperation(request);
+    request.operation = this.getOperation(request.method);
+   
     return true;
   }
 
@@ -91,9 +93,18 @@ export class PermissionsGuard implements CanActivate {
   }
 
   private getOperation(handlerName: string): PermissionOperation {
-    if (handlerName.includes('create')) return 'create';
-    if (handlerName.includes('update')) return 'update';
-    if (handlerName.includes('delete')) return 'delete';
-    return 'read';
+    const name = handlerName.toLowerCase();
+    switch (true) {
+      case name.includes('post'):
+        return 'create';
+      case name.includes('patch'):
+        return 'update';
+      case name.includes('put'):
+        return 'update';
+      case name.includes('delete'):
+        return 'delete';
+      default:
+        return 'read';
+    }
   }
 }

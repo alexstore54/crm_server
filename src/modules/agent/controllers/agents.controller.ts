@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, GetAgentLeadsParams, UpdateAgent } from '../dto';
@@ -19,11 +19,16 @@ export class AgentsController {
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
-  //@UseGuards(AgentAccessGuard, PermissionsGuard)
+  @UseGuards(AgentAccessGuard, PermissionsGuard) //PermissionsGuard
   @Post('create')
-  async createAgent(@Body() body: CreateAgent) {
-    console.log(body);
-    return this.agentService.createAgent(body);
+  async createAgent(
+    @Body() body: CreateAgent, 
+    @Req() req: any
+  ) {
+    console.log(req.operation);
+    console.log("request.operation")
+    return "Okay"
+    //return this.agentService.createAgent(body);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)

@@ -52,8 +52,8 @@ export class AuthRedisService {
       const stringifySessionInput = JSON.stringify(sessionInput);
       const stringifyPermissionsInput = JSON.stringify(permissionsInput);
 
-      await this.sessionsRedis.set(redisId, stringifySessionInput);
-      await this.permissionsRedis.set(redisId, stringifyPermissionsInput);
+      await this.sessionsRedis.set(redisId, stringifySessionInput, 'EX', this.ttl);
+      await this.permissionsRedis.set(redisId, stringifyPermissionsInput, 'EX', this.ttl);
     } catch (error: any) {
       this.handleError(error);
     }
@@ -90,7 +90,7 @@ export class AuthRedisService {
     }
     try {
       const stringifyInput = JSON.stringify({ ...permissions, ...input });
-      await this.permissionsRedis.set(redisId, stringifyInput);
+      await this.permissionsRedis.set(redisId, stringifyInput, 'EX', this.ttl);
     } catch (error: any) {
       this.handleError(error);
     }
