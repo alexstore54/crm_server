@@ -1,20 +1,18 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
 import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/shared/schemas';
 import { getModeratorSeedRole, getLowAccessAgentSeedRole, getNoAccessAgentSeedRole, getPermissions, lowAccessPermissions } from '@/seeds/seed.data';
-import { AppLoggerService } from '@/modules/logger/services';
+// import { AppLoggerService } from '@/modules/logger/services';
 import { Agent, AgentPermission, LogLevel, Permission, Role } from '@prisma/client';
 import { SEEDS_MESSAGES } from '@/shared/constants/errors';
 
 export * from './seed.data';
 
-@Injectable()
+
 export class SeedService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly logger: AppLoggerService,
-    private readonly configService: ConfigService,
+      private readonly prisma: PrismaService,
+      private readonly configService: ConfigService,
   ) {}
 
   public async seed(): Promise<void> {
@@ -48,13 +46,9 @@ export class SeedService {
         //-------------------------------------------------//
         
         
-        this.logger.log(SEEDS_MESSAGES.SEEDS_SUCCESS, {
-            message: SEEDS_MESSAGES.SEEDS_SUCCESS,
-            level: LogLevel.INFO,
-        });
       });
     } catch (error: any) {
-      this.logError(error);
+        throw new Error(error)
     }
   }
 
@@ -65,8 +59,8 @@ export class SeedService {
       });
     } catch (error: any) {
       const errorMessage = `${SEEDS_MESSAGES.DB_ERROR}: ${error.message}`;
-      this.logError(errorMessage);
-      throw new InternalServerErrorException(SEEDS_MESSAGES.DB_ERROR, errorMessage);
+      
+      throw new Error(error)
     }
   }
 
@@ -76,9 +70,7 @@ export class SeedService {
         data
       });
     } catch (error: any) {
-      const errorMessage = `${SEEDS_MESSAGES.DB_ERROR}: ${error.message}`;
-      this.logError(errorMessage);
-      throw new InternalServerErrorException(SEEDS_MESSAGES.DB_ERROR, errorMessage);
+        throw new Error(error)
     }
   }
 
@@ -92,9 +84,9 @@ export class SeedService {
 
       return await this.prisma.permission.findMany({});
     } catch (error: any) {
-      this.logError(error);
+      
       const errorMessage = `${SEEDS_MESSAGES.DB_ERROR}: ${error.message}`;
-      throw new InternalServerErrorException(SEEDS_MESSAGES.DB_ERROR, errorMessage);
+      throw new Error(error)
     }
   }
 
@@ -111,7 +103,7 @@ export class SeedService {
         })),
       });
     } catch (error: any) {
-      this.logError(error);
+        throw new Error(error)
     }
   }
 
@@ -123,7 +115,7 @@ export class SeedService {
             data 
       });
     } catch (error: any) {
-          this.logError(error);
+          
     }
   }
 
@@ -172,10 +164,4 @@ export class SeedService {
     };
 }
 
-  private logError(errorMessage: string) {
-      this.logger.log(errorMessage, {
-        message: errorMessage,
-        level: LogLevel.ERROR,
-      });
-  }
 }

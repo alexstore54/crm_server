@@ -123,6 +123,8 @@ model Phone {
 model Role {
   publicId       String           @unique @default(uuid())
   id             Int              @id @default(autoincrement())
+  canCRUD        Boolean          @default(false)
+  isVisible      Boolean          @default(false)
   name           String
   Agent          Agent[]
   RolePermission RolePermission[]
