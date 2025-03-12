@@ -6,48 +6,18 @@ import {
 } from '@/shared/types/permissions';
 
 export class PermissionsUtil {
-  public static mapPermissionDetailToPermissionTable(
-    mergedPermissions: PermissionDetail[],
+  public static mapPrismaPermissionsToPermissionTable(
+    prismaPermissions: PrismaPermissionWithDetails[],
   ): PermissionsTable {
     const permissionsTable: PermissionsTable = {};
-
-    for (const mergedPermission of mergedPermissions) {
-      if (mergedPermission.allowed) {
-        permissionsTable[mergedPermission.key] = mergedPermission.allowed;
-      }
-    }
-
-    return permissionsTable;
-  }
-
-  public static mapPrismaPermissionToPermissionDetail(
-    permissions: PrismaPermissionWithDetails[],
-  ): PermissionDetail[] {
-    return permissions.map((permission) => {
-      return {
-        id: permission.Permission.id,
-        key: permission.Permission.key as PermissionsKeys,
+    prismaPermissions.forEach((permission) => {
+      permissionsTable[permission.Permission.key as PermissionsKeys] = {
         allowed: permission.allowed,
+        permissionId: permission.Permission.id,
       };
     });
-  }
 
-
-  public static mergePermissions(
-    agentPermissions: PermissionDetail[],
-    rolePermissions: PermissionDetail[],
-  ): PermissionDetail[] {
-    const mergedPermissionsMap: { [key: string]: PermissionDetail } = {};
-
-    for (const rolePermission of rolePermissions) {
-      mergedPermissionsMap[rolePermission.key] = rolePermission;
-    }
-
-    for (const agentPermission of agentPermissions) {
-      mergedPermissionsMap[agentPermission.key] = agentPermission;
-    }
-
-    return Object.values(mergedPermissionsMap);
+    return permissionsTable;
   }
 
   public static filterPermissionsDetail(permissions: PermissionDetail[]): PermissionDetail[] {

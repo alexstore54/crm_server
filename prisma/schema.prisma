@@ -77,7 +77,7 @@ model Lead {
   LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
   Phone        Phone[]
   Desk         Desk?       @relation(fields: [deskId], references: [id])
-  Team         Team?        @relation(fields: [teamId], references: [id])
+  Team         Team?       @relation(fields: [teamId], references: [id])
 }
 
 model LeadStatus {
@@ -103,12 +103,12 @@ model Permission {
 }
 
 model Team {
-  publicId String  @unique @default(uuid())
-  id       Int     @id @default(autoincrement())
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
 
   name   String
-  Agents Agent[]   @relation("AgentTeams")
-  Leads  Lead[]   
+  Agents Agent[] @relation("AgentTeams")
+  Leads  Lead[]
 }
 
 model Phone {

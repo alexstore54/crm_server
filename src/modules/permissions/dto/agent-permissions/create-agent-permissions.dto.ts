@@ -1,11 +1,13 @@
-import { IsNumber } from 'class-validator';
-import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions/incoming-permission.dto';
-import { UseValidator } from '@/common/decorators/validation';
+import { IsArray, IsNumber, ValidateIf, ValidateNested } from 'class-validator';
+
+import { Type } from 'class-transformer';
+import { UseValidation } from '@/common/decorators/validation';
+import { IncomingPermission } from '@/modules/permissions/dto';
 
 export class CreateAgentPermissions {
   @IsNumber()
   agentId: number;
 
-  @UseValidator.validatePermissionsArray()
+  @UseValidation.validatePermissionsArray()
   permissions: IncomingPermission[];
 }

@@ -23,6 +23,18 @@ export class TeamRepository {
     }
   }
 
+  public async findOneByPublicId(teamPublicId: string): Promise<Team | null> {
+    try {
+      return this.prisma.team.findUnique({
+        where: {
+          publicId: teamPublicId,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
   public async findManyByAgentId(agentId: number): Promise<Team[]> {
     try {
       return await this.prisma.team.findMany({
@@ -33,6 +45,16 @@ export class TeamRepository {
             },
           },
         },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async createOne(data: Prisma.TeamCreateInput): Promise<Team> {
+    try {
+      return await this.prisma.team.create({
+        data,
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

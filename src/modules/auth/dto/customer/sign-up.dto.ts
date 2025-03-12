@@ -1,5 +1,5 @@
 import { IsEmail, IsPhoneNumber } from 'class-validator';
-import { UseValidator } from '@/common/decorators/validation';
+import { UseValidation } from '@/common/decorators/validation';
 
 export class SignUpCustomer {
   @IsEmail()
@@ -8,12 +8,12 @@ export class SignUpCustomer {
   @IsPhoneNumber()
   phone: string;
 
-  @UseValidator.validatePassword()
+  @UseValidation.validatePassword()
   password: string;
 
-  @UseValidator.validateName()
+  @UseValidation.validateName()
   firstname: string;
 
-  @UseValidator.validateName()
+  @UseValidation.validateName()
   lastname: string;
 }

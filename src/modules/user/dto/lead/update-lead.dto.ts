@@ -1,5 +1,5 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { UseValidator } from '@/common/decorators/validation';
+import { UseValidation } from '@/common/decorators/validation';
 
 export class UpdateLead {
   @IsOptional()
@@ -7,11 +7,11 @@ export class UpdateLead {
   country?: string;
 
   @IsOptional()
-  @UseValidator.validateName()
+  @UseValidation.validateName()
   firstname?: string;
 
   @IsOptional()
-  @UseValidator.validateName()
+  @UseValidation.validateName()
   lastname?: string;
 
   @IsOptional()

@@ -17,6 +17,16 @@ export class RolePermissionsController {
     @Param('publicId', UUIDValidationPipe) publicId: string,
     @Body() body: any,
   ) {
-    // return this.rolePermissionsService.updateOneByRolePublicId(publicId, body);
+    return this.rolePermissionsService.updateRolePermissions(publicId, body);
+  }
+
+  @UsePermissions(ENDPOINTS_PERMISSIONS.ROLE_PERMISSIONS.UPDATE_ROLES_PERMISSIONS)
+  @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
+  @Patch(':publicId/deep-update')
+  async updateDeepRolePermissions(
+    @Param('publicId', UUIDValidationPipe) publicId: string,
+    @Body() body: any,
+  ) {
+    return this.rolePermissionsService.deepUpdateRolePermissions(publicId, body);
   }
 }

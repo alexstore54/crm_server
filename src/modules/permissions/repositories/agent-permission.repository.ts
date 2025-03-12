@@ -3,7 +3,7 @@ import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AgentPermission, Prisma } from '@prisma/client';
 import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
-import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
+import { IncomingPermission } from '@/modules/permissions/dto';
 
 @Injectable()
 export class AgentPermissionRepository {

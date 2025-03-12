@@ -16,7 +16,7 @@ import {
   AuthService,
   TokensService,
 } from '@/modules/auth/services';
-import { AuthGateway } from '@/modules/auth/geateway';
+import { AuthGateway } from 'modules/auth/gateways';
 import { CustomersRepository, EmailRepository } from '@/modules/user/repositories';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { JwtService } from '@nestjs/jwt';
@@ -25,7 +25,6 @@ import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import { AgentPermissionRepository } from '@/modules/permissions/repositories';
-import { PermissionsService } from '@/modules/permissions/service';
 
 @Module({
   imports: [GatewayModule, AuthRedisModule, AgentModule, UserModule, PermissionModule],
@@ -45,7 +44,6 @@ import { PermissionsService } from '@/modules/permissions/service';
     AuthGoogleService,
     TokensService,
     AuthRedisService,
-    PermissionsService,
     //Repositories
     CustomersRepository,
     AgentRepository,
