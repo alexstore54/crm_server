@@ -1,1 +1,1 @@
-export * from './';
+export * from './create-role-permissions.dto';

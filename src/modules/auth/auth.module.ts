@@ -16,7 +16,7 @@ import {
   AuthService,
   TokensService,
 } from '@/modules/auth/services';
-import { AuthGateway } from '@/modules/auth/geateway';
+import { AuthGateway } from 'modules/auth/gateways';
 import { CustomersRepository, EmailRepository } from '@/modules/user/repositories';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { JwtService } from '@nestjs/jwt';

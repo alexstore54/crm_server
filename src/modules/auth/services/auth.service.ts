@@ -10,7 +10,7 @@ import { BcryptHelper } from '@/shared/helpers';
 import { v4 as uuidv4 } from 'uuid';
 import { TokensService } from '@/modules/auth/services/tokens.service';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { AuthGateway } from '@/modules/auth/geateway';
+import { AuthGateway } from 'modules/auth/gateways';
 import { CreateSessionInput, PayloadUUID } from '@/shared/types/redis';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { Agent } from '@prisma/client';

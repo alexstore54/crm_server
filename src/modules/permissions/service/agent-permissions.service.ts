@@ -1,7 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { UpdateAgentPermissions } from '@/modules/agent/dto/update-agent-perms.dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { PrismaService } from '@/shared/db/prisma';
 import { AgentPermissionRepository, AgentRepository } from '@/modules/agent/repositories';
 import { Agent, AgentPermission } from '@prisma/client';
 import { CreateAgentPermissions } from '@/modules/permissions/dto/agent-permissions';
@@ -36,9 +35,12 @@ export class AgentPermissionsService {
 
     try {
       return this.agentPermissionsRepository.updateMany(agent.id, permissions);
+
+      //TODO: Implement socket logic
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
+
   }
 
   public async getManyByAgentId(agentId: number): Promise<AgentPermission[]> {

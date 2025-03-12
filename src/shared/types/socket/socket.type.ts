@@ -3,6 +3,7 @@ export enum SocketRooms {
 }
 export enum SocketNamespaces {
   auth = 'auth',
+  permissions = 'permissions',
 }
 export enum SocketEvents {
   connect = 'connect',
