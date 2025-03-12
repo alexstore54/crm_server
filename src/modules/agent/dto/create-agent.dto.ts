@@ -1,6 +1,6 @@
 import { IsEmail, IsNumber, IsOptional } from 'class-validator';
-import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 import { UseValidation } from '@/common/decorators/validation';
+import { IncomingPermission } from '@/modules/permissions/dto';
 
 export class CreateAgent {
   @IsNumber()

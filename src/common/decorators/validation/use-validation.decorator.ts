@@ -11,8 +11,8 @@ import {
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
-import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
 import { applyDecorators } from '@nestjs/common';
+import { IncomingPermission } from '@/modules/permissions/dto';
 
 export class UseValidation {
   public static validateName() {
