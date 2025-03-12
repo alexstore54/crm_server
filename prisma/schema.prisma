@@ -24,6 +24,7 @@ model Agent {
 model AgentPermission {
   agentId      Int
   permissionId Int
+  allowed      Boolean    @default(false)
   Agent        Agent      @relation(fields: [agentId], references: [id])
   Permission   Permission @relation(fields: [permissionId], references: [id])
 
@@ -80,9 +81,9 @@ model Lead {
 }
 
 model LeadStatus {
-  id   Int    @id @default(autoincrement())
-  name String
-  Lead Lead[]
+      id   Int    @id @default(autoincrement())
+      name String
+      Lead Lead[]
 }
 
 model Log {
@@ -120,6 +121,7 @@ model Phone {
 }
 
 model Role {
+  publicId       String           @unique @default(uuid())
   id             Int              @id @default(autoincrement())
   name           String
   Agent          Agent[]
@@ -129,6 +131,7 @@ model Role {
 model RolePermission {
   roleId       Int
   permissionId Int
+  allowed      Boolean    @default(false)
   Permission   Permission @relation(fields: [permissionId], references: [id])
   Role         Role       @relation(fields: [roleId], references: [id])
 
@@ -140,3 +143,13 @@ enum LogLevel {
   WARN
   ERROR
 }
+
+
+// [
+//            "READ_TEAM_AGENTS" ,
+//            "CREATE_TEAM_AGENTS" ,
+//            "UPDATE_TEAM_AGENTS" ,
+// ]
+
+
+// permission = [{id: 1, key: "READ_TEAM_AGENTS"}, {id: 2, key: "READ_TEAM_AGENTS"},{id: 3, key: "READ_TEAM_AGENTS"}]

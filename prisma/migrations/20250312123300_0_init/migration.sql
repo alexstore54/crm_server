@@ -17,6 +17,7 @@ CREATE TABLE "Agent" (
 CREATE TABLE "AgentPermission" (
     "agentId" INTEGER NOT NULL,
     "permissionId" INTEGER NOT NULL,
+    "allowed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "AgentPermission_pkey" PRIMARY KEY ("agentId","permissionId")
 );
@@ -129,6 +130,7 @@ CREATE TABLE "Role" (
 CREATE TABLE "RolePermission" (
     "roleId" INTEGER NOT NULL,
     "permissionId" INTEGER NOT NULL,
+    "allowed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "RolePermission_pkey" PRIMARY KEY ("roleId","permissionId")
 );

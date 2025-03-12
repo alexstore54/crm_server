@@ -75,5 +75,5 @@ export type PrismaPermissionWithDetails =
 export type PermissionDetail = {
   id: number;
   key: PermissionsKeys;
-  allowed: boolean;
+  
 };

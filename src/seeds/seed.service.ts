@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
 import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/shared/schemas';
-import { getModeratorSeedRole, lowAccessAgentSeedRole, noAccessAgentSeedRole, getPermissions, lowAccessPermissions } from '@/seeds/seed.data';
+import { getModeratorSeedRole, getLowAccessAgentSeedRole, getNoAccessAgentSeedRole, getPermissions, lowAccessPermissions } from '@/seeds/seed.data';
 import { AppLoggerService } from '@/modules/logger/services';
 import { Agent, AgentPermission, LogLevel, Permission, Role } from '@prisma/client';
 import { SEEDS_MESSAGES } from '@/shared/constants/errors';
@@ -21,25 +21,32 @@ export class SeedService {
     try {
       await this.prisma.$transaction(async (tx) => {
         const permissions: Permission[] = await this.seedPermissions();
-        //await this.seedPermissions();
-        
+        // Создать роль модератора!
         const moderatorRole: Role = await this.seedRoles(getModeratorSeedRole());
-        const noAccessRole: Role =  await this.seedRoles(noAccessAgentSeedRole());
-        const minAccessRole: Role = await this.seedRoles(lowAccessAgentSeedRole());
+        // создать RolePermissions
+        // ДЛЯ модератора. Всё Доступно
+        await this.seedRolePermissions(permissions.map(p => ({permissionId: p.id, roleId: moderatorRole.id, allowed: true}))); 
         
+        // ДЛЯ того у кого НЕТ доступа
+        const noAccessRole: Role = await this.seedRoles(getNoAccessAgentSeedRole());
+        // ДЛЯ Агента у которого НЕТ прав. Пропускаем seedRolePermissions
+        await this.seedRolePermissions(permissions.map(p => ({permissionId: p.id, roleId: noAccessRole.id, allowed: false}))); 
+        // ДЛЯ Агента с минимальным кол-ом прав
+        const lowAccessRole: Role = await this.seedRoles(getLowAccessAgentSeedRole());
+        // создать RolePermissions
+        // ДЛЯ Агента. Минимальное кол-во доступных прав
+        const somePerms = this.getRolePermissionsList(permissions, lowAccessPermissions(), lowAccessRole.id)
         
-        const moderatorPermissions = await this.getRolePermissionsList(permissions.map(p => p.key), moderatorRole.id)
-        const noAccessPermissions  = await this.getRolePermissionsList([], noAccessRole.id)
-        const minAccessPermissions = await this.getRolePermissionsList(lowAccessPermissions(), minAccessRole.id)
-
-
-        await this.seedModeratorRolePermissions(moderatorPermissions);
-        await this.seedModeratorRolePermissions(noAccessPermissions);
-        await this.seedModeratorRolePermissions(minAccessPermissions);
+        await this.seedRolePermissions(somePerms); 
         
-        const moderator: Agent = await this.seedModerator();
+        // Создать модератора 
+        const moderator: Agent = await this.seedAgent(this.getModerator());
+        //Создать Агента БЕЗ прав
+        const noAccessUser: Agent = await this.seedAgent(this.getNoAccessUser());
+        //Создать Агента с минимальным кол-ом прав
+        const lowAccessUser: Agent = await this.seedAgent(this.getLowAccessUser());
+        //-------------------------------------------------//
         
-        //await this.seedModeratorPermissions(moderator.id, permissions); 
         
         this.logger.log(SEEDS_MESSAGES.SEEDS_SUCCESS, {
             message: SEEDS_MESSAGES.SEEDS_SUCCESS,
@@ -63,10 +70,10 @@ export class SeedService {
     }
   }
 
-  private async seedModerator(): Promise<Agent> {
+  private async seedAgent(data:any): Promise<Agent> {
     try {
       return await this.prisma.agent.create({
-        data: this.getModerator(),
+        data
       });
     } catch (error: any) {
       const errorMessage = `${SEEDS_MESSAGES.DB_ERROR}: ${error.message}`;
@@ -108,8 +115,8 @@ export class SeedService {
     }
   }
 
-  private async seedModeratorRolePermissions(
-    data: any,
+  private async seedRolePermissions(
+    data: {roleId: number, permissionId: number, allowed: boolean}[],
   ): Promise<void> {
     try {
       await this.prisma.rolePermission.createMany({
@@ -120,23 +127,24 @@ export class SeedService {
     }
   }
 
-  private async getRolePermissionsList(allowedList: string[], roleId: number){
-      try{
-          const [allowed, disallowed] = await Promise.all([
-                this.prisma.permission.findMany({where: {key: {in: allowedList}}}),
-                this.prisma.permission.findMany({where: {key: {notIn: allowedList}}})
-          ])
+  private getRolePermissionsList(permissions: Permission[], allowedList: string[], roleId: number):{roleId:number, permissionId: number, allowed: boolean}[]{
+      return permissions.map(perm => {
+          const current = allowedList.find(a_p => a_p === perm.key);
+          if(current){
+            return {
+                    roleId,
+                    permissionId: perm.id,
+                    allowed: true
+                  }
+          }
+          return {
+                  roleId,
+                  permissionId: perm.id,
+                  allowed: false
+              }
 
-          const allowedPermissions = allowed.map(permission => ({permissionId: permission.id, allowed: true, roleId}))
-          const disallowedPermissions = disallowed.map(permission => ({permissionId: permission.id, allowed: false, roleId}))
-
-          return [...allowedPermissions, ...disallowedPermissions]
-          
-      }catch(error: any){
-          this.logError(error);
-          return
-      }
-  } 
+  })
+} 
 
   private getModerator() {
       return {
@@ -146,6 +154,23 @@ export class SeedService {
         roleId: getModeratorSeedRole().id,
       };
   }
+  private getNoAccessUser() {
+      return {
+        email: this.configService.get(configKeys.NO_ACCESS_USER) as string,
+        password: this.configService.get(configKeys.NO_ACCESS_USER_HASH_PASSWORD) as string,
+        lastOnline: null,
+        roleId: getNoAccessAgentSeedRole().id,
+      };
+  }
+
+  private getLowAccessUser() {
+    return {
+      email: this.configService.get(configKeys.LOW_ACCESS_USER) as string,
+      password: this.configService.get(configKeys.LOW_ACCESS_USER_HASH_PASSWORD) as string,
+      lastOnline: null,
+      roleId: getLowAccessAgentSeedRole().id,
+    };
+}
 
   private logError(errorMessage: string) {
       this.logger.log(errorMessage, {

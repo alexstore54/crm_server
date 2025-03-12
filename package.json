@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "seeds": "ts-node -r tsconfig-paths/register src/seeds/seed.ts",
+    "seeds:isolate": "ts-node --transpile-only -r tsconfig-paths/register src/seeds/seed.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

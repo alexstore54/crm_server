@@ -1,21 +1,25 @@
 import { Role } from '@prisma/client';
 import { permissionsTableSchema } from '@/shared/schemas';
 
-export const getModeratorSeedRole = (): Role => {
+interface PartialRole extends Omit<Role, 'publicId'> {
+  publicId?: string;
+} // Иначе TS ругается на обязательное наличие publicId
+
+export const getModeratorSeedRole = (): PartialRole => {
   return {
     name: 'Moderator',
     id: 0,
   };
 };
 
-export const noAccessAgentSeedRole = (): Role => {
+export const getNoAccessAgentSeedRole = (): PartialRole => {
   return {
     name: 'No access',
     id: 1,
   };
 }
 
-export const lowAccessAgentSeedRole = (): Role => {
+export const getLowAccessAgentSeedRole = (): PartialRole => {
   return {
     name: 'Minimum access',
     id: 2,
@@ -39,6 +43,8 @@ export const lowAccessPermissions = ():string[] => {
            "READ_DESKS",
            "DELETE_DESKS" ,
            "READ_TEAMS" ,
-           "UPDATE_HIMSELF" ,
+           "UPDATE_HIMSELF",
     ]
 }
+
+
