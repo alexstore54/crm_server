@@ -138,10 +138,8 @@ export class AgentService {
   private async fetchPermissionsTable(agentId: number): Promise<PermissionsTable> {
     const agentPermissions =
       await this.agentPermissionsService.getManyWithDetailsByAgentId(agentId);
-    const mappedPermissions =
-      PermissionsUtil.mapPrismaPermissionsToPermissionDetail(agentPermissions);
 
-    return PermissionsUtil.mapPermissionDetailToPermissionTable(mappedPermissions);
+    return PermissionsUtil.mapPrismaPermissionsToPermissionTable(agentPermissions);
   }
 
   private async fetchDesksByAgentId(
