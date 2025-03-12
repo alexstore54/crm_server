@@ -5,17 +5,13 @@ import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { UserModule } from '@/modules/user/user.module';
 import { PermissionModule } from '@/modules/permissions/permission.module';
-import {
-  AgentPermissionRepository,
-  RolePermissionRepository,
-} from '@/modules/permissions/repositories';
 import { DeskRepository } from '@/modules/agent/repositories';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
 import { AgentController } from '@/modules/agent/controllers/agent.controller';
 import { TeamModule } from '@/modules/team/team.module';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
-import { AgentPermissionsService, PermissionsService } from '@/modules/permissions/service';
+import { AgentPermissionsService } from '@/modules/permissions/service';
 
 @Module({
   imports: [
@@ -33,7 +29,6 @@ import { AgentPermissionsService, PermissionsService } from '@/modules/permissio
     AuthRedisService,
     AgentService,
     ValidationService,
-    PermissionsService,
     AgentPermissionsService,
     //repositories
     AgentRepository,

@@ -5,7 +5,6 @@ import {
 } from '@/modules/permissions/controllers';
 import {
   AgentPermissionsService,
-  PermissionsService,
   RolePermissionsService,
   ValidationService,
 } from '@/modules/permissions/service';
@@ -26,7 +25,6 @@ import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-
     RolePermissionsService,
     AuthRedisService,
     ValidationService,
-    PermissionsService,
 
     AgentRepository,
     AgentPermissionRepository,
@@ -35,7 +33,6 @@ import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-
   exports: [
     RolePermissionRepository,
     AgentPermissionRepository,
-    PermissionsService,
     AgentPermissionsService,
   ],
 })

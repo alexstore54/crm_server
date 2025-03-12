@@ -1,7 +1,12 @@
 import { AgentPermission, Permission, RolePermission } from '@prisma/client';
 
 export type PermissionsTable = {
-  [key in PermissionsKeys]?: boolean;
+  [key in PermissionsKeys]?: TablePermission;
+};
+
+export type TablePermission = {
+  allowed: boolean;
+  permissionId: number;
 };
 
 export enum PermissionsKeys {

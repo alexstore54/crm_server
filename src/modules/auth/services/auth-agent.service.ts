@@ -4,14 +4,14 @@ import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { BcryptHelper } from '@/shared/helpers';
 import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
-import { PermissionsService } from '@/modules/permissions/service';
 import { PermissionsUtil } from '@/shared/utils/permissions/permissions.util';
+import { AgentPermissionsService } from '@/modules/permissions/service';
 
 @Injectable()
 export class AuthAgentService {
   constructor(
     private readonly agentRepository: AgentRepository,
-    private readonly permissionsService: PermissionsService,
+    private readonly agentPermissionsService: AgentPermissionsService,
   ) {}
 
   public async validate(data: SignInAgent): Promise<AuthAgentLoginInput> {
@@ -28,12 +28,12 @@ export class AuthAgentService {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_CREDS);
     }
 
-    const allowedPermissions = await this.permissionsService.getProcessedAgentPermissions(
+    const agentPermissions = await this.agentPermissionsService.getManyWithDetailsByAgentId(
       agent.id,
-      agent.roleId,
     );
+
     const permissionsTable =
-      PermissionsUtil.mapPermissionDetailToPermissionTable(allowedPermissions);
+      PermissionsUtil.mapPrismaPermissionsToPermissionTable(agentPermissions);
 
     return {
       agent,

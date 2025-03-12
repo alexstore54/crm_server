@@ -10,7 +10,6 @@ import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
 @Injectable()
 export class AgentPermissionsService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly agentRepository: AgentRepository,
     private readonly agentPermissionsRepository: AgentPermissionRepository,
   ) {}
@@ -42,7 +41,7 @@ export class AgentPermissionsService {
     }
   }
 
-  public async getAgentPermissionsByAgentId(agentId: number): Promise<AgentPermission[]> {
+  public async getManyByAgentId(agentId: number): Promise<AgentPermission[]> {
     try {
       return this.agentPermissionsRepository.getManyByAgentId(agentId);
     } catch (error: any) {

@@ -1,4 +1,4 @@
-import { PermissionsKeys } from '@/shared/types/auth';
+import { PermissionsKeys } from '@/shared/types/permissions';
 
 export const READ_AGENTS_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.READ_TEAM_AGENTS,

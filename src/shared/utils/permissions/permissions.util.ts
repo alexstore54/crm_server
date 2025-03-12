@@ -7,20 +7,35 @@ import {
 
 export class PermissionsUtil {
   public static mapPermissionDetailToPermissionTable(
-    mergedPermissions: PermissionDetail[],
+    permissionsDetail: PermissionDetail[],
   ): PermissionsTable {
     const permissionsTable: PermissionsTable = {};
 
-    for (const mergedPermission of mergedPermissions) {
-      if (mergedPermission.allowed) {
-        permissionsTable[mergedPermission.key] = mergedPermission.allowed;
-      }
+    for (const permissionDetail of permissionsDetail) {
+      permissionsTable[permissionDetail.key] = {
+        allowed: permissionDetail.allowed,
+        permissionId: permissionDetail.id,
+      };
     }
 
     return permissionsTable;
   }
 
-  public static mapPrismaPermissionToPermissionDetail(
+  public static mapPrismaPermissionsToPermissionTable(
+    prismaPermissions: PrismaPermissionWithDetails[],
+  ): PermissionsTable {
+    const permissionsTable: PermissionsTable = {};
+    prismaPermissions.forEach((permission) => {
+      permissionsTable[permission.Permission.key as PermissionsKeys] = {
+        allowed: permission.allowed,
+        permissionId: permission.Permission.id,
+      };
+    });
+
+    return permissionsTable;
+  }
+
+  public static mapPrismaPermissionsToPermissionDetail(
     permissions: PrismaPermissionWithDetails[],
   ): PermissionDetail[] {
     return permissions.map((permission) => {
@@ -30,24 +45,6 @@ export class PermissionsUtil {
         allowed: permission.allowed,
       };
     });
-  }
-
-
-  public static mergePermissions(
-    agentPermissions: PermissionDetail[],
-    rolePermissions: PermissionDetail[],
-  ): PermissionDetail[] {
-    const mergedPermissionsMap: { [key: string]: PermissionDetail } = {};
-
-    for (const rolePermission of rolePermissions) {
-      mergedPermissionsMap[rolePermission.key] = rolePermission;
-    }
-
-    for (const agentPermission of agentPermissions) {
-      mergedPermissionsMap[agentPermission.key] = agentPermission;
-    }
-
-    return Object.values(mergedPermissionsMap);
   }
 
   public static filterPermissionsDetail(permissions: PermissionDetail[]): PermissionDetail[] {

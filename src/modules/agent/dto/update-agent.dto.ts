@@ -13,7 +13,7 @@ import {
 import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { ERROR_MESSAGES, VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
-import { UseValidator } from '@/common/decorators/validation';
+import { UseValidation } from '@/common/decorators/validation';
 
 export class UpdateAgent {
   @IsOptional()
@@ -25,10 +25,10 @@ export class UpdateAgent {
   email?: string;
 
   @IsOptional()
-  @UseValidator.validatePassword()
+  @UseValidation.validatePassword()
   password?: string;
 
   @IsOptional()
-  @UseValidator.validateDesksIdArray()
+  @UseValidation.validateDesksIdArray()
   deskIds?: number[];
 }

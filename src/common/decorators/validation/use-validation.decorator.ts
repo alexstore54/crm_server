@@ -1,4 +1,3 @@
-import { applyDecorators } from '@nestjs/common';
 import {
   IsArray,
   IsNumber,
@@ -13,8 +12,9 @@ import { VALIDATION_REGEX } from '@/shared/constants/auth';
 import { VALIDATION_ERRORS } from '@/shared/constants/errors';
 import { Type } from 'class-transformer';
 import { IncomingPermission } from '@/modules/permissions/dto/agent-permissions';
+import { applyDecorators } from '@nestjs/common';
 
-export class UseValidator {
+export class UseValidation {
   public static validateName() {
     return applyDecorators(
       IsString(),

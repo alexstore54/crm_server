@@ -139,7 +139,7 @@ export class AgentService {
     const agentPermissions =
       await this.agentPermissionsService.getManyWithDetailsByAgentId(agentId);
     const mappedPermissions =
-      PermissionsUtil.mapPrismaPermissionToPermissionDetail(agentPermissions);
+      PermissionsUtil.mapPrismaPermissionsToPermissionDetail(agentPermissions);
 
     return PermissionsUtil.mapPermissionDetailToPermissionTable(mappedPermissions);
   }

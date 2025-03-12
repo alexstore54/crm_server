@@ -5,58 +5,58 @@ import { AgentPermission, RolePermission } from '@prisma/client';
 
 //утилита для работы с входящими permissions
 export class IncomingPermissionsUtil {
-  public static filterUniquePermissions(permissions: IncomingPermission[]): IncomingPermission[] {
-    const permissionMap = new Map<number, boolean>();
+  // public static filterUniquePermissions(permissions: IncomingPermission[]): IncomingPermission[] {
+  //   const permissionMap = new Map<number, boolean>();
+  //
+  //   for (const permission of permissions) {
+  //     permissionMap.set(permission.permissionId, permission.allowed);
+  //   }
+  //
+  //   return Array.from(permissionMap, ([permissionId, allowed]) => ({
+  //     permissionId,
+  //     allowed,
+  //   }));
+  // }
 
-    for (const permission of permissions) {
-      permissionMap.set(permission.permissionId, permission.allowed);
-    }
-
-    return Array.from(permissionMap, ([permissionId, allowed]) => ({
-      permissionId,
-      allowed,
-    }));
-  }
-
-  public static filterPermissionsByRoleDefaults(
-    uniquePermissions: IncomingPermission[],
-    rolePermissions: IncomingPermission[],
-    agentId: number,
-  ): AllowedPermission[] {
-    return uniquePermissions.reduce((acc, incoming) => {
-      const rolePerm = rolePermissions.find((rp) => rp.permissionId === incoming.permissionId);
-
-      const defaultAllowed = rolePerm ? rolePerm.allowed : false;
-      if (incoming.allowed !== defaultAllowed) {
-        acc.push({
-          agentId,
-          permissionId: incoming.permissionId,
-          allowed: incoming.allowed,
-        });
-      }
-      return acc;
-    }, [] as AllowedPermission[]);
-  }
-
-  public static mapPermissionsToAgentPermissions(
-    agentId: number,
-    rolePermissions: RolePermission[],
-    incomingPermissions: IncomingPermission[],
-  ): AgentPermission[] {
-    const rolePermissionIds = new Set(
-      rolePermissions.map((rolePermission) => rolePermission.permissionId),
-    );
-
-    return incomingPermissions
-      .filter((perm) => rolePermissionIds.has(perm.permissionId))
-      .map((perm) => {
-        const rolePerm = rolePermissions.find((rp) => rp.permissionId === perm.permissionId);
-        return rolePerm && rolePerm.allowed !== perm.allowed
-          ? { ...perm, allowed: perm.allowed, agentId }
-          : undefined;
-      })
-      .filter((item): item is AgentPermission => item !== undefined);
-  }
+  // public static filterPermissionsByRoleDefaults(
+  //   uniquePermissions: IncomingPermission[],
+  //   rolePermissions: IncomingPermission[],
+  //   agentId: number,
+  // ): AllowedPermission[] {
+  //   return uniquePermissions.reduce((acc, incoming) => {
+  //     const rolePerm = rolePermissions.find((rp) => rp.permissionId === incoming.permissionId);
+  //
+  //     const defaultAllowed = rolePerm ? rolePerm.allowed : false;
+  //     if (incoming.allowed !== defaultAllowed) {
+  //       acc.push({
+  //         agentId,
+  //         permissionId: incoming.permissionId,
+  //         allowed: incoming.allowed,
+  //       });
+  //     }
+  //     return acc;
+  //   }, [] as AllowedPermission[]);
+  // }
+  //
+  // public static mapPermissionsToAgentPermissions(
+  //   agentId: number,
+  //   rolePermissions: RolePermission[],
+  //   incomingPermissions: IncomingPermission[],
+  // ): AgentPermission[] {
+  //   const rolePermissionIds = new Set(
+  //     rolePermissions.map((rolePermission) => rolePermission.permissionId),
+  //   );
+  //
+  //   return incomingPermissions
+  //     .filter((perm) => rolePermissionIds.has(perm.permissionId))
+  //     .map((perm) => {
+  //       const rolePerm = rolePermissions.find((rp) => rp.permissionId === perm.permissionId);
+  //       return rolePerm && rolePerm.allowed !== perm.allowed
+  //         ? { ...perm, allowed: perm.allowed, agentId }
+  //         : undefined;
+  //     })
+  //     .filter((item): item is AgentPermission => item !== undefined);
+  // }
 
   // private static createRolesMap(
   //   defaultRoles: RolePermissionWithDetails[],

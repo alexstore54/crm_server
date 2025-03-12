@@ -25,7 +25,6 @@ import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import { AgentPermissionRepository } from '@/modules/permissions/repositories';
-import { PermissionsService } from '@/modules/permissions/service';
 
 @Module({
   imports: [GatewayModule, AuthRedisModule, AgentModule, UserModule, PermissionModule],
@@ -45,7 +44,6 @@ import { PermissionsService } from '@/modules/permissions/service';
     AuthGoogleService,
     TokensService,
     AuthRedisService,
-    PermissionsService,
     //Repositories
     CustomersRepository,
     AgentRepository,
