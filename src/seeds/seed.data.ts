@@ -1,7 +1,5 @@
-import { Role } from '@prisma/client';
 import { permissionsTableSchema } from '@/shared/schemas';
 import { PermissionsKeys } from '@/shared/types/permissions';
-import { v4 as uuidv4 } from 'uuid';
 
 export const getModeratorSeedRole = () => {
   return {
@@ -14,8 +12,6 @@ export const getModeratorSeedRole = () => {
 export const getNoAccessAgentSeedRole = () => {
   return {
     name: 'No access',
-    publicId: uuidv4(),
-    isMutable: false,
   };
 };
 

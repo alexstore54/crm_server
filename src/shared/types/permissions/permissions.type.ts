@@ -77,8 +77,9 @@ export type PrismaPermissionWithDetails =
   | (AgentPermission & PermissionWithDetails)
   | (RolePermission & PermissionWithDetails);
 
-export type PermissionDetail = {
-  id: number;
-  key: PermissionsKeys;
-  
+export type FullPermission = {
+  roleId: number;
+  permissionId: number;
+  allowed: boolean;
+  key?: PermissionsKeys;
 };

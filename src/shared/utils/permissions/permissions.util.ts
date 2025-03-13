@@ -1,9 +1,10 @@
 import {
-  PermissionDetail,
+  FullPermission,
   PermissionsKeys,
   PermissionsTable,
   PrismaPermissionWithDetails,
 } from '@/shared/types/permissions';
+import { Permission } from '@prisma/client';
 
 export class PermissionsUtil {
   public static mapPrismaPermissionsToPermissionTable(
@@ -20,7 +21,21 @@ export class PermissionsUtil {
     return permissionsTable;
   }
 
-  public static filterPermissionsDetail(permissions: PermissionDetail[]): PermissionDetail[] {
+  public static mapPermissionsToFullPermissions(
+    permissions: Permission[],
+    roleId: number,
+    allAllowed: boolean,
+  ): FullPermission[] {
+    return permissions.map((permission) => {
+      return {
+        roleId,
+        permissionId: permission.id,
+        allowed: allAllowed,
+      };
+    });
+  }
+
+  public static filterPermissionsDetail(permissions: FullPermission[]): FullPermission[] {
     return permissions.filter((permission) => permission.allowed);
   }
 }

@@ -1,8 +1,11 @@
 import { Role } from '@prisma/client';
 
 export const getMockedRole = (): Role => {
-  return  {
+  return {
     id: 1,
-    name: 'moderator',
-  }
-}
+    name: 'mock_role',
+    isMutable: true,
+    publicId: 'publicId',
+    isVisible: true,
+  };
+};

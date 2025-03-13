@@ -8,8 +8,12 @@ import {
   lowAccessPermissions,
 } from '@/seeds/seed.data';
 import { SEEDS_MESSAGES } from '@/shared/constants/errors';
-import { Agent, AgentPermission, Permission, Role } from '@prisma/client';
+import { Agent, Permission, Prisma, Role } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
+import { LOW_ACCESS_USER, NO_ACCESS_USER } from '@/shared/constants/tests/agents.constant';
+import { FullPermission, PermissionsKeys } from '@/shared/types/permissions';
+import { PermissionsUtil } from '@/shared/utils';
+import { NodeEnv } from '@/common/config/types';
 
 class Seed {
   private static readonly prisma: PrismaService = new PrismaService();
@@ -18,57 +22,32 @@ class Seed {
   public static async run(): Promise<void> {
     try {
       await this.prisma.$transaction(async (tx) => {
-        const permissions: Permission[] = await this.seedPermissions();
-        // Создать роль модератора!
-        const moderatorRole: Role = await this.seedRoles(getModeratorSeedRole());
-        // создать RolePermissions
-        // ДЛЯ модератора. Всё Доступно
-        await this.seedRolePermissions(
-          permissions.map((p) => ({
-            permissionId: p.id,
-            roleId: moderatorRole.id,
-            allowed: true,
-          })),
+        const permissions: Permission[] = await this.seedPermissions(tx);
+
+        //по добавлял tx везде
+        // мапы дублировались - закинул в утилитту,
+        // раскидал по методам
+
+        await this.seedModerator(permissions, tx);
+
+        const envoriment: NodeEnv | undefined = this.configService.get<NodeEnv>(
+          configKeys.NODE_ENV,
         );
 
-        // ДЛЯ того у кого НЕТ доступа
-        const noAccessRole: Role = await this.seedRoles(getNoAccessAgentSeedRole());
-        // ДЛЯ Агента у которого НЕТ прав. Пропускаем seedRolePermissions
-        await this.seedRolePermissions(
-          permissions.map((p) => ({
-            permissionId: p.id,
-            roleId: noAccessRole.id,
-            allowed: false,
-          })),
-        );
-        // ДЛЯ Агента с минимальным кол-ом прав
-        const lowAccessRole: Role = await this.seedRoles(getLowAccessAgentSeedRole());
-        // создать RolePermissions
-        // ДЛЯ Агента. Минимальное кол-во доступных прав
-        const somePerms = this.getRolePermissionsList(
-          permissions,
-          lowAccessPermissions(),
-          lowAccessRole.id,
-        );
+        if (envoriment && envoriment !== NodeEnv.production) {
+          await this.seedTestUsers(permissions, tx);
+        }
 
-        await this.seedRolePermissions(somePerms);
-
-        // Создать модератора
-        const moderator: Agent = await this.seedAgent(this.getModerator());
-        //Создать Агента БЕЗ прав
-        const noAccessUser: Agent = await this.seedAgent(this.getNoAccessUser());
-        //Создать Агента с минимальным кол-ом прав
-        const lowAccessUser: Agent = await this.seedAgent(this.getLowAccessUser());
-        //-------------------------------------------------//
+        console.log(SEEDS_MESSAGES.SEEDS_SUCCESS);
       });
     } catch (error: any) {
       throw new Error(error);
     }
   }
 
-  private static async seedRoles(data: any): Promise<Role> {
+  private static async seedRole(data: any, tx: Prisma.TransactionClient): Promise<Role> {
     try {
-      return await this.prisma.role.create({
+      return await tx.role.create({
         data,
       });
     } catch (error: any) {
@@ -78,9 +57,9 @@ class Seed {
     }
   }
 
-  private static async seedAgent(data: any): Promise<Agent> {
+  private static async seedAgent(data: any, tx: Prisma.TransactionClient): Promise<Agent> {
     try {
-      return await this.prisma.agent.create({
+      return await tx.agent.create({
         data,
       });
     } catch (error: any) {
@@ -88,9 +67,58 @@ class Seed {
     }
   }
 
-  private static async seedPermissions(): Promise<Permission[]> {
+  private static async seedModerator(
+    permissions: Permission[],
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
     try {
-      await this.prisma.permission.createMany({
+      const moderatorRole: Role = await this.seedRole(getModeratorSeedRole(), tx);
+      const moderatorRolePermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
+        permissions,
+        moderatorRole.id,
+        true,
+      );
+
+      await this.seedRolePermissions(moderatorRolePermissionsInput, tx);
+      await this.seedAgent(this.getModeratorInput(moderatorRole.id), tx);
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  }
+
+  private static async seedTestUsers(
+    permissions: Permission[],
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
+    try {
+      const noAccessRole: Role = await this.seedRole(getNoAccessAgentSeedRole(), tx);
+      const lowAccessRole: Role = await this.seedRole(getLowAccessAgentSeedRole(), tx);
+
+      const noAccessRolePermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
+        permissions,
+        noAccessRole.id,
+        false,
+      );
+
+      const lowAccessPermissionsInput = this.getRolePermissionsList(
+        permissions,
+        lowAccessPermissions(),
+        lowAccessRole.id,
+      );
+
+      await this.seedRolePermissions(noAccessRolePermissionsInput, tx);
+      await this.seedRolePermissions(lowAccessPermissionsInput, tx);
+
+      await this.seedAgent(this.getNoAccessUserInput(noAccessRole.id), tx);
+      await this.seedAgent(this.getLowAccessUserInput(lowAccessRole.id), tx);
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  }
+
+  private static async seedPermissions(tx: Prisma.TransactionClient): Promise<Permission[]> {
+    try {
+      await tx.permission.createMany({
         data: getPermissions().map((key) => ({
           key,
         })),
@@ -103,79 +131,79 @@ class Seed {
     }
   }
 
-  private static async seedModeratorPermissions(
-    moderatorId: number,
-    permissions: Permission[],
-  ): Promise<void> {
-    try {
-      await this.prisma.agentPermission.createMany({
-        data: permissions.map<AgentPermission>((permission) => ({
-          agentId: moderatorId,
-          allowed: true,
-          permissionId: permission.id,
-        })),
-      });
-    } catch (error: any) {
-      throw new Error(error);
-    }
-  }
-
   private static async seedRolePermissions(
-    data: { roleId: number; permissionId: number; allowed: boolean }[],
+    data: FullPermission[],
+    tx: Prisma.TransactionClient,
   ): Promise<void> {
     try {
-      await this.prisma.rolePermission.createMany({
+      await tx.rolePermission.createMany({
         data,
       });
     } catch (error: any) {}
   }
 
+  //!
+  // private static getRolePermissionsList(
+  //   permissions: Permission[],
+  //   //поменял тип и имя
+  //   allowedKeys: PermissionsKeys[],
+  //   roleId: number,
+  // ): {   ------------- не пиши возвращаемые возвращаемые значения в виде объектов, добавляй типы, тем более если такой или схожий тип уже встречаестя
+  //   roleId: number;
+  //   permissionId: number;
+  //   allowed: boolean;
+  // } ---------------
+  //!
+
   private static getRolePermissionsList(
     permissions: Permission[],
-    allowedList: string[],
+    //поменял тип и имя
+    allowedKeys: PermissionsKeys[],
     roleId: number,
-  ): {
-    roleId: number;
-    permissionId: number;
-    allowed: boolean;
-  }[] {
-    return permissions.map((perm) => {
-      const current = allowedList.find((a_p) => a_p === perm.key);
+  ): FullPermission[] {
+    return permissions.map((permission) => {
+      // allowedList.find(a_p) - a_p (плохая практика называть одной буквой, юзай всегда полное название)
+      const current = allowedKeys.find((key) => key === permission.key);
       if (current) {
         return {
           roleId,
-          permissionId: perm.id,
+          permissionId: permission.id,
           allowed: true,
         };
       }
       return {
         roleId,
-        permissionId: perm.id,
+        permissionId: permission.id,
         allowed: false,
       };
     });
   }
 
-  private static getModerator(roleId: number) {
+  private static getModeratorInput(roleId: number) {
     return {
+      //conig[...] заменил на this.configService.get<string>(...)
       email: this.configService.get<string>(configKeys.MODERATOR_EMAIL),
-      password:this.configService.get<string>(configKeys.MODERATOR_HASH_PASSWORD),
+      password: this.configService.get<string>(configKeys.MODERATOR_HASH_PASSWORD),
       lastOnline: null,
       roleId,
     };
   }
 
-  private static getNoAccessUser(roleId: number) {
+  private static getNoAccessUserInput(roleId: number) {
     return {
-
+      email: NO_ACCESS_USER.email,
+      password: NO_ACCESS_USER.password,
       lastOnline: null,
+      roleId,
     };
   }
 
-  private static getLowAccessUser(roleId: number) {
+  private static getLowAccessUserInput(roleId: number) {
     return {
-
+      email: LOW_ACCESS_USER.email,
+      password: LOW_ACCESS_USER.password,
       lastOnline: null,
+      roleId,
     };
   }
 }

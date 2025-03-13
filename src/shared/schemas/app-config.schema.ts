@@ -24,15 +24,8 @@ export const appConfigValidationSchema = {
   GOOGLE_CALLBACK_URL: Joi.string().uri().required(),
   CSRF_SECRET: Joi.string().required(),
   SOCKET_URL: Joi.string().uri().required(),
-  
   MODERATOR_EMAIL: Joi.string().email().required(),
   MODERATOR_HASH_PASSWORD: Joi.string().required(),
-  
-  NO_ACCESS_USER: Joi.string().email().required(),
-  NO_ACCESS_USER_HASH_PASSWORD: Joi.string().required(),
-  
-  LOW_ACCESS_USER: Joi.string().email().required(),
-  LOW_ACCESS_USER_HASH_PASSWORD: Joi.string().required(),
 };
 
 export const validationSchema = Joi.object(appConfigValidationSchema);
