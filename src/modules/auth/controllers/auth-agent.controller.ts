@@ -6,9 +6,8 @@ import { AuthService } from '@/modules/auth/services';
 import { CookiesUtil } from '@/shared/utils';
 import { AuthTokens } from '@/shared/types/auth';
 import { RequestWithAgentPayload } from '@/shared/types/auth/request-auth.type';
-import { RESPONSE_STATUS } from '@/shared/constants/response';
+import { COOKIES, RESPONSE_STATUS } from '@/shared/constants/response';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
-import { AuthAgentLoginInput } from '@/modules/auth/types/auth.type';
 
 @Controller('auth/agent')
 export class AuthAgentController {
@@ -24,10 +23,7 @@ export class AuthAgentController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    
-    
     const result = await this.authAgentService.validate(body);
-    console.log("Here")
     const tokens: AuthTokens = await this.authService.authenticateAgent({
       ...result,
       userAgent,
@@ -52,7 +48,7 @@ export class AuthAgentController {
   @Post('refresh')
   async refreshTokens(@Req() request: RequestWithAgentPayload, @Res() response: Response) {
     const payload = request.user;
-    const refreshToken = request.cookies['refresh_token'];
+    const refreshToken = request.cookies[COOKIES.REFRESH_TOKEN];
     const tokens: AuthTokens = await this.authService.refreshTokens(payload, refreshToken);
     CookiesUtil.setAuthTokens(response, tokens.accessToken, tokens.refreshToken);
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);

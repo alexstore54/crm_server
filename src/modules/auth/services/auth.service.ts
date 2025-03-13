@@ -30,7 +30,7 @@ export class AuthService {
     const { publicId } = agent;
     const payloadUUID: PayloadUUID = uuidv4();
 
-    const payload = this.mapAgentPayload(agent, payloadUUID, args.deskPublicId, args.teamPublicId);
+    const payload = this.mapAgentPayload(agent, payloadUUID, args.desksPublicId, args.teamsPublicId);
 
     const tokens = await this.tokensService.getTokens({ ...payload });
 
@@ -83,7 +83,7 @@ export class AuthService {
 
   public async logout(userPublicId: string, payloadUUID: PayloadUUID) {
     await this.authRedisService.deleteOneSession(userPublicId, payloadUUID);
-    this.gatewayService.removeClient(payloadUUID);
+    // this.gatewayService.removeClient(payloadUUID);
   }
 
   public async refreshTokens(
@@ -91,17 +91,14 @@ export class AuthService {
     refreshToken: string,
   ): Promise<AuthTokens> {
     const { sub: userPublicId, payloadUUID } = payload;
-
     const session = await this.authRedisService.getOneSession(userPublicId, payloadUUID);
-    if (!session) {
+    if (!session || !session.hashedRefreshToken) {
       throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_DENIED);
     }
     const isTokensCompare = await BcryptHelper.compare(refreshToken, session.hashedRefreshToken);
-
     if (!isTokensCompare) {
       throw new UnauthorizedException(ERROR_MESSAGES.ACCESS_DENIED);
     }
-
     const tokens = await this.tokensService.getTokens(payload);
     const newHashedToken = await BcryptHelper.hash(tokens.refreshToken);
     await this.authRedisService.updateSession(userPublicId, payloadUUID, {
@@ -109,7 +106,7 @@ export class AuthService {
       refreshToken: newHashedToken,
     });
 
-    const isAgent = 'descId' in payload;
+    const isAgent = 'desksPublicId' in payload;
 
     if (isAgent) {
       await this.authRedisService.refreshPermissions(userPublicId, payloadUUID);
@@ -137,8 +134,8 @@ export class AuthService {
     teamPublicId: string[] | null,
   ): AgentAuthPayload {
     return {
-      deskPublicId: publicDeskId,
-      teamPublicId: teamPublicId,
+      desksPublicId: publicDeskId,
+      teamsPublicId: teamPublicId,
       payloadUUID,
       sub: agent.publicId,
     };

@@ -13,6 +13,8 @@ import {
 } from '@/common/strategies/jwt';
 import { REDIS_CONFIG } from '@/shared/constants/config';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
+import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
+import { configKeys } from '@/shared/schemas';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -57,7 +59,7 @@ export class AppConfigModule {
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: (configService: ConfigService) => ({
-            secret: configService.get<string>('JWT_SECRET'),
+            secret: configService.get<string>(configKeys.JWT_SECRET),
             global: true,
           }),
         }),

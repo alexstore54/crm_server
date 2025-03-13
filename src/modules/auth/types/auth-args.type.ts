@@ -14,8 +14,8 @@ export interface AuthenticateAgentArgs {
   fingerprint: string;
   userAgent: string;
   permissions: PermissionsTable;
-  deskPublicId: string[];
-  teamPublicId: string[] | null;
+  desksPublicId: string[];
+  teamsPublicId: string[];
 }
 
 export interface AuthenticateCustomerArgs {

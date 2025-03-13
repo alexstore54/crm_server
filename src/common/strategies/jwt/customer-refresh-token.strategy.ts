@@ -9,6 +9,7 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { customerAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
 import { configKeys } from '@/shared/schemas';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
+import { COOKIES } from '@/shared/constants/response';
 
 @Injectable()
 export class CustomerRefreshTokenStrategy extends PassportStrategy(
@@ -19,7 +20,7 @@ export class CustomerRefreshTokenStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          return req.cookies['refresh_token'];
+          return req.cookies[COOKIES.REFRESH_TOKEN];
         },
       ]),
       ignoreExpiration: false,
@@ -27,12 +28,11 @@ export class CustomerRefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(data: any): Promise<CustomerAuthPayload> {
-    const payload = data[0] as AgentAuthPayload;
-
+  async validate(payload: CustomerAuthPayload): Promise<CustomerAuthPayload> {
     AuthUtil.validateCustomerAuthPayload(payload);
     return {
-      ...payload,
+      payloadUUID: payload.payloadUUID,
+      sub: payload.sub,
     };
   }
 }

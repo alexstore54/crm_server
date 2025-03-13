@@ -60,12 +60,12 @@ export class ValidationService {
     const { currentAgentPayload, leadPublicId } = args;
     const connections: GeneralConnects[] = [];
 
-    if (await this.isLeadInAgentDesk(leadPublicId, currentAgentPayload.deskPublicId)) {
+    if (await this.isLeadInAgentDesk(leadPublicId, currentAgentPayload.desksPublicId)) {
       connections.push(GeneralConnects.DESK);
     }
     if (
-      currentAgentPayload.teamPublicId &&
-      (await this.isLeadInAgentTeam(leadPublicId, currentAgentPayload.teamPublicId))
+      currentAgentPayload.teamsPublicId &&
+      (await this.isLeadInAgentTeam(leadPublicId, currentAgentPayload.teamsPublicId))
     ) {
       connections.push(GeneralConnects.TEAM);
     }

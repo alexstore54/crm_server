@@ -25,6 +25,7 @@ import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import { AgentPermissionRepository } from '@/modules/permissions/repositories';
+import { AgentRefreshTokenStrategy } from '@/common/strategies/jwt';
 
 @Module({
   imports: [GatewayModule, AuthRedisModule, AgentModule, UserModule, PermissionModule],

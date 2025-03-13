@@ -7,6 +7,7 @@ import { STRATEGIES_NAMES } from '@/shared/constants/auth';
 import { configKeys } from '@/shared/schemas';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 import { AgentAuthPayload } from '@/shared/types/auth';
+import { COOKIES } from '@/shared/constants/response';
 
 @Injectable()
 export class AgentRefreshTokenStrategy extends PassportStrategy(
@@ -17,7 +18,7 @@ export class AgentRefreshTokenStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          return req.cookies['refresh_token'];
+          return req.cookies[COOKIES.REFRESH_TOKEN];
         },
       ]),
       ignoreExpiration: false,
@@ -25,10 +26,13 @@ export class AgentRefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(data: any): Promise<AgentAuthPayload> {
-    const payload = data[0] as AgentAuthPayload;
-
+  async validate(payload: AgentAuthPayload): Promise<AgentAuthPayload> {
     AuthUtil.validateAgentAuthPayload(payload);
-    return { ...payload };
+    return {
+      sub: payload.sub,
+      desksPublicId: payload.desksPublicId,
+      teamsPublicId: payload.teamsPublicId,
+      payloadUUID: payload.payloadUUID,
+    };
   }
 }

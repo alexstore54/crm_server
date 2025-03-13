@@ -38,8 +38,8 @@ export class AuthAgentService {
     return {
       agent,
       permissions: permissionsTable,
-      deskPublicId: agent.Desk.map((desk) => desk.publicId),
-      teamPublicId: agent.Team.length > 0 ? agent.Team.map((team) => team.publicId) : null,
+      desksPublicId: agent.Desk.length > 0 ? agent.Desk.map((desk) => desk.publicId) : [],
+      teamsPublicId: agent.Team.length > 0 ? agent.Team.map((team) => team.publicId) : [],
     };
   }
 }
