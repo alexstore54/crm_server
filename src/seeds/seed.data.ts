@@ -1,50 +1,40 @@
 import { Role } from '@prisma/client';
 import { permissionsTableSchema } from '@/shared/schemas';
+import { PermissionsKeys } from '@/shared/types/permissions';
+import { v4 as uuidv4 } from 'uuid';
 
-interface PartialRole extends Omit<Role, 'publicId'> {
-  publicId?: string;
-} // Иначе TS ругается на обязательное наличие publicId
-
-export const getModeratorSeedRole = (): PartialRole => {
+export const getModeratorSeedRole = () => {
   return {
     name: 'Moderator',
-    id: 0,
+    isVisible: false,
+    isMutable: false,
   };
 };
 
-export const getNoAccessAgentSeedRole = (): PartialRole => {
+export const getNoAccessAgentSeedRole = () => {
   return {
     name: 'No access',
-    id: 1,
+    publicId: uuidv4(),
+    isMutable: false,
   };
-}
+};
 
-export const getLowAccessAgentSeedRole = (): PartialRole => {
+export const getLowAccessAgentSeedRole = () => {
   return {
     name: 'Minimum access',
-    id: 2,
   };
-}
+};
 
 export const getPermissions = (): string[] => {
   return Object.keys(permissionsTableSchema.describe().keys);
 };
 
-
-export const lowAccessPermissions = ():string[] => {
-    return [
-           "READ_TEAM_AGENTS" ,
-           "CREATE_TEAM_AGENTS" ,
-           "UPDATE_TEAM_AGENTS" ,
-           "READ_LEADS",
-           "CREATE_LEADS",
-           "UPDATE_LEADS",
-           "DELETE_LEADS",
-           "READ_DESKS",
-           "DELETE_DESKS" ,
-           "READ_TEAMS" ,
-           "UPDATE_HIMSELF",
-    ]
-}
-
-
+export const lowAccessPermissions = (): PermissionsKeys[] => {
+  return [
+    PermissionsKeys.READ_TEAM_AGENTS,
+    PermissionsKeys.READ_TEAM_LEADS,
+    PermissionsKeys.READ_DESKS,
+    PermissionsKeys.READ_TEAMS,
+    PermissionsKeys.UPDATE_HIMSELF,
+  ];
+};
