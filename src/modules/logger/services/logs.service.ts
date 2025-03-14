@@ -1,13 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { LogsRepository } from '@/modules/logger/repositories';
 import { Log } from '@prisma/client';
+import { AgentRepository } from '@/modules/agent/repositories';
 
 @Injectable()
 export class LogsService {
-  constructor(private logRepository: LogsRepository) {}
+  constructor(
+    private logRepository: LogsRepository,
+    private readonly agentRepository: AgentRepository,
+  ) {}
 
-  public async getLogsByUserId(id: string): Promise<Log[]> {
-    return this.logRepository.getLogsByUserId(id);
+  public async getLogsByUserPublicId(agentPublicId: string): Promise<Log[]> {
+    const agent = await this.agentRepository.findOneByPublicId(agentPublicId);
+    if (!agent) {
+      throw new NotFoundException();
+    }
+    return this.logRepository.findLogsByUserId(agent.id);
   }
 
   public async getLogs(page: number, limit: number): Promise<Log[]> {
@@ -16,6 +24,6 @@ export class LogsService {
   }
 
   public async getLogById(id: number): Promise<Log | null> {
-    return this.logRepository.getLogById(id);
+    return this.logRepository.findOneLogById(id);
   }
 }

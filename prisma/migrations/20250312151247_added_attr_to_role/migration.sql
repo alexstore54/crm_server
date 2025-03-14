@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Role" ADD COLUMN     "canCRUD" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isVisible" BOOLEAN NOT NULL DEFAULT false;

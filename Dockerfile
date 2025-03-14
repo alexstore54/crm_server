@@ -19,6 +19,9 @@ RUN yarn install
 # Копируем код
 COPY --chown=appuser . .
 
+# Генерируем схемы
+RUN npx prisma generate
+
 # Сборка проекта
 RUN yarn build
 
