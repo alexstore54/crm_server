@@ -40,7 +40,6 @@ export class AgentPermissionsService {
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
-
   }
 
   public async getManyByAgentId(agentId: number): Promise<AgentPermission[]> {

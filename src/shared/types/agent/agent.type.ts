@@ -8,5 +8,4 @@ export type FullAgent = {
   permissions: PermissionsTable;
 };
 
-
 export type AgentForClient = Omit<Agent, 'password'>;

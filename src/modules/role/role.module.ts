@@ -5,4 +5,4 @@ import { RoleRepository } from '@/modules/role/repositories/role.repository';
   providers: [RoleRepository],
   exports: [RoleRepository],
 })
-export class RoleModule { }
+export class RoleModule {}

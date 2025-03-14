@@ -53,6 +53,4 @@ export class AuthAgentController {
     CookiesUtil.clearAuthTokens(response);
     return response.status(200).send(RESPONSE_STATUS.SUCCESS);
   }
-
-
 }

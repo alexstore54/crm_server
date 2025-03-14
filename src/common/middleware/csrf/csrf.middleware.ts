@@ -16,7 +16,6 @@ export class CsrfMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const csrfSecret = this.configService.get<string>(configKeys.CSRF_SECRET);
 
-
     if (req.method === 'OPTIONS') {
       return next();
     }

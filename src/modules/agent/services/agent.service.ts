@@ -169,8 +169,6 @@ export class AgentService {
     return this.teamRepository.txFindManyByAgentId(agentId, tx);
   }
 
-
-
   private async getDesksByIds(deskIds: number[] | undefined, tx: Prisma.TransactionClient) {
     return deskIds && deskIds.length > 0 ? this.deskRepository.txFindManyByIds(deskIds, tx) : null;
   }

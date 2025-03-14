@@ -28,12 +28,7 @@ import { AgentRefreshTokenStrategy } from '@/common/strategies/jwt';
 
 @Module({
   imports: [GatewayModule, AuthRedisModule, AgentModule, UserModule, PermissionModule],
-  controllers: [
-    AuthController,
-    AuthCustomerController,
-    AuthAgentController,
-    AuthGoogleController,
-  ],
+  controllers: [AuthController, AuthCustomerController, AuthAgentController, AuthGoogleController],
   providers: [
     //Services
     JwtService,

@@ -30,7 +30,12 @@ export class AuthService {
     const { publicId } = agent;
     const payloadUUID: PayloadUUID = uuidv4();
 
-    const payload = this.mapAgentPayload(agent, payloadUUID, args.desksPublicId, args.teamsPublicId);
+    const payload = this.mapAgentPayload(
+      agent,
+      payloadUUID,
+      args.desksPublicId,
+      args.teamsPublicId,
+    );
 
     const tokens = await this.tokensService.getTokens({ ...payload });
 

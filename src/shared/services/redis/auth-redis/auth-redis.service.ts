@@ -116,7 +116,7 @@ export class AuthRedisService {
       if (!stringifyResult) {
         return null;
       }
-      
+
       const parsedResult = JSON.parse(stringifyResult) as { permissions: PermissionsTable };
       return parsedResult.permissions;
     } catch (error: any) {

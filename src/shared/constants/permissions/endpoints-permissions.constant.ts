@@ -31,11 +31,8 @@ export const ENDPOINTS_PERMISSIONS = {
     DELETE_AGENT_ALL_SESSIONS: [PermissionsKeys.DELETE_ALL_AGENTS_SESSIONS],
     DELETE_AGENT_SESSION: [PermissionsKeys.DELETE_ALL_AGENTS_SESSIONS],
   },
-  CUSTOMERS_SESSIONS: {
-  },
+  CUSTOMERS_SESSIONS: {},
   LOGS: {
-    READ_LOGS: [PermissionsKeys.READ_LOGS]
-  }
-
-
+    READ_LOGS: [PermissionsKeys.READ_LOGS],
+  },
 };

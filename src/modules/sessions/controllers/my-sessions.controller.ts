@@ -13,7 +13,7 @@ export class MySessionsController {
 
   @UseGuards(AgentAccessGuard)
   @Get(ENDPOINTS.MY_SESSIONS.GET_ALL_MY_SESSIONS)
-  async getAllMySessions(@Req() req: AgentRequest):Promise<Session[]> {
+  async getAllMySessions(@Req() req: AgentRequest): Promise<Session[]> {
     const { user } = req;
 
     return this.authRedisService.getAllSessionsByUserId(user.sub);

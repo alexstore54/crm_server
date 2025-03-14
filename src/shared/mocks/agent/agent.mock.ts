@@ -11,4 +11,3 @@ export const getMockedAgent = (): Agent => {
     lastOnline: new Date(),
   };
 };
-

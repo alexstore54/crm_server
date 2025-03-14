@@ -14,9 +14,7 @@ export class SocketGateway {
     private readonly gatewayService: GatewayService,
   ) {}
 
-  public async updatePermissionsMessage(userPublicId: string) {
-
-  }
+  public async updatePermissionsMessage(userPublicId: string) {}
 
   public async updatePermissionsToAll(usersPublicIds: string[]) {}
 }

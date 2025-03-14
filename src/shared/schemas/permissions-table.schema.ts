@@ -41,5 +41,5 @@ export const permissionsTableSchema: ObjectSchema<PermissionsTable> = Joi.object
   READ_ALL_CUSTOMERS_SESSIONS: Joi.boolean().optional(),
   DELETE_ALL_CUSTOMERS_SESSIONS: Joi.boolean().optional(),
 
-  READ_LOGS: Joi.boolean().optional()
+  READ_LOGS: Joi.boolean().optional(),
 });

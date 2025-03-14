@@ -1,3 +1,1 @@
-export class CreateTeam {
-
-}
+export class CreateTeam {}
