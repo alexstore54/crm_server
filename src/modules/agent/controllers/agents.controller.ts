@@ -6,21 +6,22 @@ import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissi
 import { UsePermissions } from '@/common/decorators/validation';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 import { UUIDValidationPipe } from '@/common/pipes';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
 
-@Controller('agents')
+@Controller(ENDPOINTS.AGENTS.BASE)
 export class AgentsController {
   constructor(private readonly agentService: AgentService) {}
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
-  @Get(':publicId/leads')
+  @Get(ENDPOINTS.AGENTS.GET_AGENT_LEADS)
   async getLeadsByAgentId(@Param('publicId', UUIDValidationPipe) publicId: string) {
     return this.agentService.getLeadsByPublicId(publicId);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
-  @Post('create')
+  @Post(ENDPOINTS.AGENTS.CREATE_AGENT)
   async createAgent(@Body() body: CreateAgent) {
     return 'Okay';
     //return this.agentService.createAgent(body);
@@ -28,7 +29,7 @@ export class AgentsController {
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
-  @Patch(':publicId/update')
+  @Patch(ENDPOINTS.AGENTS.UPDATE_AGENT)
   async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {
     return this.agentService.updateByPublicId(publicId, body);
   }

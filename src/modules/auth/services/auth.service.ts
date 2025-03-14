@@ -83,6 +83,8 @@ export class AuthService {
 
   public async logout(userPublicId: string, payloadUUID: PayloadUUID) {
     await this.authRedisService.deleteOneSession(userPublicId, payloadUUID);
+
+    //#TODO IMPLEMENT SOCKET
     // this.gatewayService.removeClient(payloadUUID);
   }
 

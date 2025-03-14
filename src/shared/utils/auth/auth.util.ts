@@ -14,7 +14,6 @@ export class AuthUtil {
   public static validateAgentAuthPayload(payload: AgentAuthPayload): void {
     const { error } = agentAuthPayloadSchema.validate(payload);
     if (error) {
-      console.log(error);
       throw new UnauthorizedException(ERROR_MESSAGES.INVALID_TOKEN);
     }
   }

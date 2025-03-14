@@ -7,7 +7,7 @@ export interface RequestWithCustomerPayload extends Request {
   user: CustomerAuthPayload;
 }
 
-export interface RequestWithAgentPayload extends Request {
+export interface AgentRequest extends Request {
   user: AgentAuthPayload;
   permissions?: PermissionsKeys[];
   operation?: PermissionOperation;

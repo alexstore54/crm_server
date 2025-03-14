@@ -7,7 +7,6 @@ import {
   AuthController,
   AuthCustomerController,
   AuthGoogleController,
-  SessionsController,
 } from '@/modules/auth/controllers';
 import {
   AuthAgentService,
@@ -34,7 +33,6 @@ import { AgentRefreshTokenStrategy } from '@/common/strategies/jwt';
     AuthCustomerController,
     AuthAgentController,
     AuthGoogleController,
-    SessionsController,
   ],
   providers: [
     //Services

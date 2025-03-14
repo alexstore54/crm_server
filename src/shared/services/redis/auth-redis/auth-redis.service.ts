@@ -171,6 +171,9 @@ export class AuthRedisService {
   public async getAllSessionsByUserId(userId: string): Promise<Session[]> {
     try {
       const keys = await this.sessionsRedis.keys(`${userId}:*`);
+      if (keys.length === 0) {
+        return [];
+      }
       const sessions = await this.sessionsRedis.mget(keys);
       if (!sessions || !sessions.length) {
         return [];
@@ -254,9 +257,9 @@ export class AuthRedisService {
   ) {
     try {
       const redisId = this.mapRedisId(userPublicId, payloadUUID);
-      const permissions = await this.getOnePermissionByRedisId(redisId);
+      const permissions: PermissionsTable | null = await this.getOnePermissionByRedisId(redisId);
       const sessions = await this.getAllSessionsByUserId(userPublicId);
-      if (!permissions && sessions.length === 0) {
+      if (permissions && sessions.length === 0) {
         await this.deletePermissionsByRedisId(redisId);
       }
     } catch (error: any) {

@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
 
-@Controller('auth/oauth/google')
+@Controller(ENDPOINTS.AUTH_GOOGLE.BASE)
 export class AuthGoogleController {}

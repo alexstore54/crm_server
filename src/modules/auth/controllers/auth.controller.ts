@@ -1,8 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
 
-@Controller('auth')
+@Controller(ENDPOINTS.AUTH.BASE)
 export class AuthController {
-  @Get('csrf-token')
+  @Get(ENDPOINTS.AUTH.GET_CSRF_TOKEN)
   async getCsrfToken() {
     return;
   }

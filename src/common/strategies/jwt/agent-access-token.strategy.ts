@@ -7,7 +7,7 @@ import { STRATEGIES_NAMES } from '@/shared/constants/auth';
 import { configKeys } from '@/shared/schemas';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
 import { AgentAuthPayload } from '@/shared/types/auth';
-import { COOKIES } from '@/shared/constants/response';
+import { COOKIES } from 'shared/constants/endpoints';
 
 @Injectable()
 export class AgentAccessTokenStrategy extends PassportStrategy(

@@ -5,8 +5,9 @@ import { RedisHealthIndicator } from '@liaoliaots/nestjs-redis-health';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { configKeys } from '@/shared/schemas';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
 
-@Controller('health')
+@Controller(ENDPOINTS.HEALTH.BASE)
 export class HealthController {
   private readonly redis: Redis;
 
@@ -22,7 +23,7 @@ export class HealthController {
     });
   }
 
-  @Get()
+  @Get(ENDPOINTS.HEALTH.GET_HEALTH_CHECK)
   @HealthCheck()
   async check() {
     return this.health.check([

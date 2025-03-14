@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { COOKIES } from '@/shared/constants/response';
+import { COOKIES } from 'shared/constants/endpoints';
 import { NodeEnv } from '@/common/config/types';
 import * as dotenv from 'dotenv';
 import * as process from 'node:process';

@@ -5,14 +5,15 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { RolePermissionsService } from '@/modules/permissions/service';
 import { UUIDValidationPipe } from '@/common/pipes';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
 
-@Controller('permissions/role')
-export class RolePermissionsController {
+@Controller(ENDPOINTS.ROLES_PERMISSIONS.BASE)
+export class RolesPermissionsController {
   constructor(private readonly rolePermissionsService: RolePermissionsService) {}
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.ROLE_PERMISSIONS.UPDATE_ROLES_PERMISSIONS)
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
-  @Patch(':publicId/update')
+  @Patch(ENDPOINTS.ROLES_PERMISSIONS.UPDATE_ROLE_PERMISSIONS)
   async updateRolePermissions(
     @Param('publicId', UUIDValidationPipe) publicId: string,
     @Body() body: any,
@@ -22,7 +23,7 @@ export class RolePermissionsController {
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.ROLE_PERMISSIONS.UPDATE_ROLES_PERMISSIONS)
   @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
-  @Patch(':publicId/deep-update')
+  @Patch(ENDPOINTS.ROLES_PERMISSIONS.UPDATE_DEEP_ROLE_PERMISSIONS)
   async updateDeepRolePermissions(
     @Param('publicId', UUIDValidationPipe) publicId: string,
     @Body() body: any,

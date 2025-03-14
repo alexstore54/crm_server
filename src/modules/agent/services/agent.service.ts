@@ -10,7 +10,7 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
 import { AgentRepository, DeskRepository } from '@/modules/agent/repositories';
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
-import { ArrayUtil, PermissionsUtil } from '@/shared/utils';
+import { AgentUtil, ArrayUtil, PermissionsUtil } from '@/shared/utils';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { FullAgent } from '@/shared/types/agent';
 import { AgentPermissionsService } from '@/modules/permissions/service';
@@ -89,9 +89,10 @@ export class AgentService {
       });
 
       const { agent, desks, teams } = result;
+      const clientAgent = AgentUtil.mapAgentToAgentForClient(agent);
       const permissionsTable = await this.fetchPermissionsTable(agent.id);
       return {
-        agent,
+        agent: clientAgent,
         permissions: permissionsTable,
         desks,
         teams,
@@ -167,6 +168,8 @@ export class AgentService {
   ): Promise<Team[]> {
     return this.teamRepository.txFindManyByAgentId(agentId, tx);
   }
+
+
 
   private async getDesksByIds(deskIds: number[] | undefined, tx: Prisma.TransactionClient) {
     return deskIds && deskIds.length > 0 ? this.deskRepository.txFindManyByIds(deskIds, tx) : null;

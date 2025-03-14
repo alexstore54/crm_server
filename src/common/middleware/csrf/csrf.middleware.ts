@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import csrf from 'csrf';
 import { configKeys } from '@/shared/schemas/app-config.schema';
 import { ConfigService } from '@nestjs/config';
-import { COOKIES } from '@/shared/constants/response';
+import { COOKIES } from 'shared/constants/endpoints';
 
 @Injectable()
 export class CsrfMiddleware implements NestMiddleware {

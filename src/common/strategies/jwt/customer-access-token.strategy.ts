@@ -9,7 +9,7 @@ import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { customerAuthPayloadSchema } from '@/shared/schemas/auth-payload.schema';
 import { configKeys } from '@/shared/schemas';
 import { AuthUtil } from '@/shared/utils/auth/auth.util';
-import { COOKIES } from '@/shared/constants/response';
+import { COOKIES } from 'shared/constants/endpoints';
 
 @Injectable()
 export class CustomerAccessTokenStrategy extends PassportStrategy(

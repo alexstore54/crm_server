@@ -7,14 +7,14 @@ import {
 import { ValidationService } from '@/shared/services/validation/validation.service';
 import { AgentPermissionValidation } from '@/shared/types/validation';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { RequestWithAgentPayload } from '@/shared/types/auth';
+import { AgentRequest } from '@/shared/types/auth';
 
 @Injectable()
 export class AgentPermissionGuard implements CanActivate {
   constructor(private readonly validationService: ValidationService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: RequestWithAgentPayload = context.switchToHttp().getRequest();
+    const request: AgentRequest = context.switchToHttp().getRequest();
     const { user, params, body, permissions, operation } = request;
 
     if (!permissions || !operation) {

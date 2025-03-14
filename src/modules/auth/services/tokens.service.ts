@@ -12,7 +12,6 @@ export class TokensService {
   ) {}
 
   public async getTokens(payload: AgentAuthPayload | CustomerAuthPayload): Promise<AuthTokens> {
-    console.log(payload);
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {

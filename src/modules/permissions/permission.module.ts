@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
   AgentPermissionsController,
-  RolePermissionsController,
+  RolesPermissionsController,
 } from '@/modules/permissions/controllers';
 import {
   AgentPermissionsService,
@@ -21,7 +21,7 @@ import { RoleRepository } from '@/modules/role/repositories/role.repository';
 
 @Module({
   imports: [forwardRef(() => AgentModule), ValidationModule, AuthRedisModule, RoleModule],
-  controllers: [AgentPermissionsController, RolePermissionsController],
+  controllers: [AgentPermissionsController, RolesPermissionsController],
   providers: [
     AgentPermissionsService,
     RolePermissionsService,
