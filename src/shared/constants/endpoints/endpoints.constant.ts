@@ -65,6 +65,12 @@ export const ENDPOINTS = {
     GET_TEAM: ':publicId',
     DELETE_TEAM: ':publicId',
   },
+  LOGS: {
+    BASE: 'logs',
+    GET_LOGS: '/',
+    GET_USERS_LOGS: '/users/:publicId',
+    GET_ONE_LOG: ':id',
+  },
   CUSTOMER_SESSIONS: {
     BASE: 'sessions/customers',
     GET_CUSTOMER_SESSIONS: ':publicId',

@@ -8,20 +8,21 @@ import { AppLoggerService } from '@/modules/logger/services';
 import cookieParser from 'cookie-parser';
 import { configKeys } from '@/shared/schemas';
 import { UUIDValidationPipe } from '@/common/pipes';
+import { PrismaService } from '@/shared/db/prisma';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const logger = app.get(AppLoggerService);
   const config = app.get(ConfigService);
-  const reflector = app.get(Reflector);
+  const prisma = new PrismaService();
 
   app.enableCors({
     origin: config.get<string>(configKeys.CORS_ORIGIN),
   });
   app.use(cookieParser());
   app.useGlobalFilters(new AppExceptionFilter(logger, config));
-  app.useGlobalInterceptors(new AppLoggingInterceptor(logger));
+  app.useGlobalInterceptors(new AppLoggingInterceptor(logger, prisma));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

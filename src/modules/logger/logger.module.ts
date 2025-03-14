@@ -9,10 +9,15 @@ import { LogsController } from '@/modules/logger/controllers/logs.controller';
 import { LogsService } from '@/modules/logger/services';
 import { PrismaTransport } from '@/modules/logger/transports';
 import { configKeys } from '@/shared/schemas';
+import { AgentModule } from '@/modules/agent/agent.module';
+import { AgentRepository } from '@/modules/agent/repositories';
+import { ValidationService } from '@/shared/services/validation';
+import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 
 @Global()
 @Module({
   imports: [
+    AgentModule,
     ConfigModule,
     WinstonModule.forRootAsync({
       imports: [ConfigModule],
@@ -29,7 +34,14 @@ import { configKeys } from '@/shared/schemas';
       }),
     }),
   ],
-  providers: [AppLoggerService, LogsRepository, LogsService],
+  providers: [
+    AppLoggerService,
+    LogsRepository,
+    LogsService,
+    AgentRepository,
+    AuthRedisService,
+    ValidationService,
+  ],
   controllers: [LogsController],
   exports: [AppLoggerService, LogsRepository],
 })

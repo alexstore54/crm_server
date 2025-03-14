@@ -1,24 +1,37 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { Log } from '@prisma/client';
 import { LogsService } from '@/modules/logger/services';
-import { GetLogs } from '@/modules/logger/dto';
+import { ENDPOINTS } from '@/shared/constants/endpoints';
+import { UUIDValidationPipe } from '@/common/pipes';
+import { AgentAccessGuard } from '@/common/guards/tokens/agent';
+import { PermissionsGuard } from '@/common/guards/permissions';
+import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
+import { UsePermissions } from '@/common/decorators/validation';
 
-@Controller('logs')
+@Controller(ENDPOINTS.LOGS.BASE)
 export class LogsController {
   constructor(private loggerService: LogsService) {}
 
-  @Get()
-  async getLogs(@Query() query: GetLogs): Promise<Log[]> {
-    const { page, limit } = query;
+  @UsePermissions(ENDPOINTS_PERMISSIONS.LOGS.READ_LOGS)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Get(ENDPOINTS.LOGS.GET_LOGS)
+  async getLogs(
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
+  ): Promise<Log[]> {
     return this.loggerService.getLogs(page, limit);
   }
 
-  @Get('/users/:id')
-  async getLogsByUserId(@Param('id', ParseIntPipe) id: number): Promise<Log[]> {
-    return this.loggerService.getLogsByUserId(id);
+  @UsePermissions(ENDPOINTS_PERMISSIONS.LOGS.READ_LOGS)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Get(ENDPOINTS.LOGS.GET_USERS_LOGS)
+  async getLogsByUserId(@Param(':publicId', UUIDValidationPipe) publicId: string): Promise<Log[]> {
+    return this.loggerService.getLogsByUserPublicId(publicId);
   }
 
-  @Get('/:id')
+  @UsePermissions(ENDPOINTS_PERMISSIONS.LOGS.READ_LOGS)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Get(ENDPOINTS.LOGS.GET_ONE_LOG)
   async getLogById(@Param('id', ParseIntPipe) id: number): Promise<Log | null> {
     return this.loggerService.getLogById(id);
   }

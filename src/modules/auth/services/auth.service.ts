@@ -133,7 +133,7 @@ export class AuthService {
     agent: Agent,
     payloadUUID: PayloadUUID,
     publicDeskId: string[],
-    teamPublicId: string[] | null,
+    teamPublicId: string[],
   ): AgentAuthPayload {
     return {
       desksPublicId: publicDeskId,
