@@ -124,7 +124,7 @@ class Seed {
         })),
       });
 
-      return await this.prisma.permission.findMany({});
+      return await tx.permission.findMany({});
     } catch (error: any) {
       const errorMessage = `${SEEDS_MESSAGES.DB_ERROR}: ${error.message}`;
       throw new Error(error);
