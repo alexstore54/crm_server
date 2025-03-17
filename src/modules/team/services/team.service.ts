@@ -7,16 +7,20 @@ import { Team } from '@prisma/client';
 export class TeamService {
   constructor(private readonly teamRepository: TeamRepository) {}
 
-  public async createOne(data: CreateTeam) {
-    // return this.teamRepository.createOne(data);
+  public async createOne(data: CreateTeam): Promise<Team> {
+    return this.teamRepository.createOne(data);
   }
 
-  public async updateOne(teamPublicId: string, data: UpdateTeam) {
-    // return this.teamRepository.updateOne(teamPublicId, data);
+  public async updateOne(teamPublicId: string, data: UpdateTeam): Promise<Team> {
+    return this.teamRepository.updateOneByPublicId(teamPublicId, data);
+  }
+
+  public async getManyTeams(page: number, limit: number) {
+    return this.teamRepository.findMany(page, limit);
   }
 
   public async deleteOne(teamPublicId: string) {
-    // return this.teamRepository.deleteOne(teamPublicId);
+    return this.teamRepository.deleteOneByPublicId(teamPublicId);
   }
 
   public async getTeamByPublicId(teamPublicId: string): Promise<Team> {

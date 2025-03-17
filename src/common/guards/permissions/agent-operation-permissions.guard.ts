@@ -25,7 +25,7 @@ export class AgentPermissionGuard implements CanActivate {
       operation,
       permissions,
       currentAgentPayload: user,
-      agentId: params.publicId || body.publicId,
+      agentPublicId: params.publicId || body.publicId,
     };
 
     try {

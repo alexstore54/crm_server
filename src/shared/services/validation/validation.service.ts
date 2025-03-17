@@ -6,6 +6,7 @@ import {
   GeneralConnects,
   LeadPermissionValidation,
   PermissionOperation,
+  TeamsPermissionValidation,
 } from '@/shared/types/validation';
 import { PERMISSION_CONFIG } from '@/shared/constants/permissions';
 import { PermissionsKeys } from '@/shared/types/permissions';
@@ -15,7 +16,9 @@ export class ValidationService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Main validation methods
-  async validateAgentOperationPermissions(args: AgentPermissionValidation): Promise<boolean> {
+  public async validateAgentOperationPermissions(
+    args: AgentPermissionValidation,
+  ): Promise<boolean> {
     const { permissions, currentAgentPayload, operation } = args;
 
     const moderatorPermission = PERMISSION_CONFIG.agent.moderator[operation];
@@ -28,28 +31,44 @@ export class ValidationService {
     return this.checkAgentPermissions(connections, permissions, operation);
   }
 
-  async validateLeadOperationPermissions(args: LeadPermissionValidation): Promise<boolean> {
-    const { permissions, currentAgentPayload, operation } = args;
+  public async validateLeadOperationPermissions(args: LeadPermissionValidation): Promise<boolean> {
+    const { permissions, currentAgentPayload, operation, leadPublicId } = args;
     const moderatorPermission = PERMISSION_CONFIG.lead.moderator[operation];
 
     if (permissions.includes(moderatorPermission)) {
       return true;
     }
 
+    if (operation !== 'read') {
+      return await this.isLeadAssignedToAgent(leadPublicId, currentAgentPayload.sub);
+    }
+
     const connections = await this.getLeadConnections(args);
     return this.checkLeadPermissions(connections, permissions, operation);
   }
 
+  public async validateTeamOperationPermissions(args: TeamsPermissionValidation): Promise<boolean> {
+    const { permissions, currentAgentPayload, operation, teamPublicId } = args;
+    const moderatorPermission = PERMISSION_CONFIG.team.moderator[operation];
+
+    if (permissions.includes(moderatorPermission)) {
+      return true;
+    }
+
+
+    return this.isTeamInOneDesk(teamPublicId, currentAgentPayload.desksPublicId);
+  }
+
   private async getAgentConnections(args: AgentPermissionValidation): Promise<GeneralConnects[]> {
-    const { currentAgentPayload, agentId } = args;
+    const { currentAgentPayload, agentPublicId } = args;
     const { sub: currentAgentId } = currentAgentPayload;
-    const agentIds = [currentAgentId, agentId];
+    const agentIds = [currentAgentId, agentPublicId];
     const connections: GeneralConnects[] = [];
 
-    if (await this.areAgentsInSameTeam(agentIds, agentId)) {
+    if (await this.areAgentsInSameTeam(agentIds, agentPublicId)) {
       connections.push(GeneralConnects.TEAM);
     }
-    if (await this.areAgentsInSameDesk(agentIds, agentId)) {
+    if (await this.areAgentsInSameDesk(agentIds, agentPublicId)) {
       connections.push(GeneralConnects.DESK);
     }
 
@@ -69,8 +88,6 @@ export class ValidationService {
     ) {
       connections.push(GeneralConnects.TEAM);
     }
-
-    //#TODO: IMPLEMENT IN THE TEAM LOGIC
 
     return connections;
   }
@@ -104,7 +121,22 @@ export class ValidationService {
     }
   }
 
-  async isLeadAssignedToAgent(leadId: string, agentId: string): Promise<boolean> {
+  private async isTeamInOneDesk(teamPublicId: string, deskIds: string[]): Promise<boolean> {
+    try {
+      const desks = await this.prisma.desk.findMany({
+        where: {
+          publicId: { in: deskIds },
+          Team: { some: { publicId: teamPublicId } },
+        },
+      });
+
+      return desks.length === deskIds.length;
+    } catch (error) {
+      throw this.createDbError(error);
+    }
+  }
+
+  private async isLeadAssignedToAgent(leadId: string, agentId: string): Promise<boolean> {
     try {
       const agent = await this.prisma.agent.findUnique({
         where: { publicId: agentId },

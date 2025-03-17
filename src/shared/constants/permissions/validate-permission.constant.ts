@@ -41,4 +41,18 @@ export const PERMISSION_CONFIG = {
       read: PermissionsKeys.READ_TEAM_LEADS,
     },
   },
+  team: {
+    moderator: {
+      create: PermissionsKeys.CREATE_TEAMS,
+      update: PermissionsKeys.UPDATE_TEAMS,
+      delete: PermissionsKeys.DELETE_TEAMS,
+      read: PermissionsKeys.READ_TEAM_LEADS,
+    },
+    desk: {
+      update: PermissionsKeys.UPDATE_DESK_TEAMS,
+      delete: PermissionsKeys.DELETE_DESK_LEADS,
+      read: PermissionsKeys.READ_DESK_TEAMS,
+      create: PermissionsKeys.CREATE_TEAM_LEADS,
+    }
+  }
 };

@@ -18,7 +18,7 @@ export interface AgentPermissionValidation {
   operation: PermissionOperation;
   permissions: PermissionsKeys[];
   currentAgentPayload: AgentAuthPayload;
-  agentId: string;
+  agentPublicId: string;
 }
 
 export interface LeadPermissionValidation {
@@ -26,4 +26,11 @@ export interface LeadPermissionValidation {
   permissions: PermissionsKeys[];
   currentAgentPayload: AgentAuthPayload;
   leadPublicId: string;
+}
+
+export interface TeamsPermissionValidation {
+  operation: PermissionOperation;
+  permissions: PermissionsKeys[];
+  currentAgentPayload: AgentAuthPayload;
+  teamPublicId: string;
 }

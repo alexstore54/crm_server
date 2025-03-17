@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Prisma, Team } from '@prisma/client';
+import { CreateTeam, UpdateTeam } from '@/modules/team/dto';
 
 @Injectable()
 export class TeamRepository {
@@ -51,7 +52,43 @@ export class TeamRepository {
     }
   }
 
-  public async createOne(data: Prisma.TeamCreateInput): Promise<Team> {
+  public async findMany(page: number, limit: number): Promise<Team[]> {
+    try {
+      return this.prisma.team.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async updateOneByPublicId(teamPublicId: string, data: UpdateTeam): Promise<Team> {
+    try {
+      return this.prisma.team.update({
+        where: {
+          publicId: teamPublicId,
+        },
+        data,
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async deleteOneByPublicId(teamPublicId: string): Promise<Team> {
+    try {
+      return this.prisma.team.delete({
+        where: {
+          publicId: teamPublicId,
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async createOne(data: CreateTeam): Promise<Team> {
     try {
       return await this.prisma.team.create({
         data,

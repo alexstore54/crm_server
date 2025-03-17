@@ -23,8 +23,10 @@ export const ENDPOINTS_PERMISSIONS = {
   },
   TEAMS: {
     CREATE_TEAM: [PermissionsKeys.CREATE_TEAMS],
-    UPDATE_TEAM: [PermissionsKeys.UPDATE_TEAMS],
+    UPDATE_TEAM: [PermissionsKeys.UPDATE_TEAMS, PermissionsKeys.UPDATE_DESK_TEAMS],
     DELETE_TEAM: [PermissionsKeys.DELETE_TEAMS],
+    GET_TEAM: [PermissionsKeys.READ_TEAMS, PermissionsKeys.READ_DESK_TEAMS],
+    GET_ALL_TEAMS: [PermissionsKeys.READ_TEAMS, PermissionsKeys.READ_DESK_TEAMS],
   },
   AGENTS_SESSIONS: {
     GET_AGENT_SESSIONS: [PermissionsKeys.READ_ALL_AGENTS_SESSIONS],
