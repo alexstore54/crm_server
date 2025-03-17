@@ -4,9 +4,7 @@ import { PrismaService } from '@/shared/db/prisma';
 
 @Injectable()
 export class HealthService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   public async dbHealthCheck(): Promise<HealthIndicatorResult> {
     try {

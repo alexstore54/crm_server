@@ -1,0 +1,96 @@
+import { AgentPermission, Permission, RolePermission } from '@prisma/client';
+
+export type PermissionsTable = {
+  [key in PermissionsKeys]?: TablePermission;
+};
+
+export type TablePermission = {
+  allowed: boolean;
+  permissionId: number;
+};
+
+export enum PermissionsKeys {
+  // Moderator | Admin permissions
+  //agents
+  READ_ALL_AGENTS = 'READ_ALL_AGENTS',
+  CREATE_AGENTS = 'CREATE_ALL_AGENTS',
+  UPDATE_ALL_AGENTS = 'UPDATE_ALL_AGENTS',
+  DELETE_ALL_AGENTS = 'DELETE_ALL_AGENTS',
+  UPDATE_ALL_AGENTS_PERMISSIONS = 'UPDATE_ALL_AGENTS_PERMISSIONS',
+
+  //logs
+  READ_LOGS = 'READ_LOGS',
+
+  //leads
+  READ_ALL_LEADS = 'READ_ALL_LEADS',
+  UPDATE_ALL_LEADS = 'READ_TEAM_LEADS',
+  DELETE_ALL_LEADS = 'DELETE_ALL_LEADS',
+  CREATE_ALL_LEADS = 'CREATE_ALL_LEADS',
+
+  // Team-agents
+  READ_TEAM_AGENTS = 'READ_TEAM_AGENTS',
+  CREATE_TEAM_AGENTS = 'CREATE_TEAM_AGENTS',
+  UPDATE_TEAM_AGENTS = 'UPDATE_TEAM_AGENTS',
+  DELETE_TEAM_AGENTS = 'DELETE_TEAM_AGENTS',
+
+  //Desk-agents
+  READ_DESK_AGENTS = 'READ_DESK_AGENTS',
+  CREATE_DESK_AGENTS = 'CREATE_DESK_AGENTS',
+  UPDATE_DESK_AGENTS = 'UPDATE_DESK_AGENTS',
+  DELETE_DESK_AGENTS = 'DELETE_DESK_AGENTS',
+
+  // Leads / Customers
+  READ_TEAM_LEADS = 'READ_TEAM_LEADS',
+  CREATE_TEAM_LEADS = 'CREATE_TEAM_LEADS',
+  UPDATE_TEAM_LEADS = 'UPDATE_TEAM_LEADS',
+  DELETE_TEAM_LEADS = 'DELETE_TEAM_LEADS',
+
+  READ_DESK_LEADS = 'READ_DESK_LEADS',
+  CREATE_DESK_LEADS = 'CREATE_DESK_LEADS',
+  UPDATE_DESK_LEADS = 'UPDATE_DESK_LEADS',
+  DELETE_DESK_LEADS = 'DELETE_DESK_LEADS',
+
+  // Roles
+  READ_ROLES = 'READ_ROLES',
+  CREATE_ROLES = 'CREATE_ROLES',
+  UPDATE_ROLES = 'UPDATE_ROLES',
+  DELETE_ROLES = 'DELETE_ROLES',
+
+  // Desks
+  READ_DESKS = 'READ_DESKS',
+  CREATE_DESKS = 'CREATE_DESKS',
+  UPDATE_DESKS = 'UPDATE_DESKS',
+  DELETE_DESKS = 'DELETE_DESKS',
+
+  //AGENTS-SESSIONS
+  READ_ALL_AGENTS_SESSIONS = 'READ_ALL_AGENTS_SESSIONS',
+  DELETE_ALL_AGENTS_SESSIONS = 'DELETE_ALL_AGENTS_SESSIONS',
+
+  //CUSTOMERS_SESSIONS
+  READ_ALL_CUSTOMERS_SESSIONS = 'READ_ALL_CUSTOMERS_SESSIONS',
+  DELETE_ALL_CUSTOMERS_SESSIONS = 'DELETE_ALL_CUSTOMERS_SESSIONS',
+
+  // Teams
+  READ_TEAMS = 'READ_TEAMS',
+  CREATE_TEAMS = 'CREATE_TEAMS',
+  UPDATE_TEAMS = 'UPDATE_TEAMS',
+  DELETE_TEAMS = 'DELETE_TEAMS',
+  ASSIGN_AGENTS_TO_TEAMS = 'ASSIGN_AGENTS_TO_TEAMS',
+
+  // Himself
+  UPDATE_HIMSELF = 'UPDATE_HIMSELF',
+}
+
+type PermissionWithDetails = {
+  Permission: Permission;
+};
+export type PrismaPermissionWithDetails =
+  | (AgentPermission & PermissionWithDetails)
+  | (RolePermission & PermissionWithDetails);
+
+export type FullPermission = {
+  roleId: number;
+  permissionId: number;
+  allowed: boolean;
+  key?: PermissionsKeys;
+};

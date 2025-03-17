@@ -3,11 +3,15 @@ import { LogsRepository } from '@/modules/logger/repositories';
 import { CreateLog } from '@/modules/logger/dto';
 
 export class PrismaTransport extends Transport {
-  constructor(private logsRepository: LogsRepository, opts?: Transport.TransportStreamOptions) {
+  constructor(
+    private logsRepository: LogsRepository,
+    opts?: Transport.TransportStreamOptions,
+  ) {
     super(opts);
   }
 
   async log(info: CreateLog, callback: () => void): Promise<void> {
+    //#TODO: PROD FIX
     if (!info || !info.context) {
       return callback();
     }
@@ -16,8 +20,7 @@ export class PrismaTransport extends Transport {
       this.emit('logged', info);
     });
 
-    await this.logsRepository.createLog(info);
+    await this.logsRepository.createOneLog(info);
     callback();
   }
-
 }

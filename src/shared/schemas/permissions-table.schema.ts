@@ -1,0 +1,45 @@
+import Joi, { ObjectSchema } from 'joi';
+import { PermissionsTable } from '@/shared/types/permissions';
+
+export const permissionsTableSchema: ObjectSchema<PermissionsTable> = Joi.object({
+  READ_ALL_AGENTS: Joi.boolean().optional(),
+  CREATE_AGENTS: Joi.boolean().optional(),
+  UPDATE_ALL_AGENTS: Joi.boolean().optional(),
+  DELETE_ALL_AGENTS: Joi.boolean().optional(),
+  READ_TEAM_AGENTS: Joi.boolean().optional(),
+  CREATE_TEAM_AGENTS: Joi.boolean().optional(),
+  UPDATE_TEAM_AGENTS: Joi.boolean().optional(),
+  DELETE_TEAM_AGENTS: Joi.boolean().optional(),
+  READ_DESK_AGENTS: Joi.boolean().optional(),
+  CREATE_DESK_AGENTS: Joi.boolean().optional(),
+  UPDATE_DESK_AGENTS: Joi.boolean().optional(),
+  DELETE_DESK_AGENTS: Joi.boolean().optional(),
+  READ_LEADS: Joi.boolean().optional(),
+  CREATE_LEADS: Joi.boolean().optional(),
+  UPDATE_LEADS: Joi.boolean().optional(),
+  DELETE_LEADS: Joi.boolean().optional(),
+  ASSIGN_LEADS: Joi.boolean().optional(),
+  READ_ROLES: Joi.boolean().optional(),
+  CREATE_ROLES: Joi.boolean().optional(),
+  UPDATE_ROLES: Joi.boolean().optional(),
+  DELETE_ROLES: Joi.boolean().optional(),
+  READ_DESKS: Joi.boolean().optional(),
+  CREATE_DESKS: Joi.boolean().optional(),
+  UPDATE_DESKS: Joi.boolean().optional(),
+  DELETE_DESKS: Joi.boolean().optional(),
+  READ_TEAMS: Joi.boolean().optional(),
+  CREATE_TEAMS: Joi.boolean().optional(),
+  UPDATE_TEAMS: Joi.boolean().optional(),
+  DELETE_TEAMS: Joi.boolean().optional(),
+  ASSIGN_AGENTS_TO_TEAMS: Joi.boolean().optional(),
+  UPDATE_HIMSELF: Joi.boolean().optional(),
+  UPDATE_ALL_AGENTS_PERMISSIONS: Joi.boolean().optional(),
+  READ_ALL_AGENTS_SESSIONS: Joi.boolean().optional(),
+  DELETE_ALL_AGENTS_SESSIONS: Joi.boolean().optional(),
+
+  //CUSTOMERS_SESSIONS
+  READ_ALL_CUSTOMERS_SESSIONS: Joi.boolean().optional(),
+  DELETE_ALL_CUSTOMERS_SESSIONS: Joi.boolean().optional(),
+
+  READ_LOGS: Joi.boolean().optional(),
+});

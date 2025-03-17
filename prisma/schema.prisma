@@ -7,17 +7,147 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Agent {
+  publicId        String            @unique @default(uuid())
+  id              Int               @id @default(autoincrement())
+  roleId          Int
+  email           String            @db.VarChar(100)
+  password        String
+  lastOnline      DateTime?         @db.Timestamptz(0)
+  Role            Role              @relation(fields: [roleId], references: [id])
+  AgentPermission AgentPermission[]
+  Lead            Lead[]
+  Desk            Desk[]            @relation("AgentDesks")
+  Team            Team[]            @relation("AgentTeams")
+}
+
+model AgentPermission {
+  agentId      Int
+  permissionId Int
+  allowed      Boolean    @default(false)
+  Agent        Agent      @relation(fields: [agentId], references: [id])
+  Permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([agentId, permissionId])
+}
+
+model Customer {
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
+  leadId   Int    @unique
+
+  password   String
+  lastOnline DateTime? @db.Timestamptz(0)
+  Lead       Lead      @relation(fields: [leadId], references: [id])
+  Email      Email[]
+}
+
+model Desk {
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
+  name     String
+
+  Lead  Lead[]
+  Agent Agent[] @relation("AgentDesks")
+}
+
+model Email {
+  id         Int      @id @default(autoincrement())
+  email      String
+  isMain     Boolean  @default(false)
+  customerId Int
+  createdAt  DateTime @default(now()) @db.Timestamptz(0)
+  Customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model Lead {
+  id           Int         @id @default(autoincrement())
+  statusId     Int?
+  firstname    String?
+  lastname     String?
+  country      String?
+  createdAt    DateTime    @default(now()) @db.Timestamptz(0)
+  defaultEmail String
+  agentId      Int?
+  deskId       Int?
+  teamId       Int?
+  isVerified   Boolean     @default(false)
+  Customer     Customer?
+  Agent        Agent?      @relation(fields: [agentId], references: [id])
+  LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
+  Phone        Phone[]
+  Desk         Desk?       @relation(fields: [deskId], references: [id])
+  Team         Team?       @relation(fields: [teamId], references: [id])
+}
+
+model LeadStatus {
+  id   Int    @id @default(autoincrement())
+  name String
+  Lead Lead[]
+}
+
 model Log {
-  id        Int       @id @default(autoincrement())
-  level     LogLevel? @default(INFO)
+  level     LogLevel     @default(INFO)
   message   String
-  userId    String?
   context   Json?
-  createdAt DateTime  @default(now())
+  createdAt DateTime     @default(now()) @db.Timestamptz(0)
+  userId    Int?
+  userType  LogUserType?
+  id        Int          @id @default(autoincrement())
+}
+
+model Permission {
+  id              Int               @id @default(autoincrement())
+  key             String            @unique
+  AgentPermission AgentPermission[]
+  RolePermission  RolePermission[]
+}
+
+model Team {
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
+
+  name   String
+  Agents Agent[] @relation("AgentTeams")
+  Leads  Lead[]
+}
+
+model Phone {
+  id         Int      @id @default(autoincrement())
+  phone      String
+  isMain     Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(0)
+  leadId     Int
+  Lead       Lead     @relation(fields: [leadId], references: [id])
+}
+
+model Role {
+  publicId       String           @unique @default(uuid())
+  id             Int              @id @default(autoincrement())
+  isMutable      Boolean          @default(true)
+  isVisible      Boolean          @default(true)
+  name           String
+  Agent          Agent[]
+  RolePermission RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  allowed      Boolean    @default(false)
+  Permission   Permission @relation(fields: [permissionId], references: [id])
+  Role         Role       @relation(fields: [roleId], references: [id])
+
+  @@id([roleId, permissionId])
 }
 
 enum LogLevel {
   INFO
   WARN
   ERROR
+}
+
+enum LogUserType {
+  AGENT
+  CUSTOMER
 }
