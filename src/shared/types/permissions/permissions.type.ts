@@ -6,7 +6,7 @@ export type PermissionsTable = {
 
 export type TablePermission = {
   allowed: boolean;
-  permissionId: number;
+  id: number;
 };
 
 export enum PermissionsKeys {

@@ -67,8 +67,8 @@ describe(UsersUtil.name, () => {
       const result: UserEmail[] = UsersUtil.mapEmailsToCustomerEmails(emails);
 
       expect(result).toEqual([
-        { email: getMockedEmail().email, isMain: getMockedEmail().isMain },
-        { email: getMockedMainEmail().email, isMain: getMockedMainEmail().isMain },
+        { email: getMockedEmail().email, isMain: getMockedEmail().isMain, id: getMockedEmail().id },
+        { email: getMockedMainEmail().email, isMain: getMockedMainEmail().isMain, id: getMockedMainEmail().id },
       ]);
     });
   });
@@ -80,8 +80,8 @@ describe(UsersUtil.name, () => {
       const result: UserPhone[] = UsersUtil.mapPhonesToUserPhones(phones);
 
       expect(result).toEqual([
-        { phone: getMockedPhone().phone, isMain: getMockedPhone().isMain },
-        { phone: getMockedMainPhone().phone, isMain: getMockedMainPhone().isMain },
+        { phone: getMockedPhone().phone, isMain: getMockedPhone().isMain, id: getMockedPhone().id },
+        { phone: getMockedMainPhone().phone, isMain: getMockedMainPhone().isMain, id: getMockedMainPhone().id  },
       ]);
     });
   });

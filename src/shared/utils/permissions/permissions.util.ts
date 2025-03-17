@@ -14,7 +14,7 @@ export class PermissionsUtil {
     prismaPermissions.forEach((permission) => {
       permissionsTable[permission.Permission.key as PermissionsKeys] = {
         allowed: permission.allowed,
-        permissionId: permission.Permission.id,
+        id: permission.Permission.id,
       };
     });
 
