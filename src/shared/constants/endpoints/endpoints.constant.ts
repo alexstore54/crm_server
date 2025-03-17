@@ -82,12 +82,13 @@ export const ENDPOINTS = {
     GET_ALL_MY_SESSIONS: 'all',
     DELETE_ALL: 'all',
   },
-  DESK: {
+  DESKS: {
     BASE: 'desks',
     GET_DESK_TEAMS: ':publicId/teams',
     GET_DESK: ':publicId',
     CREATE_DESK: 'create',
     UPDATE_DESK: ':publicId/update',
     DELETE_DESK: ':publicId',
+    GET_ALL_DESKS: '/',
   }
 };

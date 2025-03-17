@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
+import { DeskService } from '@/modules/desk/services/desk.service';
+import { DeskController } from '@/modules/desk/controllers/desk.controller';
+import { AuthRedisModule } from '@/shared/services/redis/auth-redis';
+import { ValidationModule } from '@/shared/services/validation';
+import { DeskRepository } from '@/modules/desk/repositories/desk.repository';
 
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [],
-  exports: [],
+  imports: [AuthRedisModule, ValidationModule],
+  controllers: [DeskController],
+  providers: [DeskService, DeskRepository],
+  exports: [DeskRepository],
 })
 export class TeamsModule {}
