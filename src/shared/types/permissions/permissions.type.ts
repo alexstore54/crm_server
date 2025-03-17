@@ -94,3 +94,8 @@ export type FullPermission = {
   allowed: boolean;
   key?: PermissionsKeys;
 };
+export type FullAgentPermission = {
+  agentId: number;
+  permissionId: number;
+  allowed: boolean;
+};

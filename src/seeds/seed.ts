@@ -8,10 +8,10 @@ import {
   lowAccessPermissions,
 } from '@/seeds/seed.data';
 import { SEEDS_MESSAGES } from '@/shared/constants/errors';
-import { Agent, Permission, Prisma, Role } from '@prisma/client';
+import { Agent, AgentPermission, Permission, Prisma, Role, RolePermission } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { LOW_ACCESS_USER, NO_ACCESS_USER } from '@/shared/constants/tests/agents.constant';
-import { FullPermission, PermissionsKeys } from '@/shared/types/permissions';
+import { FullAgentPermission, FullPermission, PermissionsKeys } from '@/shared/types/permissions';
 import { PermissionsUtil } from '@/shared/utils';
 import { NodeEnv } from '@/common/config/types';
 
@@ -78,9 +78,18 @@ class Seed {
         moderatorRole.id,
         true,
       );
+      const moderatorAgentPermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
+        permissions,
+        moderatorRole.id,
+        true,
+      );
 
-      await this.seedRolePermissions(moderatorRolePermissionsInput, tx);
-      await this.seedAgent(this.getModeratorInput(moderatorRole.id), tx);
+
+      const dbRolePermissions = await this.seedRolePermissions(moderatorRolePermissionsInput, tx);
+      const moderator = await this.seedAgent(this.getModeratorInput(moderatorRole.id), tx);
+      // permissionId, agentId, allowed
+      await this.seedAgentPermissions(this.getAgentPermissionsList(dbRolePermissions, moderator.id), tx)  
+
     } catch (error: any) {
       throw new Error(error);
     }
@@ -106,11 +115,15 @@ class Seed {
         lowAccessRole.id,
       );
 
-      await this.seedRolePermissions(noAccessRolePermissionsInput, tx);
-      await this.seedRolePermissions(lowAccessPermissionsInput, tx);
+      const noAccessRolePermissions = await this.seedRolePermissions(noAccessRolePermissionsInput, tx);
+      const lowAccessRolePermissions = await this.seedRolePermissions(lowAccessPermissionsInput, tx);
 
-      await this.seedAgent(this.getNoAccessUserInput(noAccessRole.id), tx);
-      await this.seedAgent(this.getLowAccessUserInput(lowAccessRole.id), tx);
+      const noAccessAgent = await this.seedAgent(this.getNoAccessUserInput(noAccessRole.id), tx);
+      const lowAccessAgent = await this.seedAgent(this.getLowAccessUserInput(lowAccessRole.id), tx);
+
+      await this.seedAgentPermissions(this.getAgentPermissionsList(noAccessRolePermissions, noAccessAgent.id), tx)
+      await this.seedAgentPermissions(this.getAgentPermissionsList(lowAccessRolePermissions, lowAccessAgent.id), tx)
+
     } catch (error: any) {
       throw new Error(error);
     }
@@ -124,22 +137,33 @@ class Seed {
         })),
       });
 
-      return await this.prisma.permission.findMany({});
+      return await tx.permission.findMany({});
     } catch (error: any) {
       const errorMessage = `${SEEDS_MESSAGES.DB_ERROR}: ${error.message}`;
       throw new Error(error);
     }
   }
 
+  private static async seedAgentPermissions(
+    data: FullAgentPermission[],
+    tx: Prisma.TransactionClient
+  ): Promise<AgentPermission[]>{
+    try{
+      return await tx.agentPermission.createManyAndReturn({data})
+    }catch(error: any){
+      throw error
+    }
+  }
+
   private static async seedRolePermissions(
     data: FullPermission[],
-    tx: Prisma.TransactionClient,
-  ): Promise<void> {
+    tx: Prisma.TransactionClient
+  ): Promise<RolePermission[]> {
     try {
-      await tx.rolePermission.createMany({
-        data,
-      });
-    } catch (error: any) {}
+      return await tx.rolePermission.createManyAndReturn({data});
+    } catch (error: any) {
+      throw error; 
+    }
   }
 
   //!
@@ -154,6 +178,18 @@ class Seed {
   //   allowed: boolean;
   // } ---------------
   //!
+  private static getAgentPermissionsList(
+    rolePermissions: RolePermission[],
+    agentId: number
+  ){
+    return rolePermissions.map(rp => {
+        return {
+            permissionId: rp.permissionId,
+            allowed: rp.allowed,
+            agentId
+        }
+    })
+  }
 
   private static getRolePermissionsList(
     permissions: Permission[],
@@ -164,18 +200,18 @@ class Seed {
     return permissions.map((permission) => {
       // allowedList.find(a_p) - a_p (плохая практика называть одной буквой, юзай всегда полное название)
       const current = allowedKeys.find((key) => key === permission.key);
-      if (current) {
-        return {
-          roleId,
-          permissionId: permission.id,
-          allowed: true,
-        };
-      }
-      return {
-        roleId,
-        permissionId: permission.id,
-        allowed: false,
-      };
+        if (current) {
+          return {
+            roleId,
+            permissionId: permission.id,
+            allowed: true,
+          };
+        }
+          return {
+            roleId,
+            permissionId: permission.id,
+            allowed: false,
+          };
     });
   }
 

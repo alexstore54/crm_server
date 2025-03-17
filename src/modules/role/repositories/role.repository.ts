@@ -18,4 +18,12 @@ export class RoleRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+
+  public async findMany(): Promise<Role[]>{
+    try {
+      return this.prisma.role.findMany({})
+    }catch(error: any){
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 }
