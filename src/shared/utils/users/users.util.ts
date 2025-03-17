@@ -24,6 +24,7 @@ export class UsersUtil {
     return emails.map((email) => ({
       email: email.email,
       isMain: email.isMain,
+      id: email.id,
     }));
   }
 
@@ -31,6 +32,7 @@ export class UsersUtil {
     return phones.map((phone) => ({
       phone: phone.phone,
       isMain: phone.isMain,
+      id: phone.id,
     }));
   }
 }

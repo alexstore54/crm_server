@@ -12,6 +12,6 @@ export const getMockedPhone = (): Phone => ({
   phone: '123456789',
   isMain: false,
   created_at: new Date(),
-  leadId: 1,
-  id: 1,
+  leadId: 2,
+  id: 2,
 });
