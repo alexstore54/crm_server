@@ -12,8 +12,8 @@ export const getMockedMainEmail = (): Email => {
 
 export const getMockedEmail = (): Email => {
   return {
-    id: 1,
-    customerId: 1,
+    id: 2,
+    customerId: 2,
     email: 'example@mail.com',
     isMain: false,
     createdAt: new Date(),

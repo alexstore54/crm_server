@@ -1,28 +1,35 @@
 import { ArrayUtil } from './array.util';
 
-describe('ArrayUtil.isArraysEqual', () => {
-  test('должен возвращать true для одинаковых массивов', () => {
-    expect(ArrayUtil.isArraysEqual([1, 2, 3], [3, 2, 1])).toBe(true);
-    expect(ArrayUtil.isArraysEqual([5, 10, 15], [10, 15, 5])).toBe(true);
-  });
+describe(ArrayUtil, () => {
+  describe(ArrayUtil.isArraysEqual.name, () => {
+    it('should return true for equal arrays', () => {
+      const arr1 = [1, 2, 3];
+      const arr2 = [3, 2, 1];
+      expect(ArrayUtil.isArraysEqual(arr1, arr2)).toBe(true);
+    });
 
-  test('должен возвращать false для массивов разной длины', () => {
-    expect(ArrayUtil.isArraysEqual([1, 2], [1, 2, 3])).toBe(false);
-    expect(ArrayUtil.isArraysEqual([5, 10, 15], [10, 15])).toBe(false);
-  });
+    it('should return false for arrays of different lengths', () => {
+      const arr1 = [1, 2, 3];
+      const arr2 = [1, 2, 3, 4];
+      expect(ArrayUtil.isArraysEqual(arr1, arr2)).toBe(false);
+    });
 
-  test('должен возвращать false для массивов с разными элементами', () => {
-    expect(ArrayUtil.isArraysEqual([1, 2, 3], [4, 5, 6])).toBe(false);
-    expect(ArrayUtil.isArraysEqual([7, 8, 9], [9, 8, 10])).toBe(false);
-  });
+    it('should return false for arrays with different elements', () => {
+      const arr1 = [1, 2, 3];
+      const arr2 = [4, 5, 6];
+      expect(ArrayUtil.isArraysEqual(arr1, arr2)).toBe(false);
+    });
 
-  test('должен корректно обрабатывать пустые массивы', () => {
-    expect(ArrayUtil.isArraysEqual([], [])).toBe(true);
-    expect(ArrayUtil.isArraysEqual([], [1])).toBe(false);
-  });
+    it('should return true for empty arrays', () => {
+      const arr1: number[] = [];
+      const arr2: number[] = [];
+      expect(ArrayUtil.isArraysEqual(arr1, arr2)).toBe(true);
+    });
 
-  test('должен учитывать повторяющиеся элементы', () => {
-    expect(ArrayUtil.isArraysEqual([1, 1, 2], [1, 2, 2])).toBe(false);
-    expect(ArrayUtil.isArraysEqual([2, 2, 3], [3, 2, 2])).toBe(true);
+    it('should return false for arrays with same elements but different counts', () => {
+      const arr1 = [1, 1, 2];
+      const arr2 = [1, 2, 2];
+      expect(ArrayUtil.isArraysEqual(arr1, arr2)).toBe(false);
+    });
   });
 });

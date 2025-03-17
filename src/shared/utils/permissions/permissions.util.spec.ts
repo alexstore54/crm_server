@@ -1,6 +1,6 @@
-import { FiltersUtil } from './filters.util';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { FiltersUtil } from '@/shared/utils';
 
 describe(FiltersUtil.name, () => {
   describe(FiltersUtil.getExceptionStatus.name, () => {
@@ -22,13 +22,13 @@ describe(FiltersUtil.name, () => {
       expect(FiltersUtil.getExceptionMessage(exception)).toBe('Error');
     });
 
-    it('should return the provided message if the exception is not HttpException', () => {
+    it('should return the passed message if the exception is not HttpException', () => {
       expect(FiltersUtil.getExceptionMessage(new Error(), 'An error occurred')).toBe(
         'An error occurred',
       );
     });
 
-    it('should return the default message if the exception is not HttpException and no message is provided', () => {
+    it('should return the default message if the exception is not HttpException and no message is passed', () => {
       expect(FiltersUtil.getExceptionMessage(new Error())).toBe(
         ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
       );

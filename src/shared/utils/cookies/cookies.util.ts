@@ -14,14 +14,12 @@ export class CookiesUtil {
   }
 
   public static setAuthTokens(res: Response, accessToken: string, refreshToken: string) {
-    this.setCookies(res, COOKIES.ACCESS_TOKEN, accessToken, {
+    const options = {
       httpOnly: this.isProduction,
       secure: this.isProduction,
-    });
-    this.setCookies(res, COOKIES.REFRESH_TOKEN, refreshToken, {
-      httpOnly: this.isProduction,
-      secure: this.isProduction,
-    });
+    };
+    this.setCookies(res, COOKIES.ACCESS_TOKEN, accessToken, options);
+    this.setCookies(res, COOKIES.REFRESH_TOKEN, refreshToken, options);
   }
 
   public static clearAuthTokens(res: Response) {

@@ -1,7 +1,7 @@
 import { SchemaUtil } from './schema.util';
 
-describe('SchemaUtil', () => {
-  describe('getConfigKeys', () => {
+describe(SchemaUtil.name, () => {
+  describe(SchemaUtil.getConfigKeys.name, () => {
     it('should return an object with keys matching their own names', () => {
       const input = {
         NODE_ENV: 'development',
