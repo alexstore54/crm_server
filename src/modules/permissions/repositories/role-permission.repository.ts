@@ -2,11 +2,16 @@ import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { IncomingPermission } from '@/modules/permissions/dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
+import { FullPermission, PrismaPermissionWithDetails } from '@/shared/types/permissions';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  public async txCreateMany(permissions: FullPermission[], tx: Prisma.TransactionClient){
+      return tx.rolePermission.createManyAndReturn({data: permissions})
+  }
 
   public async updateManyByRoleId(
     roleId: number,

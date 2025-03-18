@@ -1,7 +1,8 @@
-import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { RoleService } from '../services/role.service';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
 import { UUIDValidationPipe } from '@/common/pipes';
+import { CreateRole } from '../dto/createRole.dto';
 
 @Controller(ENDPOINTS.ROLE.BASE)
 export class RoleController {
@@ -18,7 +19,11 @@ export class RoleController {
   }
 
   @Post(ENDPOINTS.ROLE.CREATE_ROLE)
-  async createRole() {}
+  async createRole(
+     @Req() req: Request, @Body() body: CreateRole
+  ) {
+    return this.roleService.createRole(body)
+  }
 
   @Patch(ENDPOINTS.ROLE.UPDATE_ONE_ROLE)
   async updateRole(

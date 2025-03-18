@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
@@ -25,5 +25,13 @@ export class RoleRepository {
     }catch(error: any){
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
+  }
+
+  public async txCreateOne(name: string, tx: Prisma.TransactionClient):Promise<Role>{
+      try{
+          return tx.role.create({data:{name}})
+      }catch(error: any){
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+      }
   }
 }
