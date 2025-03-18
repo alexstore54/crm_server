@@ -1,10 +1,12 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { RoleRepository } from "../repositories/role.repository";
-import { PrismaClient, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { CreateRole } from "../dto/createRole.dto";
 import { RolePermissionRepository } from "@/modules/agent/repositories";
 import { PermissionRepository } from "@/modules/permissions/repositories";
 import { ERROR_MESSAGES } from "@/shared/constants/errors";
+import { PermissionsUtil } from "@/shared/utils";
+import { PrismaService } from "@/shared/db/prisma";
 
 @Injectable()
 export class RoleService {
@@ -12,7 +14,8 @@ export class RoleService {
         private readonly rolePermissionRepository: RolePermissionRepository,
         private readonly roleRepository: RoleRepository,
         private readonly permissionRepository: PermissionRepository,
-        private readonly prisma: PrismaClient
+        private readonly prisma: PrismaService
+
     ){}
 
     public async createRole(data: CreateRole){
@@ -24,21 +27,10 @@ export class RoleService {
                 // Вытаскиваем реально существующие permissions, тем самым отсеивая невалидные id с клиента 
                 const DBpermissions = await this.permissionRepository.txFindManyByIds(incomingPermissionIds, tx);
                 // Фильтруем и собираем данные 
-                const mapPermissionsToRolePermissions = DBpermissions.map(db_perm => {
-                    const incomePermisson = permissions.find(in_perm => in_perm.permissionId === db_perm.id);
-                    if(incomePermisson){
-                        return {
-                            roleId: newRole.id,
-                            permissionId: incomePermisson.permissionId,
-                            allowed: incomePermisson.allowed
-                        }
-                    }
-                    return null;
-                }).filter(item => item !== null);
-                
+                const mappedRolePermissions = PermissionsUtil.mapAndFilterPermissionsToRolePermissions(DBpermissions, newRole.id, permissions);
                 // В случае, если всё таки какие-то permissionID были невалидными, 
                 // то ищем остатки которые остались и задаём им false вручную
-                if(mapPermissionsToRolePermissions.length !== permissions.length){
+                if(mappedRolePermissions.length !== permissions.length){
                     const ExcludePermissions = await this.permissionRepository.txFindManyByIdsExclude(incomingPermissionIds, tx);
                     const mapExcludePermissions = ExcludePermissions.map(ex_perm => (
                         {
@@ -46,20 +38,19 @@ export class RoleService {
                             permissionId: ex_perm.id,
                         }
                     ))
-                    const newRolePermissions = await this.rolePermissionRepository.txCreateMany([...mapExcludePermissions, ...mapPermissionsToRolePermissions],tx);
+                    const newRolePermissions = await this.rolePermissionRepository.txCreateMany([...mapExcludePermissions, ...mappedRolePermissions], tx);
                     return {
                             role: newRole,
                             permissions: newRolePermissions
-                    }
+                        }
                 }else {
-                    const newRolePermissions = await this.rolePermissionRepository.txCreateMany(mapPermissionsToRolePermissions, tx);
+                    const newRolePermissions = await this.rolePermissionRepository.txCreateMany(mappedRolePermissions, tx);
                     return {
                             role: newRole,
                             permissions: newRolePermissions
-                    }
+                        }
                 }
                 
-                // const newRolePermissions = await this.rolePermissionRepository.
             })
         }catch(error:any){
             throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

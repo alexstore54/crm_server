@@ -1,9 +1,10 @@
+import { PrismaService } from "@/shared/db/prisma";
 import { Injectable } from "@nestjs/common";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class PermissionRepository {
-    constructor (private readonly prisma: PrismaClient){}
+    constructor (private readonly prisma: PrismaService){}
 
     public async findOneById(){}
     public async findOneByKey(){}
