@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/shared/db/prisma';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Prisma, Team } from '@prisma/client';
@@ -78,16 +78,38 @@ export class TeamRepository {
 
   public async deleteOneByPublicId(teamPublicId: string): Promise<Team> {
     try {
-      return this.prisma.team.delete({
-        where: {
-          publicId: teamPublicId,
-        },
+      return this.prisma.$transaction(async (tx) => {
+        // Find the team to get its ID
+        const team = await tx.team.findUnique({
+          where: {
+            publicId: teamPublicId,
+          },
+        });
+
+        if (!team) {
+          throw new NotFoundException();
+        }
+
+        await tx.agent.updateMany({
+          where: {
+            teamId: team.id,
+          },
+          data: {
+            teamId: null,
+          },
+        });
+
+        // Delete the team
+        return tx.team.delete({
+          where: {
+            publicId: teamPublicId,
+          },
+        });
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
   public async createOne(data: CreateTeam): Promise<Team> {
     try {
       return await this.prisma.team.create({

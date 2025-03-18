@@ -32,25 +32,31 @@ model AgentPermission {
 }
 
 model Customer {
-  publicId    String @unique @default(uuid())
-  id          Int    @id @default(autoincrement())
-  leadId      Int    @unique
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
+  leadId   Int    @unique
 
-  password    String
-  lastOnline  DateTime? @db.Timestamptz(0)
-  Lead        Lead      @relation(fields: [leadId], references: [id])
-  Email       Email[]
+  password   String
+  lastOnline DateTime? @db.Timestamptz(0)
+  Lead       Lead      @relation(fields: [leadId], references: [id])
+  Email      Email[]
 }
 
 model Desk {
-  publicId    String  @unique @default(uuid())
-  id          Int     @id @default(autoincrement())
-  name        String
+  publicId String      @unique @default(uuid())
+  id       Int         @id @default(autoincrement())
+  name     String
+  Shifts   DeskAdmin[]
+  Lead     Lead[]
+  Agent    Agent[]     @relation("AgentDesks")
+  Teams    Team[]
+}
 
-  shiftIds    Int[]
-  Lead        Lead[]
-  Agent       Agent[] @relation("AgentDesks")
-  Teams       Team[]  
+model DeskAdmin {
+  id      Int  @id @default(autoincrement())
+  deskId  Int
+  agentId Int  @unique
+  Desk    Desk @relation(fields: [deskId], references: [id])
 }
 
 model Email {
@@ -107,17 +113,16 @@ model Permission {
 }
 
 model Team {
-  publicId String   @unique @default(uuid())
-  id       Int      @id @default(autoincrement())
+  publicId String @unique @default(uuid())
+  id       Int    @id @default(autoincrement())
 
-  name     String
-  
-  deskId   Int
-  desk     Desk     @relation(fields: [deskId], references: [id])
+  name String
 
-  Agents   Agent[]  @relation("AgentTeams")
-  Leads    Lead[]
+  deskId Int
+  desk   Desk @relation(fields: [deskId], references: [id])
 
+  Agents Agent[] @relation("AgentTeams")
+  Leads  Lead[]
 }
 
 model Phone {

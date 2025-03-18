@@ -28,4 +28,5 @@ export class AgentPermissionsController {
   async getAgentPermissions(@Param('publicId', UUIDValidationPipe) publicId: string) {
     return this.agentPermissionsService.getPermissionsByAgentPublicId(publicId);
   }
+
 }

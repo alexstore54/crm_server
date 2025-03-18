@@ -82,6 +82,12 @@ export const ENDPOINTS = {
     GET_ALL_MY_SESSIONS: 'all',
     DELETE_ALL: 'all',
   },
+  DESKS_ADMINS: {
+    BASE: 'desks/:publicId/shifts',
+    GET_ADMINS: '/',
+    ASSIGN_SHIFT: 'assign',
+    UNASSIGN_SHIFT: 'unassign',
+  },
   DESKS: {
     BASE: 'desks',
     GET_DESK_TEAMS: ':publicId/teams',
@@ -90,6 +96,5 @@ export const ENDPOINTS = {
     UPDATE_DESK: ':publicId/update',
     DELETE_DESK: ':publicId',
     GET_ALL_DESKS: '/',
-    ASSIGN_SHIFT: ':publicId/assign-shift',
-  }
+  },
 };

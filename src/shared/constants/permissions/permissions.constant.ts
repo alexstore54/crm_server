@@ -54,6 +54,20 @@ export const TEAM_DESK_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.UPDATE_DESK_LEADS,
   PermissionsKeys.READ_DESK_LEADS,
 ];
+
+export const DESK_ADMIN_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.READ_DESK_TEAMS,
+  PermissionsKeys.UPDATE_DESK_TEAMS,
+  PermissionsKeys.DELETE_DESK_TEAMS,
+
+  PermissionsKeys.DELETE_DESK_LEADS,
+  PermissionsKeys.UPDATE_DESK_LEADS,
+  PermissionsKeys.UPDATE_DESK_TEAMS,
+
+  PermissionsKeys.READ_DESK_AGENTS,
+  PermissionsKeys.UPDATE_DESK_AGENTS,
+];
+
 export const PERMISSIONS_NEED_VALIDATE: PermissionsKeys[] = [
   ...TEAM_AGENT_PERMISSIONS,
   ...DESK_AGENT_PERMISSIONS,

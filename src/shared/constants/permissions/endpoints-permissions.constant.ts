@@ -39,8 +39,13 @@ export const ENDPOINTS_PERMISSIONS = {
     CREATE_DESK: [PermissionsKeys.CREATE_DESKS],
     UPDATE_DESK: [PermissionsKeys.UPDATE_DESKS],
     DELETE_DESK: [PermissionsKeys.DELETE_DESKS],
-    GET_ALL_DESKS:[PermissionsKeys.READ_DESKS],
+    GET_ALL_DESKS: [PermissionsKeys.READ_DESKS],
     ASSIGN_SHIFT: [PermissionsKeys.UPDATE_DESKS],
+  },
+  DESK_ADMINS: {
+    ASSIGN_SHIFT: [PermissionsKeys.UPDATE_DESKS],
+    UNASSIGN_SHIFT: [PermissionsKeys.UPDATE_DESKS],
+    GET_ALL: [PermissionsKeys.READ_DESKS, PermissionsKeys.READ_DESK_TEAMS],
   },
   CUSTOMERS_SESSIONS: {},
   LOGS: {
