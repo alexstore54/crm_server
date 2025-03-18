@@ -79,27 +79,26 @@ export class TeamRepository {
   public async deleteOneByPublicId(teamPublicId: string): Promise<Team> {
     try {
       return this.prisma.$transaction(async (tx) => {
-        // Find the team to get its ID
         const team = await tx.team.findUnique({
           where: {
             publicId: teamPublicId,
           },
         });
-
         if (!team) {
           throw new NotFoundException();
         }
 
-        await tx.agent.updateMany({
+        await tx.team.update({
           where: {
-            teamId: team.id,
+            publicId: teamPublicId,
           },
           data: {
-            teamId: null,
+            Agents: {
+              set: [],
+            },
           },
         });
 
-        // Delete the team
         return tx.team.delete({
           where: {
             publicId: teamPublicId,
@@ -110,10 +109,23 @@ export class TeamRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+
   public async createOne(data: CreateTeam): Promise<Team> {
     try {
-      return await this.prisma.team.create({
-        data,
+      return this.prisma.$transaction(async (tx) => {
+        const desk = await tx.desk.findUnique({
+          where: {
+            id: data.deskId,
+          },
+        });
+
+        if (!desk) {
+          throw new NotFoundException();
+        }
+
+        return this.prisma.team.create({
+          data,
+        });
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

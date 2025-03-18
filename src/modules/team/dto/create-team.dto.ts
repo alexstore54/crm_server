@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MinLength, MaxLength, IsNumber } from 'class-validator';
 
 export class CreateTeam {
   @IsString()
@@ -10,4 +10,7 @@ export class CreateTeam {
   @MaxLength(255)
   @IsOptional()
   description?: string;
+
+  @IsNumber()
+  deskId: number;
 }

@@ -172,6 +172,27 @@ export class DeskRepository {
           },
         });
 
+        const teams = await tx.team.findMany({
+          where: {
+            deskId,
+          },
+        });
+
+        if (teams.length > 0) {
+          for (const team of teams) {
+            await tx.team.update({
+              where: {
+                id: team.id,
+              },
+              data: {
+                Agents: {
+                  set: [],
+                },
+              },
+            });
+          }
+        }
+
         await tx.team.deleteMany({
           where: {
             deskId,
