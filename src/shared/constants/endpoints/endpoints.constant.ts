@@ -90,5 +90,6 @@ export const ENDPOINTS = {
     UPDATE_DESK: ':publicId/update',
     DELETE_DESK: ':publicId',
     GET_ALL_DESKS: '/',
+    ASSIGN_SHIFT: ':publicId/assign-shift',
   }
 };

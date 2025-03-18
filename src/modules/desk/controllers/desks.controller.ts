@@ -9,7 +9,7 @@ import { PermissionsGuard } from '@/common/guards/permissions';
 import { UUIDValidationPipe } from '@/common/pipes';
 
 @Controller(ENDPOINTS.DESKS.BASE)
-export class DeskController {
+export class DesksController {
   constructor(private readonly deskService: DeskService) {}
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESKS.GET_DESK)
@@ -49,5 +49,10 @@ export class DeskController {
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Delete(ENDPOINTS.DESKS.DELETE_DESK)
   public async deleteDesk(@Param('publicId', UUIDValidationPipe) publicId: string): Promise<void> {}
+
+  @UsePermissions(ENDPOINTS_PERMISSIONS.DESKS.ASSIGN_SHIFT)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Post(ENDPOINTS.DESKS.ASSIGN_SHIFT)
+  public async assignShift(@Body() body: AssignShift): Promise<void> {}
 
 }

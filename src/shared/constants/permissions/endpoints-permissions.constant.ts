@@ -40,6 +40,7 @@ export const ENDPOINTS_PERMISSIONS = {
     UPDATE_DESK: [PermissionsKeys.UPDATE_DESKS],
     DELETE_DESK: [PermissionsKeys.DELETE_DESKS],
     GET_ALL_DESKS:[PermissionsKeys.READ_DESKS],
+    ASSIGN_SHIFT: [PermissionsKeys.UPDATE_DESKS],
   },
   CUSTOMERS_SESSIONS: {},
   LOGS: {
