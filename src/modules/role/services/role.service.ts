@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { RoleRepository } from "../repositories/role.repository";
-import { Role } from "@prisma/client";
+import { Role, RolePermission } from "@prisma/client";
 import { CreateRole } from "../dto/createRole.dto";
 import { RolePermissionRepository } from "@/modules/agent/repositories";
 import { PermissionRepository } from "@/modules/permissions/repositories";
@@ -18,7 +18,7 @@ export class RoleService {
 
     ){}
 
-    public async createRole(data: CreateRole){
+    public async createRole(data: CreateRole):Promise<{role: Role, permissions: RolePermission[]}>{
         const {name, permissions} = data;
         const incomingPermissionIds = permissions.map(p => p.permissionId)
         try{
@@ -28,9 +28,12 @@ export class RoleService {
                 const DBpermissions = await this.permissionRepository.txFindManyByIds(incomingPermissionIds, tx);
                 // Фильтруем и собираем данные 
                 const mappedRolePermissions = PermissionsUtil.mapAndFilterPermissionsToRolePermissions(DBpermissions, newRole.id, permissions);
-                // В случае, если всё таки какие-то permissionID были невалидными, 
+                
+                // В случае, если всё таки какие-то permissionID были невалидными, либо permissions пришли пустыми,
                 // то ищем остатки которые остались и задаём им false вручную
-                if(mappedRolePermissions.length !== permissions.length){
+                if(mappedRolePermissions.length !== permissions.length 
+                || permissions.length === 0){
+
                     const ExcludePermissions = await this.permissionRepository.txFindManyByIdsExclude(incomingPermissionIds, tx);
                     const mapExcludePermissions = ExcludePermissions.map(ex_perm => (
                         {
@@ -39,6 +42,7 @@ export class RoleService {
                         }
                     ))
                     const newRolePermissions = await this.rolePermissionRepository.txCreateMany([...mapExcludePermissions, ...mappedRolePermissions], tx);
+                    
                     return {
                             role: newRole,
                             permissions: newRolePermissions

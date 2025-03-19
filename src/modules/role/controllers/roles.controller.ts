@@ -9,7 +9,9 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Get(ENDPOINTS.ROLE.GET_ALL_ROLES)
-  async getRoles() {}
+  async getRoles() {
+    return this.roleService.getRoles();
+  }
 
   @Get(ENDPOINTS.ROLE.GET_ONE)
   async getRole(
@@ -20,7 +22,7 @@ export class RoleController {
 
   @Post(ENDPOINTS.ROLE.CREATE_ROLE)
   async createRole(
-     @Req() req: Request, @Body() body: CreateRole
+      @Body() body: CreateRole
   ) {
     return this.roleService.createRole(body)
   }

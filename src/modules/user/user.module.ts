@@ -7,7 +7,7 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PrismaModule, PrismaService } from '@/shared/db/prisma';
 
 @Module({
-  controllers: [CustomerController, LeadsController, PrismaModule],
+  controllers: [CustomerController, LeadsController],
   providers: [
     CustomerService,
     LeadsService,
