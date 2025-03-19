@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { RoleRepository } from "../repositories/role.repository";
-import { Role, RolePermission } from "@prisma/client";
+import { Permission, Role, RolePermission } from "@prisma/client";
 import { CreateRole } from "../dto/createRole.dto";
 import { RolePermissionRepository } from "@/modules/agent/repositories";
 import { PermissionRepository } from "@/modules/permissions/repositories";
@@ -27,40 +27,33 @@ export class RoleService {
         try{
             return await this.prisma.$transaction(async (tx) => {
                 const newRole = await this.roleRepository.txCreateOne(name, tx);
-                // Вытаскиваем реально существующие permissions, тем самым отсеивая невалидные id с клиента 
+                // Получаем существующие permissions, чтобы отсеять невалидные id
                 const DBpermissions = await this.permissionRepository.txFindManyByIds(incomingPermissionIds, tx);
-                // Фильтруем и собираем данные 
                 const mappedRolePermissions = PermissionsUtil.mapAndFilterPermissionsToRolePermissions(DBpermissions, newRole.id, permissions);
-                
-                // В случае, если всё таки какие-то permissionID были невалидными, либо permissions пришли пустыми,
-                // то ищем остатки которые остались и задаём им false вручную
-                if(mappedRolePermissions.length !== permissions.length 
-                || permissions.length === 0){
-
-                    const ExcludePermissions = await this.permissionRepository.txFindManyByIdsExclude(incomingPermissionIds, tx);
-                    const mapExcludePermissions = ExcludePermissions.map(ex_perm => (
-                        {
-                            roleId: newRole.id,
-                            permissionId: ex_perm.id,
-                        }
-                    ))
-                    await this.rolePermissionRepository.txCreateMany([...mapExcludePermissions, ...mappedRolePermissions], tx);
-                    const newRolePermissions = await this.rolePermissionRepository.txFindManyWithKeysByRoleId(newRole.id, tx)
-
-                    return {
-                            role: newRole,
-                            permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(newRolePermissions)
-                        }
-                }else {
-                    await this.rolePermissionRepository.txCreateMany(mappedRolePermissions, tx);
-                    const newRolePermissions = await this.rolePermissionRepository.txFindManyWithKeysByRoleId(newRole.id, tx);
-                    return {
-                            role: newRole,
-                            permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(newRolePermissions)
-                        }
+    
+                let rolePermissionsToCreate = mappedRolePermissions;
+    
+                // Если количество валидных permissions не совпадает с переданными,
+                // либо список permissions пустой, добавляем оставшиеся с дефолтным значением (false)
+                if (mappedRolePermissions.length !== permissions.length || permissions.length === 0) {
+                    const excludePermissions = await this.permissionRepository.txFindManyByIdsExclude(incomingPermissionIds, tx);
+                    const mappedExcludePermissions = excludePermissions.map(ex_perm => ({
+                        roleId: newRole.id,
+                        permissionId: ex_perm.id,
+                        allowed: false
+                    }));
+                    rolePermissionsToCreate = [...mappedRolePermissions, ...mappedExcludePermissions];
                 }
-                
-            })
+    
+                await this.rolePermissionRepository.txCreateMany(rolePermissionsToCreate, tx);
+                const newRolePermissions = await this.rolePermissionRepository.txFindManyWithKeysByRoleId(newRole.id, tx);
+                const { role } = plainToInstance(SingleRoleResponse, { role: newRole }, { excludeExtraneousValues: true });
+    
+                return {
+                    role,
+                    permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(newRolePermissions)
+                };
+            });
         }catch(error:any){
             throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
         }
