@@ -17,7 +17,6 @@ import { SessionsModule } from '@/modules/sessions/sessions.module';
     AppConfigModule.register({
       config: { validationSchema },
     }),
-    PrismaModule,
     HealthModule,
     GatewayModule,
     AuthModule,

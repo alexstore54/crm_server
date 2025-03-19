@@ -1,2 +1,2 @@
 export * from './desk.repository';
-export * from './desk-admin.repository';
+export * from './lead-manager.repository';

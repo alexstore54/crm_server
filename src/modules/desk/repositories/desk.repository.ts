@@ -166,7 +166,7 @@ export class DeskRepository {
           throw new NotFoundException();
         }
 
-        await tx.deskAdmin.deleteMany({
+        await tx.leadManager.deleteMany({
           where: {
             deskId,
           },

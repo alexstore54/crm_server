@@ -8,13 +8,14 @@ import {
 import { Agent, Desk, Lead, Prisma, Team } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
-import { AgentRepository, DeskRepository } from '@/modules/agent/repositories';
+import { AgentRepository } from '@/modules/agent/repositories';
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
 import { AgentUtil, ArrayUtil, PermissionsUtil } from '@/shared/utils';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { FullAgent } from '@/shared/types/agent';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { PermissionsTable } from '@/shared/types/permissions';
+import { DeskRepository } from '@/modules/desk/repositories';
 
 @Injectable()
 export class AgentService {

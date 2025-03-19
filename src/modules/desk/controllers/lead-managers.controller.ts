@@ -6,32 +6,32 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsGuard } from '@/common/guards/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
-import { ShiftService } from '@/modules/desk/services/shift.service';
+import { LeadManagerService } from '@/modules/desk/services/lead-manager.service';
 import { AgentForClient } from '@/shared/types/agent';
 import { UUIDValidationPipe } from '@/common/pipes';
 
 @Controller(ENDPOINTS.DESKS_ADMINS.BASE)
-export class DesksAdminsController {
-  constructor(private readonly shiftService: ShiftService) {}
+export class LeadManagersController {
+  constructor(private readonly leadManagerService: LeadManagerService) {}
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESK_ADMINS.ASSIGN_SHIFT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post(ENDPOINTS.DESKS_ADMINS.ASSIGN_SHIFT)
-  public async assignShift(
+  public async assign(
     @Body() body: AssignShift,
     @Param('publicId', UUIDValidationPipe) publicId: string,
   ): Promise<AgentForClient[]> {
-    return this.shiftService.assign(publicId, body);
+    return this.leadManagerService.assign(publicId, body);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESK_ADMINS.ASSIGN_SHIFT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post(ENDPOINTS.DESKS_ADMINS.UNASSIGN_SHIFT)
-  public async unassignShift(
+  public async unassign(
     @Body() body: UnassignShift,
     @Param('publicId', UUIDValidationPipe) publicId: string,
   ): Promise<AgentForClient[]> {
-    return this.shiftService.unassign(publicId, body);
+    return this.leadManagerService.unassign(publicId, body);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESK_ADMINS.GET_ALL)
@@ -40,6 +40,6 @@ export class DesksAdminsController {
   public async getAll(
     @Param('publicId', UUIDValidationPipe) publicId: string,
   ): Promise<AgentForClient[]> {
-    return this.shiftService.getAll(publicId);
+    return this.leadManagerService.getAll(publicId);
   }
 }

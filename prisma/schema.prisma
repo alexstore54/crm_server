@@ -43,16 +43,16 @@ model Customer {
 }
 
 model Desk {
-  publicId String      @unique @default(uuid())
-  id       Int         @id @default(autoincrement())
+  publicId String        @unique @default(uuid())
+  id       Int           @id @default(autoincrement())
   name     String
-  Shifts   DeskAdmin[]
+  Shifts   LeadManager[]
   Lead     Lead[]
-  Agent    Agent[]     @relation("AgentDesks")
+  Agent    Agent[]       @relation("AgentDesks")
   Teams    Team[]
 }
 
-model DeskAdmin {
+model LeadManager {
   id      Int  @id @default(autoincrement())
   deskId  Int
   agentId Int  @unique

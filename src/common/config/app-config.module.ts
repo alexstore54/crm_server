@@ -15,6 +15,7 @@ import { REDIS_CONFIG } from '@/shared/constants/config';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
 import { configKeys } from '@/shared/schemas';
+import { PrismaModule } from '@/shared/db/prisma';
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -68,7 +69,7 @@ export class AppConfigModule {
           session: false,
           global: true,
         }),
-        ValidationModule,
+        PrismaModule,
       ],
       providers: [
         //services
@@ -78,7 +79,6 @@ export class AppConfigModule {
         AgentRefreshTokenStrategy,
         CustomerAccessTokenStrategy,
         CustomerRefreshTokenStrategy,
-        ValidationService,
       ],
       exports: [ConfigModule],
     };

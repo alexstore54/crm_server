@@ -126,7 +126,7 @@ export class ValidationService {
       const desks = await this.prisma.desk.findMany({
         where: {
           publicId: { in: deskIds },
-          Team: { some: { publicId: teamPublicId } },
+          Teams: { some: { publicId: teamPublicId } },
         },
       });
 

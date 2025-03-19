@@ -5,12 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AssignShift } from '@/modules/desk/dto/shifts/assign-shift.dto';
-import { Agent, DeskAdmin } from '@prisma/client';
+import { Agent, LeadManager } from '@prisma/client';
 import { PrismaService } from '@/shared/db/prisma';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
 @Injectable()
-export class DeskAdminRepository {
+export class LeadManagerRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private async getDeskByPublicId(tx: any, deskPublicId: string) {
@@ -26,7 +26,7 @@ export class DeskAdminRepository {
   }
 
   private async getAgentsByDeskId(tx: any, deskId: number): Promise<Agent[]> {
-    const shifts: DeskAdmin[] = await tx.shift.findMany({
+    const shifts: LeadManager[] = await tx.shift.findMany({
       where: { deskId },
       select: { agentId: true },
     });
@@ -45,7 +45,7 @@ export class DeskAdminRepository {
       return this.prisma.$transaction(async (tx) => {
         const desk = await this.getDeskByPublicId(tx, deskPublicId);
 
-        const existingShift = await tx.deskAdmin.findUnique({
+        const existingShift = await tx.leadManager.findUnique({
           where: { agentId },
         });
 
@@ -53,7 +53,7 @@ export class DeskAdminRepository {
           throw new BadRequestException(ERROR_MESSAGES.USER_EXISTS);
         }
 
-        await tx.deskAdmin.create({
+        await tx.leadManager.create({
           data: {
             deskId: desk.id,
             agentId,
@@ -74,7 +74,7 @@ export class DeskAdminRepository {
       return this.prisma.$transaction(async (tx) => {
         const desk = await this.getDeskByPublicId(tx, deskPublicId);
 
-        await tx.deskAdmin.delete({
+        await tx.leadManager.delete({
           where: {
             deskId: desk.id,
             agentId,

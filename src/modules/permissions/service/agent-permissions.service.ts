@@ -1,10 +1,11 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { UpdateAgentPermissions } from '@/modules/agent/dto/update-agent-perms.dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { AgentPermissionRepository, AgentRepository } from '@/modules/agent/repositories';
+import { AgentRepository } from '@/modules/agent/repositories';
 import { Agent, AgentPermission } from '@prisma/client';
 import { CreateAgentPermissions } from '@/modules/permissions/dto/agent-permissions';
 import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
+import { AgentPermissionRepository } from '@/modules/permissions/repositories';
 
 @Injectable()
 export class AgentPermissionsService {
