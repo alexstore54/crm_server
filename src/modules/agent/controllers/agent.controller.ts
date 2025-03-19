@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UploadedFile, UseGuards } from '@nestjs/common';
 import { AgentService } from '@/modules/agent/services/agent.service';
 import { AgentRequest } from '@/shared/types/auth';
 import { Agent, Lead } from '@prisma/client';
@@ -9,6 +9,7 @@ import { UsePermissions } from '@/common/decorators/validation';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 import { FullAgent } from '@/shared/types/agent';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
+import { UploadPicture } from '@/common/decorators/media';
 
 @Controller(ENDPOINTS.AGENT.BASE)
 export class AgentController {
@@ -21,10 +22,15 @@ export class AgentController {
     return this.agentService.getLeadsByPublicId(user.sub);
   }
 
+  @UploadPicture()
   @UsePermissions(ENDPOINTS_PERMISSIONS.CURRENT_AGENT.UPDATE_ME)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch(ENDPOINTS.AGENT.UPDATE_ME)
-  async updateMe(@Req() req: AgentRequest, @Body() body: UpdateAgent): Promise<Agent> {
+  async updateMe(
+    @Req() req: AgentRequest,
+    @Body() body: UpdateAgent,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<Agent> {
     const user = req.user;
     return this.agentService.updateByPublicId(user.sub, body);
   }

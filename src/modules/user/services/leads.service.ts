@@ -7,12 +7,12 @@ import { LeadRepository } from '@/modules/user/repositories';
 export class LeadsService {
   constructor(private readonly leadsRepository: LeadRepository) {}
 
-  public async getOneByPublicId(publicId: string): Promise<Lead> {
-    const lead = await this.leadsRepository.findOneFullById(publicId);
-
-    if(!lead) {
-      throw new NotFoundException();
-    }
+  public async getOneByPublicId(publicId: string): Promise<any> {
+    // const lead = await this.leadsRepository.findOneFullById(publicId);
+    //
+    // if(!lead) {
+    //   throw new NotFoundException();
+    // }
 
   }
 }

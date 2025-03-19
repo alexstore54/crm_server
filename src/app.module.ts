@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppConfigModule } from '@/common/config';
 import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
-import { CsrfMiddleware } from '@/common/middleware';
+import { CsrfMiddleware, FileLockerMiddleware } from '@/common/middleware';
 import { UserModule } from '@/modules/user/user.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { GatewayModule } from '@/shared/gateway';
@@ -32,5 +32,6 @@ import { SessionsModule } from '@/modules/sessions/sessions.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(CsrfMiddleware).forRoutes('/*');
+    consumer.apply(FileLockerMiddleware).forRoutes('/public/*');
   }
 }

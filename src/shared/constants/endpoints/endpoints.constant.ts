@@ -48,7 +48,7 @@ export const ENDPOINTS = {
   ROLE: {
     BASE: 'roles',
     GET_ONE: ':publicId',
-    GET_ALL_ROLES: 'all',
+    GET_ALL_ROLES: '/',
     CREATE_ROLE: 'create',
     UPDATE_ONE_ROLE: ':publicId/update',
     DELETE_ROLE: ':publicId',
@@ -64,7 +64,7 @@ export const ENDPOINTS = {
     UPDATE_TEAM: ':publicId/update',
     GET_TEAM: ':publicId',
     DELETE_TEAM: ':publicId',
-    GET_ALL_TEAMS: '',
+    GET_ALL_TEAMS: '/',
   },
   LOGS: {
     BASE: 'logs',
@@ -79,7 +79,7 @@ export const ENDPOINTS = {
   },
   MY_SESSIONS: {
     BASE: 'sessions/my',
-    GET_ALL_MY_SESSIONS: 'all',
+    GET_ALL_MY_SESSIONS: '/',
     DELETE_ALL: 'all',
   },
   DESKS_ADMINS: {
@@ -107,5 +107,12 @@ export const ENDPOINTS = {
   },
   LEADS_CALLBACK: {
     BASE: 'leads/callback',
+  },
+  MEDIA: {
+    BASE: 'media',
+    GET_DOCUMENT: 'documents/:publicId',
+    GET_MANY_DOCUMENTS: 'documents',
+    GET_PICTURES: 'pictures/:publicId',
+    GET_MANY_PICTURES: 'pictures',
   }
 };

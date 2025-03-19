@@ -27,6 +27,7 @@ export class AgentsController {
     //return this.agentService.createAgent(body);
   }
 
+
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch(ENDPOINTS.AGENTS.UPDATE_AGENT)

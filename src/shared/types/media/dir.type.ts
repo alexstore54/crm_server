@@ -3,11 +3,13 @@ export enum MediaDir {
   AGENTS = 'agents',
   DESKS = 'desks',
   TEAMS = 'teams',
+  //#TODO add documents by type (pdf etc)
 }
 
 export enum MediaPrefix {
-  DEFAULT = 'default',
-  MAIN = 'main',
+  DEFAULT = 'pictures/default',
+  MAIN = 'pictures/main',
+  DOCUMENTS = 'documents',
 }
 
 export interface MediaDirPath {
