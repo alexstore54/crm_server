@@ -10,7 +10,11 @@ export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   public async txCreateMany(permissions: FullPermission[], tx: Prisma.TransactionClient){
-      return tx.rolePermission.createManyAndReturn({data: permissions})
+       await tx.rolePermission.createMany({data: permissions});
+  }
+
+  public async txFindManyWithKeysByRoleId(roleId: number,tx: Prisma.TransactionClient){
+      return tx.rolePermission.findMany({where: {roleId}, include: {Permission: true}});
   }
 
   public async updateManyByRoleId(

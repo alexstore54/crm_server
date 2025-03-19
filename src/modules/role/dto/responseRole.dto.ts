@@ -4,6 +4,7 @@ export class RoleResponse {
     @Expose()
     publicId: string;
 
+
     @Expose()
     name: string;
 }
@@ -14,13 +15,18 @@ export class RolesResponse {
     roles: RoleResponse[];
 }
 
+export class SingleRoleResponse {
+    @Expose()
+    @Type(() => RoleResponse)
+    role: RoleResponse;
+  }
 
 export class RolePermissionResponse {
     @Expose()
-    roleId: number;
+    key: string;
 
     @Expose()
-    permissionId: number;
+    id: number;
 
     @Expose()
     allowed: boolean;

@@ -8,7 +8,7 @@ import { ERROR_MESSAGES } from "@/shared/constants/errors";
 import { PermissionsUtil } from "@/shared/utils";
 import { PrismaService } from "@/shared/db/prisma";
 import { plainToInstance } from "class-transformer";
-import { RoleAndPermissionsResponse, RolesResponse } from "../dto/responseRole.dto";
+import { RoleAndPermissionsResponse, RolesResponse, SingleRoleResponse } from "../dto/responseRole.dto";
 import { RolesUtil } from "@/shared/utils/roles/roles.util";
 
 @Injectable()
@@ -21,7 +21,7 @@ export class RoleService {
 
     ){}
 
-    public async createRoleWithPermissions(data: CreateRole):Promise<{role: Role, permissions: RolePermission[]}>{
+    public async createRoleWithPermissions(data: CreateRole){
         const {name, permissions} = data;
         const incomingPermissionIds = permissions.map(p => p.permissionId)
         try{
@@ -44,17 +44,19 @@ export class RoleService {
                             permissionId: ex_perm.id,
                         }
                     ))
-                    const newRolePermissions = await this.rolePermissionRepository.txCreateMany([...mapExcludePermissions, ...mappedRolePermissions], tx);
-                    
+                    await this.rolePermissionRepository.txCreateMany([...mapExcludePermissions, ...mappedRolePermissions], tx);
+                    const newRolePermissions = await this.rolePermissionRepository.txFindManyWithKeysByRoleId(newRole.id, tx)
+
                     return {
                             role: newRole,
-                            permissions: newRolePermissions
+                            permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(newRolePermissions)
                         }
                 }else {
-                    const newRolePermissions = await this.rolePermissionRepository.txCreateMany(mappedRolePermissions, tx);
+                    await this.rolePermissionRepository.txCreateMany(mappedRolePermissions, tx);
+                    const newRolePermissions = await this.rolePermissionRepository.txFindManyWithKeysByRoleId(newRole.id, tx);
                     return {
                             role: newRole,
-                            permissions: newRolePermissions
+                            permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(newRolePermissions)
                         }
                 }
                 
@@ -69,14 +71,16 @@ export class RoleService {
         return plainToInstance(RolesResponse, { roles }, { excludeExtraneousValues: true });
     }
 
-    public async getRoleByPublicId(publicId: string): Promise<Role | null>{
-        return this.roleRepository.findOneByPublicId(publicId)
+    public async getRoleByPublicId(publicId: string){
+        const singleRole = await this.roleRepository.findOneByPublicId(publicId);
+        
+        return plainToInstance(SingleRoleResponse, {role: singleRole},  {excludeExtraneousValues: true});
     }
 
     public async getRolesWithPermissions(){
         const RolesAndPermissions = await this.roleRepository.findManyWithRolePermissions();
-        const formattedRoles = RolesUtil.mapRolesWithRolePermissions(RolesAndPermissions);
-        return plainToInstance(RoleAndPermissionsResponse, formattedRoles, { excludeExtraneousValues: true }); 
+        
+        return RolesUtil.mapRolesWithRolePermissions(RolesAndPermissions);
     }
 
     public async getRoleByPublicIdWithPermissions(publicId: string){

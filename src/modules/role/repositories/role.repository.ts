@@ -30,7 +30,11 @@ export class RoleRepository {
     try{
       return this.prisma.role.findMany({
           include: {
-              RolePermission: true
+              RolePermission: {
+                include: {
+                  Permission: true
+                }
+              }
           }
       })
     }catch(error: any){

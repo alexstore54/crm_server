@@ -11,6 +11,7 @@ export class PermissionsUtil {
   public static mapPrismaPermissionsToPermissionTable(
     prismaPermissions: PrismaPermissionWithDetails[],
   ): PermissionsTable {
+    
     const permissionsTable: PermissionsTable = {};
     prismaPermissions.forEach((permission) => {
       permissionsTable[permission.Permission.key as PermissionsKeys] = {
