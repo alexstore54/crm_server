@@ -35,7 +35,8 @@ export class RoleService {
     
                 // Если количество валидных permissions не совпадает с переданными,
                 // либо список permissions пустой, добавляем оставшиеся с дефолтным значением (false)
-                if (mappedRolePermissions.length !== permissions.length || permissions.length === 0) {
+                if (mappedRolePermissions.length !== permissions.length 
+                    || permissions.length === 0) {
                     const excludePermissions = await this.permissionRepository.txFindManyByIdsExclude(incomingPermissionIds, tx);
                     const mappedExcludePermissions = excludePermissions.map(ex_perm => ({
                         roleId: newRole.id,

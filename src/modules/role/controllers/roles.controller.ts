@@ -7,7 +7,8 @@ import { CreateRole } from '../dto/createRole.dto';
 @Controller(ENDPOINTS.ROLE.BASE)
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
-
+  
+  // Получение всех ролей с правами
   @Get(ENDPOINTS.ROLE.GET_ALL_WITH_PERMISSSIONS)
   async getRolesWithPermissions() {
     return this.roleService.getRolesWithPermissions();
