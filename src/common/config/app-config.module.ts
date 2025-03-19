@@ -12,10 +12,11 @@ import {
   CustomerRefreshTokenStrategy,
 } from '@/common/strategies/jwt';
 import { REDIS_CONFIG } from '@/shared/constants/config';
-import { ValidationModule, ValidationService } from '@/shared/services/validation';
-import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
 import { configKeys } from '@/shared/schemas';
 import { PrismaModule } from '@/shared/db/prisma';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 
 export type CommonModuleOptions = {
   config: ConfigModuleOptions;
@@ -70,6 +71,10 @@ export class AppConfigModule {
           global: true,
         }),
         PrismaModule,
+        ServeStaticModule.forRoot({
+          rootPath: join(__dirname, '..', 'public', 'media'),
+          serveRoot: '/media',
+        }),
       ],
       providers: [
         //services

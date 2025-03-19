@@ -23,7 +23,8 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "@media/*": ["public/media/*"]
     },
     "esModuleInterop": true
   }

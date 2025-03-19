@@ -97,4 +97,15 @@ export const ENDPOINTS = {
     DELETE_DESK: ':publicId',
     GET_ALL_DESKS: '/',
   },
+  LEADS: {
+    BASE: 'leads',
+    GET_LEAD: ':publicId',
+    GET_ALL_LEADS: '/',
+    CREATE_LEAD: 'create',
+    UPDATE_LEAD: ':publicId/update',
+    DELETE_LEAD: ':publicId',
+  },
+  LEADS_CALLBACK: {
+    BASE: 'leads/callback',
+  }
 };

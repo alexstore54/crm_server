@@ -136,15 +136,13 @@ export class ValidationService {
     }
   }
 
-  private async isLeadAssignedToAgent(leadId: string, agentId: string): Promise<boolean> {
+  private async isLeadAssignedToAgent(leadPublicId: string, agentId: string): Promise<boolean> {
     try {
       const agent = await this.prisma.agent.findUnique({
         where: { publicId: agentId },
-        select: {
+        include: {
           Lead: {
-            select: {
-              Customer: { where: { publicId: leadId } },
-            },
+            where: { publicId: leadPublicId }
           },
         },
       });

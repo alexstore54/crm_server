@@ -1,17 +1,21 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Lead, Prisma } from '@prisma/client';
-import { UpdateLead } from '@/modules/user/dto/lead';
+import { Agent, Desk, Lead, LeadStatus, Prisma, Team } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CreateLeadInput } from '@/modules/user/types';
+import { FullLead } from '@/shared/types/user';
 
 @Injectable()
 export class LeadRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async getAll(): Promise<Lead[]> {
+  public async getAll(page: number, limit: number): Promise<Lead[]> {
     try {
-      return await this.prisma.lead.findMany();
+      const offset = (page - 1) * limit;
+      return await this.prisma.lead.findMany({
+        skip: offset,
+        take: limit,
+      });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -44,6 +48,66 @@ export class LeadRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+
+  // public async findOneFullById(publicId: string): Promise<FullLead | null> {
+  //   try {
+  //     return this.prisma.$transaction(async (tx) => {
+  //       const lead = await tx.lead.findUnique({
+  //         where: {
+  //           publicId,
+  //         },
+  //       });
+  //
+  //       if (!lead) {
+  //         return null;
+  //       }
+  //
+  //       //TODO: ADD DEFAULT DESK
+  //       let desk: Desk | null = null;
+  //       let agent: Agent | null = null;
+  //       let team: Team | null = null;
+  //       let leadStatus: LeadStatus | null = null;
+  //
+  //       if (lead.deskId) {
+  //         desk = await tx.desk.findUnique({
+  //           where: {
+  //             id: lead.deskId,
+  //           },
+  //         });
+  //       }
+  //       if (lead.teamId) {
+  //         team = await tx.team.findUnique({
+  //           where: {
+  //             id: lead.teamId,
+  //           },
+  //         });
+  //       }
+  //       if (lead.agentId) {
+  //         agent = await tx.agent.findUnique({
+  //           where: {
+  //             id: lead.agentId,
+  //           },
+  //         });
+  //       }
+  //       if(lead.statusId) {
+  //         leadStatus = await tx.leadStatus.findUnique({
+  //           where: {
+  //             id: lead.statusId,
+  //           },
+  //         });
+  //       }
+  //       return {
+  //         ...lead,
+  //         desk,
+  //         agent,
+  //         team,
+  //         leadStatus,
+  //       };
+  //     });
+  //   } catch (error: any) {
+  //     throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+  //   }
+  // }
 
   public async findOneByPhone(phone: string): Promise<Lead | null> {
     try {

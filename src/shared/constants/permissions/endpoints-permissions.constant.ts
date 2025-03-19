@@ -47,6 +47,29 @@ export const ENDPOINTS_PERMISSIONS = {
     UNASSIGN_SHIFT: [PermissionsKeys.UPDATE_DESKS],
     GET_ALL: [PermissionsKeys.READ_DESKS, PermissionsKeys.READ_DESK_TEAMS],
   },
+  LEADS: {
+    GET_LEAD: [
+      PermissionsKeys.READ_ALL_LEADS,
+      PermissionsKeys.READ_TEAM_LEADS,
+      PermissionsKeys.READ_DESK_LEADS,
+    ],
+    GET_ALL_LEADS: [PermissionsKeys.READ_ALL_LEADS],
+    UPDATE_LEAD: [
+      PermissionsKeys.UPDATE_ALL_LEADS,
+      PermissionsKeys.UPDATE_TEAM_LEADS,
+      PermissionsKeys.UPDATE_DESK_LEADS,
+    ],
+    DELETE_LEAD: [
+      PermissionsKeys.DELETE_ALL_LEADS,
+      PermissionsKeys.DELETE_TEAM_LEADS,
+      PermissionsKeys.DELETE_DESK_LEADS,
+    ],
+    CREATE_LEAD: [
+      PermissionsKeys.CREATE_ALL_LEADS,
+      // PermissionsKeys.CREATE_TEAM_LEADS,
+      // PermissionsKeys.CREATE_DESK_LEADS,
+    ],
+  },
   CUSTOMERS_SESSIONS: {},
   LOGS: {
     READ_LOGS: [PermissionsKeys.READ_LOGS],
