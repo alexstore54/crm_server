@@ -7,6 +7,9 @@ import { PermissionRepository } from "@/modules/permissions/repositories";
 import { ERROR_MESSAGES } from "@/shared/constants/errors";
 import { PermissionsUtil } from "@/shared/utils";
 import { PrismaService } from "@/shared/db/prisma";
+import { plainToInstance } from "class-transformer";
+import { RoleAndPermissionsResponse, RolesResponse } from "../dto/responseRole.dto";
+import { RolesUtil } from "@/shared/utils/roles/roles.util";
 
 @Injectable()
 export class RoleService {
@@ -18,7 +21,7 @@ export class RoleService {
 
     ){}
 
-    public async createRole(data: CreateRole):Promise<{role: Role, permissions: RolePermission[]}>{
+    public async createRoleWithPermissions(data: CreateRole):Promise<{role: Role, permissions: RolePermission[]}>{
         const {name, permissions} = data;
         const incomingPermissionIds = permissions.map(p => p.permissionId)
         try{
@@ -61,12 +64,23 @@ export class RoleService {
         }
     }
 
-    public async getRoles():Promise<Role[]>{
-        return this.roleRepository.findMany()
+    public async getRoles(){
+        const roles = await this.roleRepository.findMany()
+        return plainToInstance(RolesResponse, { roles }, { excludeExtraneousValues: true });
     }
 
     public async getRoleByPublicId(publicId: string): Promise<Role | null>{
         return this.roleRepository.findOneByPublicId(publicId)
+    }
+
+    public async getRolesWithPermissions(){
+        const RolesAndPermissions = await this.roleRepository.findManyWithRolePermissions();
+        const formattedRoles = RolesUtil.mapRolesWithRolePermissions(RolesAndPermissions);
+        return plainToInstance(RoleAndPermissionsResponse, formattedRoles, { excludeExtraneousValues: true }); 
+    }
+
+    public async getRoleByPublicIdWithPermissions(publicId: string){
+        
     }
 
     public async updateRole() {}

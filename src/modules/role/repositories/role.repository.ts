@@ -26,6 +26,17 @@ export class RoleRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+  public async findManyWithRolePermissions(){
+    try{
+      return this.prisma.role.findMany({
+          include: {
+              RolePermission: true
+          }
+      })
+    }catch(error: any){
+        throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
 
   public async txCreateOne(name: string, tx: Prisma.TransactionClient):Promise<Role>{
       try{
