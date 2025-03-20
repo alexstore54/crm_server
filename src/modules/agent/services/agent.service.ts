@@ -103,7 +103,7 @@ export class AgentService {
     }
   }
 
-  public async updateByPublicId(publicId: string, data: UpdateAgent) {
+  public async updateByPublicId(publicId: string, data: UpdateAgent, file?: Express.Multer.File) {
     const { deskIds, ...rest } = data;
 
     const currentAgent = await this.agentRepository.findOneByPublicIdWithDesks(publicId);

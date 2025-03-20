@@ -11,6 +11,8 @@ import { AgentModule } from '@/modules/agent/agent.module';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import { TeamModule } from '@/modules/team/team.module';
 import { SessionsModule } from '@/modules/sessions/sessions.module';
+import { MediaModule } from '@/modules/media';
+import { RoleModule } from '@/modules/role/role.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { SessionsModule } from '@/modules/sessions/sessions.module';
     PermissionModule,
     TeamModule,
     SessionsModule,
+    MediaModule,
+    RoleModule,
   ],
   controllers: [],
   providers: [],

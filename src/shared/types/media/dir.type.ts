@@ -7,9 +7,8 @@ export enum MediaDir {
 }
 
 export enum MediaPrefix {
-  DEFAULT = 'pictures/default',
-  MAIN = 'pictures/main',
-  DOCUMENTS = 'documents',
+  DEFAULT = 'documents',
+  PICTURES = 'pictures',
 }
 
 export interface MediaDirPath {

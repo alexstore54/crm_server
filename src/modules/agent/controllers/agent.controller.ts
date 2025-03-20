@@ -32,7 +32,7 @@ export class AgentController {
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<Agent> {
     const user = req.user;
-    return this.agentService.updateByPublicId(user.sub, body);
+    return this.agentService.updateByPublicId(user.sub, body, file);
   }
 
   @UseGuards(AgentAccessGuard)
