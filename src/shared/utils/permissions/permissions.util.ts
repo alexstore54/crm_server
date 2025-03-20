@@ -5,7 +5,7 @@ import {
   PermissionsTable,
   PrismaPermissionWithDetails,
 } from '@/shared/types/permissions';
-import { Permission } from '@prisma/client';
+import { Permission, RolePermission } from '@prisma/client';
 
 export class PermissionsUtil {
   public static mapPrismaPermissionsToPermissionTable(
@@ -54,6 +54,18 @@ export class PermissionsUtil {
       return null;
     }).filter(item => item !== null);
   }
+  public static mapRolePermissionsToAgentPermissions(
+    rolePermissions: RolePermission[],
+    agentId: number,
+){
+    return rolePermissions.map(rp => {
+        return {
+            permissionId: rp.permissionId,
+            allowed: rp.allowed,
+            agentId
+        }
+    })
+}
 
   public static filterPermissionsDetail(permissions: FullPermission[]): FullPermission[] {
       return permissions.filter(perm => perm.allowed);

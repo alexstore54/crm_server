@@ -42,7 +42,7 @@ export class AgentService {
 
   public async createAgent(data: CreateAgent) {
     const { permissions, deskIds } = data;
-
+    
     const isExistAgent = await this.agentRepository.findOneByEmail(data.email);
     if (isExistAgent) {
       throw new BadRequestException(`${ERROR_MESSAGES.USER_EXISTS}`);

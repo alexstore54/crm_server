@@ -13,3 +13,10 @@ export class CreateRole {
     @UseValidation.validatePermissionsArray()
     permissions: IncomingPermission[]
 }
+
+export class UpdateRole {
+    @IsString()
+    @Transform(({ value }) => value.trim())
+    @Length(2, 50)
+    name: string
+}

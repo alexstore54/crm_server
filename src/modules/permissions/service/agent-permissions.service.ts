@@ -10,7 +10,7 @@ import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
 export class AgentPermissionsService {
   constructor(
     private readonly agentRepository: AgentRepository,
-    private readonly agentPermissionsRepository: AgentPermissionRepository,
+    private readonly agentPermissionRepository: AgentPermissionRepository,
   ) {}
 
   public async getPermissionsByAgentPublicId(publicId: string) {
@@ -19,7 +19,7 @@ export class AgentPermissionsService {
       throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
     }
     try {
-      return this.agentPermissionsRepository.getManyByAgentId(agent.id);
+      return this.agentPermissionRepository.getManyByAgentId(agent.id);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -34,7 +34,7 @@ export class AgentPermissionsService {
     }
 
     try {
-      return this.agentPermissionsRepository.updateMany(agent.id, permissions);
+      return this.agentPermissionRepository.updateMany(agent.id, permissions);
 
       //TODO: Implement socket logic
     } catch (error: any) {
@@ -44,7 +44,7 @@ export class AgentPermissionsService {
 
   public async getManyByAgentId(agentId: number): Promise<AgentPermission[]> {
     try {
-      return this.agentPermissionsRepository.getManyByAgentId(agentId);
+      return this.agentPermissionRepository.getManyByAgentId(agentId);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -54,7 +54,7 @@ export class AgentPermissionsService {
     agentId: number,
   ): Promise<PrismaPermissionWithDetails[]> {
     try {
-      return this.agentPermissionsRepository.getManyWithDetailsByAgentId(agentId);
+      return this.agentPermissionRepository.getManyWithDetailsByAgentId(agentId);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -62,9 +62,9 @@ export class AgentPermissionsService {
 
   public async createMany(input: CreateAgentPermissions): Promise<AgentPermission[]> {
     const { agentId, permissions } = input;
-
+    
     try {
-      return this.agentPermissionsRepository.createMany(agentId, permissions);
+      return this.agentPermissionRepository.createMany(agentId, permissions);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }

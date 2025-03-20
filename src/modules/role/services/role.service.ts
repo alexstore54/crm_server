@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { RoleRepository } from "../repositories/role.repository";
-import { Permission, Role, RolePermission } from "@prisma/client";
-import { CreateRole } from "../dto/createRole.dto";
-import { RolePermissionRepository } from "@/modules/agent/repositories";
+import { Agent, Permission, Prisma, Role, RolePermission } from "@prisma/client";
+import { CreateRole, UpdateRole } from "../dto/createRole.dto";
+import { AgentPermissionRepository, AgentRepository, RolePermissionRepository } from "@/modules/agent/repositories";
 import { PermissionRepository } from "@/modules/permissions/repositories";
 import { ERROR_MESSAGES } from "@/shared/constants/errors";
 import { PermissionsUtil } from "@/shared/utils";
@@ -10,14 +10,18 @@ import { PrismaService } from "@/shared/db/prisma";
 import { plainToInstance } from "class-transformer";
 import { RoleAndPermissionsResponse, RolesResponse, SingleRoleResponse } from "../dto/responseRole.dto";
 import { RolesUtil } from "@/shared/utils/roles/roles.util";
+import { getNoAccessAgentSeedRole } from "@/seeds/seed.data";
+import { AllowedPermission } from "@/modules/permissions/types";
 
 @Injectable()
 export class RoleService {
     constructor(
         private readonly rolePermissionRepository: RolePermissionRepository,
-        private readonly roleRepository: RoleRepository,
+        private readonly agentPermissionRepository: AgentPermissionRepository,
         private readonly permissionRepository: PermissionRepository,
-        private readonly prisma: PrismaService
+        private readonly roleRepository: RoleRepository,
+
+        private readonly prisma: PrismaService,
 
     ){}
 
@@ -78,15 +82,64 @@ export class RoleService {
     }
 
     public async getRoleByPublicIdWithPermissions(publicId: string){
+        const singleRoleWithPermissions = await this.roleRepository.findOneByPublicIdWithPermissions(publicId);
+        if(!singleRoleWithPermissions) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
+        
+        const { role } = plainToInstance(SingleRoleResponse, { role: singleRoleWithPermissions }, { excludeExtraneousValues: true });
+        
+        return {
+                role,
+                permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(singleRoleWithPermissions!.RolePermission)
+            };
+    }
+
+    public async updateRoleByPublicId(publicId: string, data:UpdateRole ) {
+        const role = await this.roleRepository.findOneByPublicId(publicId);
+        
+        if(!role) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
+        if(!role.isMutable || !role.isVisible) throw new InternalServerErrorException(`${ERROR_MESSAGES.DONT_HAVE_RIGHTS}`);
+        
+        const updatedRole = await this.roleRepository.updateOneByPublicId(data, publicId);
+        return plainToInstance(SingleRoleResponse, {role: updatedRole},  {excludeExtraneousValues: true});
+    }
+
+    public async deleteRoleByPublicId(publicId: string, deep: boolean) {
+        const role = await this.roleRepository.findOneByPublicId(publicId);
+        if(!role) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
+        if(!role.isMutable || !role.isVisible) throw new InternalServerErrorException(`${ERROR_MESSAGES.DONT_HAVE_RIGHTS}`);
+        
+        await this.prisma.$transaction(async (tx) => {
+            const tempRole: Role | null = await this.roleRepository.txfindOneByPublicId(getNoAccessAgentSeedRole().publicId, tx);
+            if(!tempRole) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
+            const agents: Agent[] = await tx.agent.findMany({where: {roleId: role.id}});
+            await tx.agent.updateMany({where: {roleId: role.id}, data: {roleId: tempRole.id}});
+
+            await this.rolePermissionRepository.txDeleteManyByRoleId(role.id, tx);
+            await this.roleRepository.txDeleteOneByPublicId(publicId, tx);
+
+            if(deep){
+                await this.deepDeleteRoleByPublicId(tx, agents, tempRole);
+            }
+        })
         
     }
 
-    public async updateRole() {}
+    private async deepDeleteRoleByPublicId(tx: Prisma.TransactionClient, agents: Agent[], tempRole: Role){ 
+        const agentIds = agents.map(a => a.id);
+        await this.agentPermissionRepository.txDeleteManyByAgentsIds(agentIds, tx);  
 
-    public async deleteRole() {}
+        const rolePerms = await this.rolePermissionRepository.txFindManyByRoleId(tempRole.id, tx)
+        
+        const agentsPermissions: AllowedPermission[] = [];
+        agentIds.forEach(agentId => {
+                const agentPerms = PermissionsUtil.mapRolePermissionsToAgentPermissions(rolePerms, agentId);
+                agentsPermissions.push(...agentPerms);
+        })
+        
+        await this.agentPermissionRepository.txCreateMany(agentsPermissions, tx);
 
-    public async readRoleWithPermissionsByPublicId(publicId: string) {
-        try {
-        } catch (err: any) {}
     }
+
+    
+
 }

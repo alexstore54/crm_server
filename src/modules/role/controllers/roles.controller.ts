@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { RoleService } from '../services/role.service';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
 import { UUIDValidationPipe } from '@/common/pipes';
-import { CreateRole } from '../dto/createRole.dto';
+import { CreateRole, UpdateRole } from '../dto/createRole.dto';
 
 @Controller(ENDPOINTS.ROLE.BASE)
 export class RoleController {
@@ -37,8 +37,6 @@ export class RoleController {
   }
 
 
-
-
   @Post(ENDPOINTS.ROLE.CREATE_ROLE)
   async createRoleWithPermissions(
       @Body() body: CreateRole
@@ -49,12 +47,17 @@ export class RoleController {
   @Patch(ENDPOINTS.ROLE.UPDATE_ONE_ROLE)
   async updateRole(
     @Param('publicId', UUIDValidationPipe) publicId: string,
+    @Body() data: UpdateRole
   ) {
-
+      return this.roleService.updateRoleByPublicId(publicId, data)
   }
 
   @Delete(ENDPOINTS.ROLE.DELETE_ROLE)
   async deleteRole(
     @Param('publicId', UUIDValidationPipe) publicId: string,
-  ) {}
+    @Query('deep') deep: boolean
+  ) {
+      console.log(deep)
+      return this.roleService.deleteRoleByPublicId(publicId, deep);   
+    }
 }
