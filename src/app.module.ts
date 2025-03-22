@@ -13,6 +13,7 @@ import { TeamModule } from '@/modules/team/team.module';
 import { SessionsModule } from '@/modules/sessions/sessions.module';
 import { MediaModule } from '@/modules/media';
 import { RoleModule } from '@/modules/role/role.module';
+import { DeskModule } from '@/modules/desk/desk.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RoleModule } from '@/modules/role/role.module';
     SessionsModule,
     MediaModule,
     RoleModule,
+    DeskModule,
   ],
   controllers: [],
   providers: [],

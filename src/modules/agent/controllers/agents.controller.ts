@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UploadedFile, UseGuards } from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, UpdateAgent } from '../dto';
@@ -7,6 +7,7 @@ import { UsePermissions } from '@/common/decorators/validation';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 import { UUIDValidationPipe } from '@/common/pipes';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
+import { UploadPicture } from '@/common/decorators/media';
 
 @Controller(ENDPOINTS.AGENTS.BASE)
 export class AgentsController {
@@ -19,19 +20,23 @@ export class AgentsController {
     return this.agentService.getLeadsByPublicId(publicId);
   }
 
+  @UploadPicture()
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post(ENDPOINTS.AGENTS.CREATE_AGENT)
-  async createAgent(@Body() body: CreateAgent) {
-    return 'Okay';
-    //return this.agentService.createAgent(body);
+  async createAgent(@Body() body: CreateAgent, @UploadedFile() file?: Express.Multer.File) {
+    return this.agentService.createAgent(body, file);
   }
 
-
-  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_AGENT_LEADS)
+  @UploadPicture()
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.UPDATE_AGENT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch(ENDPOINTS.AGENTS.UPDATE_AGENT)
-  async updateAgent(@Param('publicId') publicId: string, @Body() body: UpdateAgent) {
-    return this.agentService.updateByPublicId(publicId, body);
+  async updateAgent(
+    @Param('publicId') publicId: string,
+    @Body() body: UpdateAgent,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.agentService.updateByPublicId(publicId, body, file);
   }
 }

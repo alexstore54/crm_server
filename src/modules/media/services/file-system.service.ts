@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MediaDirPath } from '@/shared/types/media';
+import { MediaDirPath, SaveMediaArgs } from '@/shared/types/media';
 import { configKeys } from '@/shared/schemas';
 import { NodeEnv } from '@/common/config/types';
 import { FS_ERRORS } from '@/shared/constants/errors';
@@ -8,7 +8,7 @@ import * as filestream from 'fs-extra';
 import * as path from 'path';
 
 @Injectable()
-export class MediaService {
+export class FileSystemService {
   private readonly baseMediaDir: string;
   private readonly isProduction: boolean;
   private readonly defaultErrorMessage: string;
@@ -19,10 +19,13 @@ export class MediaService {
     this.defaultErrorMessage = FS_ERRORS.DEFAULT_MESSAGE;
   }
 
-  public async save(filename: string, buffer: Buffer, dirPath: MediaDirPath): Promise<string> {
+  public async save(args: SaveMediaArgs): Promise<string> {
+    const { filename, dirPath, buffer, mimetype, publicId } = args;
     try {
-      await this.checkFile(filename, dirPath);
-      const fullFilePath = path.join(this.getFullPath(dirPath), path.basename(filename));
+      const fullFilePath =
+        path.join(this.getFullPath(dirPath), path.basename(publicId), path.basename(filename)) +
+        mimetype;
+      await this.ensureDirectoryExists(path.dirname(fullFilePath));
       await filestream.writeFile(fullFilePath, buffer);
       return fullFilePath;
     } catch (error) {

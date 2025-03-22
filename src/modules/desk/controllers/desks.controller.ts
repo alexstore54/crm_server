@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
 } from '@nestjs/common';
 import { ENDPOINTS, RESPONSE_STATUS } from '@/shared/constants/endpoints';
@@ -19,6 +20,7 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsGuard } from '@/common/guards/permissions';
 import { UUIDValidationPipe } from '@/common/pipes';
 import { CreateDesk, UpdateDesk } from '@/modules/desk/dto/desks';
+import { UploadPicture } from '@/common/decorators/media';
 
 @Controller(ENDPOINTS.DESKS.BASE)
 export class DesksController {
@@ -50,21 +52,27 @@ export class DesksController {
     return this.deskService.getTeamsByPublicId(publicId);
   }
 
+  @UploadPicture()
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESKS.UPDATE_DESK)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch(ENDPOINTS.DESKS.UPDATE_DESK)
   public async updateDesk(
     @Param('publicId', UUIDValidationPipe) publicId: string,
     @Body() body: UpdateDesk,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<Desk> {
-    return this.deskService.updateDesk(publicId, body);
+    return this.deskService.updateDesk(publicId, body, file);
   }
 
+  @UploadPicture()
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESKS.CREATE_DESK)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post(ENDPOINTS.DESKS.CREATE_DESK)
-  public async createDesk(@Body() body: CreateDesk): Promise<Desk> {
-    return this.deskService.createOne(body);
+  public async createDesk(
+    @Body() body: CreateDesk,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<Desk> {
+    return this.deskService.createOne(body, file);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.DESKS.DELETE_DESK)

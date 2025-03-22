@@ -2,13 +2,29 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Desk, Team } from '@prisma/client';
 import { CreateDesk, UpdateDesk } from '@/modules/desk/dto/desks';
 import { DeskRepository } from '@/modules/desk/repositories';
+import { MediaService } from '@/modules/media/services/media.service';
+import { MediaDir, MediaPrefix } from '@/shared/types/media';
 
 @Injectable()
 export class DeskService {
-  constructor(private readonly deskRepository: DeskRepository) {}
+  constructor(
+    private readonly deskRepository: DeskRepository,
+    private readonly mediaService: MediaService,
+  ) {}
 
-  public async updateDesk(publicId: string, body: UpdateDesk): Promise<Desk> {
-    return this.deskRepository.updateOne(publicId, body);
+  public async updateDesk(
+    publicId: string,
+    body: UpdateDesk,
+    file?: Express.Multer.File,
+  ): Promise<Desk> {
+    const avatarURL = await this.mediaService.save({
+      publicId,
+      name: 'avatar',
+      file,
+      dir: MediaDir.DESKS,
+      prefix: MediaPrefix.PICTURES,
+    });
+    return this.deskRepository.updateOne(publicId, body, avatarURL);
   }
 
   public async getOne(publicId: string): Promise<Desk> {
@@ -17,8 +33,19 @@ export class DeskService {
     return desk;
   }
 
-  public async createOne(data: CreateDesk): Promise<Desk> {
-    return this.deskRepository.createOne(data);
+  public async createOne(data: CreateDesk, file?: Express.Multer.File): Promise<Desk> {
+    const desk = await this.deskRepository.createOne(data);
+    const avatarURL = await this.mediaService.save({
+      name: 'avatar',
+      publicId: desk.publicId,
+      file,
+      prefix: MediaPrefix.PICTURES,
+      dir: MediaDir.DESKS,
+    });
+    if (avatarURL) {
+      return this.deskRepository.updateOne(desk.publicId, {}, avatarURL);
+    }
+    return desk;
   }
 
   public async getMany(page: number, limit: number): Promise<Desk[]> {

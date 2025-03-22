@@ -3,7 +3,7 @@ export enum MediaDir {
   AGENTS = 'agents',
   DESKS = 'desks',
   TEAMS = 'teams',
-  //#TODO add documents by type (pdf etc)
+  DOCUMENTS = 'documents',
 }
 
 export enum MediaPrefix {

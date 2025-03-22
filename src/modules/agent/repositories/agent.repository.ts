@@ -95,12 +95,14 @@ export class AgentRepository {
     data: UpdateAgent,
     tx: Prisma.TransactionClient,
     desks: number[] | null,
+    src?: string
   ) {
     try {
       return tx.agent.update({
         where: { id },
         data: {
           ...data,
+          avatarURL: src ? src : undefined,
           Desk: desks
             ? {
                 set: desks.map((id) => ({ id })),

@@ -16,6 +16,8 @@ import { FullAgent } from '@/shared/types/agent';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { PermissionsTable } from '@/shared/types/permissions';
 import { DeskRepository } from '@/modules/desk/repositories';
+import { MediaService } from '@/modules/media/services/media.service';
+import { MediaDir, MediaPrefix } from '@/shared/types/media';
 
 @Injectable()
 export class AgentService {
@@ -26,6 +28,7 @@ export class AgentService {
     private readonly deskRepository: DeskRepository,
     private readonly agentPermissionsService: AgentPermissionsService,
     private readonly prisma: PrismaService,
+    private readonly mediaService: MediaService,
   ) {}
 
   public async getLeadsByPublicId(publicId: string): Promise<Lead[]> {
@@ -41,7 +44,7 @@ export class AgentService {
     }
   }
 
-  public async createAgent(data: CreateAgent) {
+  public async createAgent(data: CreateAgent, file?: Express.Multer.File) {
     const { permissions, deskIds } = data;
 
     const isExistAgent = await this.agentRepository.findOneByEmail(data.email);
@@ -70,6 +73,20 @@ export class AgentService {
             agentId: newAgent.id,
             permissions,
           });
+        });
+      }
+
+      const avatarURL = await this.mediaService.save({
+        name: 'avatar',
+        publicId: newAgent.publicId,
+        prefix: MediaPrefix.PICTURES,
+        dir: MediaDir.AGENTS,
+      });
+
+      if (avatarURL) {
+        return this.prisma.agent.update({
+          where: { id: newAgent.id },
+          data: { avatarURL },
         });
       }
 
@@ -111,10 +128,24 @@ export class AgentService {
       throw new NotFoundException(`${ERROR_MESSAGES.USER_IS_NOT_EXISTS}`);
     }
 
+    const avatarURL = await this.mediaService.save({
+      publicId: currentAgent.publicId,
+      name: 'avatar',
+      prefix: MediaPrefix.PICTURES,
+      dir: MediaDir.AGENTS,
+      file,
+    });
+
     try {
       return this.prisma.$transaction(async (tx) => {
         const newDeskIds = deskIds ? await this.getValidDeskIds(deskIds, currentAgent, tx) : null;
-        return await this.agentRepository.txUpdateOne(currentAgent.id, { ...rest }, tx, newDeskIds);
+        return await this.agentRepository.txUpdateOne(
+          currentAgent.id,
+          { ...rest },
+          tx,
+          newDeskIds,
+          avatarURL,
+        );
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);

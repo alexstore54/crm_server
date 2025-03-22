@@ -121,13 +121,16 @@ export class DeskRepository {
     }
   }
 
-  public async updateOne(publicId: string, data: UpdateDesk): Promise<Desk> {
+  public async updateOne(publicId: string, data: UpdateDesk, avatarURL?: string): Promise<Desk> {
     try {
       return this.prisma.desk.update({
         where: {
           publicId: publicId,
         },
-        data,
+        data: {
+          ...data,
+          avatarURL: avatarURL ? avatarURL : undefined,
+        },
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

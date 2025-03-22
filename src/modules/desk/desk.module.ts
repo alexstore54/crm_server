@@ -6,11 +6,13 @@ import { ValidationModule } from '@/shared/services/validation';
 import { DeskRepository } from '@/modules/desk/repositories/desk.repository';
 import { LeadManagerService } from '@/modules/desk/services/lead-manager.service';
 import { LeadManagerRepository } from '@/modules/desk/repositories';
+import { MediaModule } from '@/modules/media';
+import { MediaService } from '@/modules/media/services/media.service';
 
 @Module({
-  imports: [AuthRedisModule, ValidationModule],
+  imports: [AuthRedisModule, ValidationModule, MediaModule],
   controllers: [DesksController],
-  providers: [DeskService, LeadManagerService, DeskRepository, LeadManagerRepository],
+  providers: [DeskService, LeadManagerService, DeskRepository, LeadManagerRepository, MediaService],
   exports: [DeskRepository, LeadManagerRepository],
 })
-export class TeamsModule {}
+export class DeskModule {}

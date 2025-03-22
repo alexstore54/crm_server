@@ -63,13 +63,16 @@ export class TeamRepository {
     }
   }
 
-  public async updateOneByPublicId(teamPublicId: string, data: UpdateTeam): Promise<Team> {
+  public async updateOneByPublicId(teamPublicId: string, data: UpdateTeam, avatarURL?: string): Promise<Team> {
     try {
       return this.prisma.team.update({
         where: {
           publicId: teamPublicId,
         },
-        data,
+        data: {
+          ...data,
+          avatarURL,
+        }
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

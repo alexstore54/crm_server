@@ -19,6 +19,7 @@ model Agent {
   Lead            Lead[]
   Desk            Desk[]            @relation("AgentDesks")
   Team            Team[]            @relation("AgentTeams")
+  avatarURL       String?
 }
 
 model AgentPermission {
@@ -32,10 +33,10 @@ model AgentPermission {
 }
 
 model Customer {
-  publicId String @unique @default(uuid())
-  id       Int    @id @default(autoincrement())
-  leadId   Int    @unique
-
+  publicId   String    @unique @default(uuid())
+  id         Int       @id @default(autoincrement())
+  leadId     Int       @unique
+  avatarURL  String?
   password   String
   lastOnline DateTime? @db.Timestamptz(0)
   Lead       Lead      @relation(fields: [leadId], references: [id])
@@ -43,13 +44,14 @@ model Customer {
 }
 
 model Desk {
-  publicId String        @unique @default(uuid())
-  id       Int           @id @default(autoincrement())
-  name     String
-  Shifts   LeadManager[]
-  Lead     Lead[]
-  Agent    Agent[]       @relation("AgentDesks")
-  Teams    Team[]
+  publicId     String        @unique @default(uuid())
+  id           Int           @id @default(autoincrement())
+  name         String
+  LeadManagers LeadManager[]
+  avatarURL    String?
+  Lead         Lead[]
+  Agent        Agent[]       @relation("AgentDesks")
+  Teams        Team[]
 }
 
 model LeadManager {
@@ -113,16 +115,14 @@ model Permission {
 }
 
 model Team {
-  publicId String @unique @default(uuid())
-  id       Int    @id @default(autoincrement())
-
-  name String
-
-  deskId Int
-  desk   Desk @relation(fields: [deskId], references: [id])
-
-  Agents Agent[] @relation("AgentTeams")
-  Leads  Lead[]
+  publicId  String  @unique @default(uuid())
+  id        Int     @id @default(autoincrement())
+  name      String
+  deskId    Int
+  desk      Desk    @relation(fields: [deskId], references: [id])
+  avatarURL String?
+  Agents    Agent[] @relation("AgentTeams")
+  Leads     Lead[]
 }
 
 model Phone {
@@ -141,6 +141,7 @@ model Role {
   isVisible      Boolean          @default(true)
   name           String
   Agent          Agent[]
+  avatarURL      String?
   RolePermission RolePermission[]
 }
 

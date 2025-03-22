@@ -7,7 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
+  Query, UploadedFile,
   UseGuards,
 } from '@nestjs/common';
 import { UsePermissions } from '@/common/decorators/validation';
@@ -20,26 +20,31 @@ import { ENDPOINTS, RESPONSE_STATUS } from '@/shared/constants/endpoints';
 import { TeamService } from '@/modules/team/services/team.service';
 import { Team } from '@prisma/client';
 import { TeamPermissionsGuard } from '@/common/guards/permissions/team-operation-permissions.guard';
+import { UploadPicture } from '@/common/decorators/media';
 
 @Controller(ENDPOINTS.TEAMS.BASE)
 export class TeamsController {
   constructor(private readonly teamService: TeamService) {}
 
+  @UploadPicture()
   @UsePermissions(ENDPOINTS_PERMISSIONS.TEAMS.CREATE_TEAM)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post(ENDPOINTS.TEAMS.CREATE_TEAM)
-  async createTeam(@Body() body: CreateTeam): Promise<Team> {
-    return this.teamService.createOne(body);
+  async createTeam(@Body() body: CreateTeam, @UploadedFile() file?: Express.Multer.File): Promise<Team> {
+    return this.teamService.createOne(body, file);
   }
 
+
+  @UploadPicture()
   @UsePermissions(ENDPOINTS_PERMISSIONS.TEAMS.UPDATE_TEAM)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Patch(ENDPOINTS.TEAMS.UPDATE_TEAM)
   async updateTeam(
     @Body() body: UpdateTeam,
     @Param('publicId', UUIDValidationPipe) publicId: string,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<Team> {
-    return this.teamService.updateOne(publicId, body);
+    return this.teamService.updateOne(publicId, body, file);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.TEAMS.GET_ALL_TEAMS)

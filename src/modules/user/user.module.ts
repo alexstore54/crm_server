@@ -4,12 +4,18 @@ import { CustomerService, LeadsService } from '@/modules/user/services';
 import { CustomersRepository, LeadRepository } from '@/modules/user/repositories';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PrismaService } from '@/shared/db/prisma';
-import { CustomerController, LeadsCallBackController, LeadsController } from '@/modules/user/controllers';
+import {
+  CustomerController,
+  LeadsCallBackController,
+  LeadsController,
+} from '@/modules/user/controllers';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
+import { MediaModule } from '@/modules/media';
+import { MediaService } from '@/modules/media/services/media.service';
 
 @Module({
-  imports: [ValidationModule, AuthRedisModule],
+  imports: [ValidationModule, AuthRedisModule, MediaModule],
   controllers: [CustomerController, LeadsController, LeadsCallBackController],
   providers: [
     CustomerService,
@@ -19,7 +25,8 @@ import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-
     AgentAccessGuard,
     PrismaService,
     AuthRedisService,
-    ValidationService
+    ValidationService,
+    MediaService,
   ],
   exports: [CustomersRepository, LeadRepository],
 })

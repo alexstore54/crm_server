@@ -12,6 +12,7 @@ import { TeamModule } from '@/modules/team/team.module';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { DeskRepository } from '@/modules/desk/repositories';
+import { MediaModule } from '@/modules/media';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DeskRepository } from '@/modules/desk/repositories';
     AuthRedisModule,
     ValidationModule,
     TeamModule,
+    MediaModule,
   ],
   controllers: [AgentsController, AgentController],
   providers: [
