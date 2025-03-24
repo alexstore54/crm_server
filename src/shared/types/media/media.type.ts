@@ -8,9 +8,6 @@ export interface SaveMediaArgs {
   buffer: Buffer,
 }
 
-export interface InputMedia {
-  src: string;
-}
 
 export interface SaveInput {
   publicId: string;
@@ -18,4 +15,9 @@ export interface SaveInput {
   file?: Express.Multer.File;
   prefix: MediaPrefix;
   dir: MediaDir;
+}
+
+export interface UpdateMediaParams {
+  isAvatarRemoved?: boolean;
+  file?: Express.Multer.File;
 }

@@ -17,8 +17,9 @@ export const getMockedFullCustomer = (): FullCustomer => ({
 
 export const getMockedCustomer = (): Customer => ({
   id: getMockedLead().id as number,
-  publicId: 'publicId',
   password: 'password',
+  avatarURL: null,
   leadId: getMockedLead().id as number,
+  publicId: getMockedLead().publicId,
   lastOnline: new Date(),
 });

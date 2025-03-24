@@ -6,6 +6,7 @@ export const getMockedAgent = (): Agent => {
   return {
     id: 1,
     email: getMockedEmail().email,
+    avatarURL: null,
     roleId: 1,
     password: 'password',
     publicId: 'publicId',
@@ -15,6 +16,7 @@ export const getMockedAgent = (): Agent => {
 
 export const getMockedAgentForClient = (): AgentForClient => {
   return {
+    avatarURL: null,
     id: 1,
     email: getMockedEmail().email,
     roleId: 1,

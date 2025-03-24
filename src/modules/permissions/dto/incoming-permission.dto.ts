@@ -2,7 +2,7 @@ import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export class IncomingPermission {
   @IsNumber()
-  permissionId: number;
+  id: number;
 
   @IsOptional()
   @IsBoolean()

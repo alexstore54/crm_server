@@ -1,42 +1,41 @@
-import { Expose, Type } from "class-transformer";
+import { Expose, Type } from 'class-transformer';
 
 export class RoleResponse {
-    @Expose()
-    publicId: string;
+  @Expose()
+  publicId: string;
 
-
-    @Expose()
-    name: string;
+  @Expose()
+  name: string;
 }
 
 export class RolesResponse {
-    @Expose()
-    @Type(() => RoleResponse)
-    roles: RoleResponse[];
+  @Expose()
+  @Type(() => RoleResponse)
+  roles: RoleResponse[];
 }
 
 export class SingleRoleResponse {
-    @Expose()
-    @Type(() => RoleResponse)
-    role: RoleResponse;
-  }
+  @Expose()
+  @Type(() => RoleResponse)
+  role: RoleResponse;
+}
 
 export class RolePermissionResponse {
-    @Expose()
-    key: string;
+  @Expose()
+  key: string;
 
-    @Expose()
-    id: number;
+  @Expose()
+  id: number;
 
-    @Expose()
-    allowed: boolean;
+  @Expose()
+  allowed: boolean;
 }
 
 export class RoleAndPermissionsResponse {
-    @Expose()
-    role: RoleResponse;
+  @Expose()
+  role: RoleResponse;
 
-    @Expose()
-    @Type(() => RolePermissionResponse)
-    permissions: RolePermissionResponse[];
+  @Expose()
+  @Type(() => RolePermissionResponse)
+  permissions: RolePermissionResponse[];
 }

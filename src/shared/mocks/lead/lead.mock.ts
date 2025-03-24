@@ -6,7 +6,6 @@ export const getMockedLead = (): Lead => ({
   id: 1,
   firstname: 'firstname',
   lastname: 'lastname',
-  publicId: 'publicId',
   country: 'country',
   defaultEmail: getMockedEmail().email,
   agentId: 1,

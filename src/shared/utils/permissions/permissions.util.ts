@@ -43,11 +43,11 @@ export class PermissionsUtil {
       incomingPermissions: IncomingPermission[]
   ){
     return DBpermissions.map(db_perm => {
-      const incomePermisson = incomingPermissions.find(in_perm => in_perm.permissionId === db_perm.id);
+      const incomePermisson = incomingPermissions.find(in_perm => in_perm.id === db_perm.id);
       if(incomePermisson){
           return {
               roleId,
-              permissionId: incomePermisson.permissionId,
+              permissionId: incomePermisson.id,
               allowed: incomePermisson.allowed
           }
       }

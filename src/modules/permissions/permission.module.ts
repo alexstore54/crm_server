@@ -19,22 +19,25 @@ import { ValidationModule } from '@/shared/services/validation';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { RoleModule } from '@/modules/role/role.module';
 
-
 @Module({
   imports: [forwardRef(() => AgentModule), ValidationModule, AuthRedisModule, RoleModule],
   controllers: [AgentPermissionsController, RolesPermissionsController],
   providers: [
-      AgentPermissionsService,
-      RolePermissionsService,
-      AuthRedisService,
-      ValidationService,
+    AgentPermissionsService,
+    RolePermissionsService,
+    AuthRedisService,
+    ValidationService,
+    AgentRepository,
+    PermissionRepository,
+    AgentPermissionRepository,
+    RolePermissionRepository,
 
-      AgentRepository,
-      PermissionRepository,
-      AgentPermissionRepository,
-      RolePermissionRepository,
-    
   ],
-  exports: [RolePermissionRepository, AgentPermissionRepository, AgentPermissionsService, PermissionRepository],
+  exports: [
+    RolePermissionRepository,
+    AgentPermissionRepository,
+    AgentPermissionsService,
+    PermissionRepository,
+  ],
 })
 export class PermissionModule {}

@@ -2,6 +2,7 @@ export enum MediaDir {
   LEADS = 'leads',
   AGENTS = 'agents',
   DESKS = 'desks',
+  ROLES = 'roles',
   TEAMS = 'teams',
   DOCUMENTS = 'documents',
 }

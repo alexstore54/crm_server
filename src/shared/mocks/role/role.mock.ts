@@ -5,6 +5,7 @@ export const getMockedRole = (): Role => {
     id: 1,
     name: 'mock_role',
     isMutable: true,
+    avatarURL: null,
     publicId: 'publicId',
     isVisible: true,
   };

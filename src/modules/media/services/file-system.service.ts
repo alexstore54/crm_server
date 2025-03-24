@@ -32,9 +32,9 @@ export class FileSystemService {
       throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
     }
   }
-  public async remove(filename: string, dirPath: MediaDirPath): Promise<void> {
+  public async remove(publicId: string, filename: string, dirPath: MediaDirPath): Promise<void> {
     try {
-      const fullFilePath = path.join(this.getFullPath(dirPath), path.basename(filename));
+      const fullFilePath = path.join(this.getFullPath(dirPath), path.basename(publicId), path.basename(filename));
       const fileExists = await filestream.pathExists(fullFilePath);
 
       if (!fileExists) {

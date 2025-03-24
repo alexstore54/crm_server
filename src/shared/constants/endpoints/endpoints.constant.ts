@@ -45,15 +45,13 @@ export const ENDPOINTS = {
     UPDATE_ROLE_PERMISSIONS: ':publicId/update',
     UPDATE_DEEP_ROLE_PERMISSIONS: ':publicId/deep-update',
   },
-  ROLE: {
+  ROLES: {
     BASE: 'roles',
     GET_ONE: ':publicId',
-    GET_ALL_ROLES: '/',
-    GET_ONE_WITH_PERMISSIONS: ':publicId/permissions',
-    GET_ALL_WITH_PERMISSIONS: 'permissions',
-    CREATE_ROLE: 'create',
+    GET_MANY: '/',
+    CREATE_ONE: 'create',
     UPDATE_ONE_ROLE: ':publicId/update',
-    DELETE_ROLE: ':publicId',
+    DELETE_ONE: ':publicId',
   },
   AGENTS_SESSIONS: {
     BASE: 'sessions/agents',

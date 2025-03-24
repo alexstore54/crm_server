@@ -70,6 +70,13 @@ export const ENDPOINTS_PERMISSIONS = {
       // PermissionsKeys.CREATE_DESK_LEADS,
     ],
   },
+  ROLES: {
+    GET_ONE: [PermissionsKeys.READ_ROLES],
+    CREATE_ONE: [PermissionsKeys.CREATE_ROLES],
+    UPDATE_ONE: [PermissionsKeys.UPDATE_ROLES],
+    GET_MANY: [PermissionsKeys.READ_ROLES],
+    DELETE_ONE: [PermissionsKeys.DELETE_ROLES],
+  },
   CUSTOMERS_SESSIONS: {},
   LOGS: {
     READ_LOGS: [PermissionsKeys.READ_LOGS],

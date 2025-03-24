@@ -1,63 +1,92 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseBoolPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
 import { RoleService } from '../services/role.service';
-import { ENDPOINTS } from '@/shared/constants/endpoints';
+import { ENDPOINTS, RESPONSE_STATUS } from '@/shared/constants/endpoints';
 import { UUIDValidationPipe } from '@/common/pipes';
-import { CreateRole, UpdateRole } from '../dto/createRole.dto';
+import { CreateRole, UpdateRole } from '@/modules/role/dto';
+import { UsePermissions } from '@/common/decorators/validation';
+import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
+import { AgentAccessGuard } from '@/common/guards/tokens/agent';
+import { PermissionsGuard } from '@/common/guards/permissions';
+import { UploadPicture } from '@/common/decorators/media';
+import { UpdateMediaParams } from '@/shared/types/media';
+import { ClientRole, FullRole } from '@/shared/types/roles';
 
-@Controller(ENDPOINTS.ROLE.BASE)
+//#REFACTORED - добавил гуарды, убрал лишние эндпоинты
+//ENDPOINTS.ROLE -> ENDPOINTS.ROLES (доеб, но так правильнее)
+//добавил возвращаемые типы
+
+@Controller(ENDPOINTS.ROLES.BASE)
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
-  
-  // Получение всех ролей с правами
-  @Get(ENDPOINTS.ROLE.GET_ALL_WITH_PERMISSSIONS)
-  async getRolesWithPermissions() {
-    return this.roleService.getRolesWithPermissions();
-  }
 
-  // Получение конкретной роли с правами
-  @Get(ENDPOINTS.ROLE.GET_ONE_WITH_PERMISSSIONS)
+  @UsePermissions(ENDPOINTS_PERMISSIONS.ROLES.GET_ONE)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Get(ENDPOINTS.ROLES.GET_ONE)
   async getRoleWithPermissions(
     @Param('publicId', UUIDValidationPipe) publicId: string,
-  ) {
-    return this.roleService.getRoleByPublicIdWithPermissions(publicId);
+  ): Promise<FullRole> {
+    return this.roleService.getFullRole(publicId);
   }
 
-  // Получение всех ролей
-  @Get(ENDPOINTS.ROLE.GET_ALL)
-  async getRoles() {
-    return this.roleService.getRoles();
+  //#REFACTORED - добавил пагинацию query, limit
+  @UsePermissions(ENDPOINTS_PERMISSIONS.ROLES.GET_MANY)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Get(ENDPOINTS.ROLES.GET_MANY)
+  async getRoles(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ): Promise<ClientRole[]> {
+    return this.roleService.getRoles(page, limit);
   }
 
-  // Получение конкретной роли
-  @Get(ENDPOINTS.ROLE.GET_ONE)
-  async getRole(
-    @Param('publicId', UUIDValidationPipe) publicId: string,
-  ) {
-    return this.roleService.getRoleByPublicId(publicId);
-  }
-
-
-  @Post(ENDPOINTS.ROLE.CREATE_ROLE)
+  @UploadPicture()
+  @UsePermissions(ENDPOINTS_PERMISSIONS.ROLES.CREATE_ONE)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Post(ENDPOINTS.ROLES.CREATE_ONE)
   async createRoleWithPermissions(
-      @Body() body: CreateRole
-  ) {
-    return this.roleService.createRoleWithPermissions(body)
+    @Body() body: CreateRole,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<FullRole> {
+    return this.roleService.createOne(body, file);
   }
 
-  @Patch(ENDPOINTS.ROLE.UPDATE_ONE_ROLE)
+  @UploadPicture()
+  @UsePermissions(ENDPOINTS_PERMISSIONS.ROLES.UPDATE_ONE)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Patch(ENDPOINTS.ROLES.UPDATE_ONE_ROLE)
   async updateRole(
     @Param('publicId', UUIDValidationPipe) publicId: string,
-    @Body() data: UpdateRole
-  ) {
-      return this.roleService.updateRoleByPublicId(publicId, data)
+    @Body() data: UpdateRole,
+    @Query('isAvatarRemoved', ParseBoolPipe) isAvatarRemoved?: boolean,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<FullRole> {
+    const updateMediaParams: UpdateMediaParams = {
+      isAvatarRemoved,
+      file,
+    };
+    return this.roleService.updateRoleByPublicId(publicId, data, updateMediaParams);
   }
 
-  @Delete(ENDPOINTS.ROLE.DELETE_ROLE)
+  @UsePermissions(ENDPOINTS_PERMISSIONS.ROLES.DELETE_ONE)
+  @UseGuards(AgentAccessGuard, PermissionsGuard)
+  @Delete(ENDPOINTS.ROLES.DELETE_ONE)
   async deleteRole(
     @Param('publicId', UUIDValidationPipe) publicId: string,
-    @Query('deep') deep: boolean
-  ) {
-      console.log(deep)
-      return this.roleService.deleteRoleByPublicId(publicId, deep);   
-    }
+    @Query('deep') deep: boolean,
+  ): Promise<string> {
+    await this.roleService.deleteRoleByPublicId(publicId, deep);
+    return RESPONSE_STATUS.SUCCESS;
+  }
 }

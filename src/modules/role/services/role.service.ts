@@ -1,145 +1,176 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { RoleRepository } from "../repositories/role.repository";
-import { Agent, Permission, Prisma, Role, RolePermission } from "@prisma/client";
-import { CreateRole, UpdateRole } from "../dto/createRole.dto";
-import { AgentPermissionRepository, AgentRepository, RolePermissionRepository } from "@/modules/agent/repositories";
-import { PermissionRepository } from "@/modules/permissions/repositories";
-import { ERROR_MESSAGES } from "@/shared/constants/errors";
-import { PermissionsUtil } from "@/shared/utils";
-import { PrismaService } from "@/shared/db/prisma";
-import { plainToInstance } from "class-transformer";
-import { RoleAndPermissionsResponse, RolesResponse, SingleRoleResponse } from "../dto/responseRole.dto";
-import { RolesUtil } from "@/shared/utils/roles/roles.util";
-import { getNoAccessAgentSeedRole } from "@/seeds/seed.data";
-import { AllowedPermission } from "@/modules/permissions/types";
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { RoleRepository } from '@/modules/role/repositories/role.repository';
+import { CreateRole, UpdateRole } from '../dto';
+import { PermissionsUtil, RolesUtil } from '@/shared/utils';
+import { Agent, Prisma, PrismaClient, Role } from '@prisma/client';
+import { AllowedPermission } from '@/modules/permissions/types';
+import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { ClientRole, FullRole } from '@/shared/types/roles';
+import { MediaDir, MediaPrefix, UpdateMediaParams } from '@/shared/types/media';
+import { MediaService } from '@/modules/media';
+import { PermissionsTable } from '@/shared/types/permissions';
+import { AgentPermissionsService, RolePermissionsService } from '@/modules/permissions/service';
 
 @Injectable()
 export class RoleService {
-    constructor(
-        private readonly rolePermissionRepository: RolePermissionRepository,
-        private readonly agentPermissionRepository: AgentPermissionRepository,
-        private readonly permissionRepository: PermissionRepository,
-        private readonly roleRepository: RoleRepository,
+  constructor(
+    private readonly roleRepository: RoleRepository,
+    private readonly mediaService: MediaService,
+    private readonly rolePermissionsService: RolePermissionsService,
+    private readonly agentPermissionsService: AgentPermissionsService,
+    private readonly prisma: PrismaClient,
+  ) {}
 
-        private readonly prisma: PrismaService,
+  public async createOne(data: CreateRole, file?: Express.Multer.File): Promise<FullRole> {
+    const { name, permissions } = data;
+    //#REFACTORED - именуй переменные до конца, не одной буквой (p -> permission)
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        let role: Role = await this.roleRepository.txCreateOne(name, tx);
+        const prismaRolePermissions = await this.rolePermissionsService.txCreateMany(
+          {
+            roleId: role.id,
+            permissions,
+          },
+          tx,
+        );
 
-    ){}
+        const avatarURL = await this.mediaService.save({
+          name: 'avatar',
+          publicId: role.publicId,
+          file,
+          prefix: MediaPrefix.PICTURES,
+          dir: MediaDir.ROLES,
+        });
 
-    public async createRoleWithPermissions(data: CreateRole){
-        const {name, permissions} = data;
-        const incomingPermissionIds = permissions.map(p => p.permissionId)
-        try{
-            return await this.prisma.$transaction(async (tx) => {
-                const newRole = await this.roleRepository.txCreateOne(name, tx);
-                // Получаем существующие permissions, чтобы отсеять невалидные id
-                const DBpermissions = await this.permissionRepository.txFindManyByIds(incomingPermissionIds, tx);
-                const mappedRolePermissions = PermissionsUtil.mapAndFilterPermissionsToRolePermissions(DBpermissions, newRole.id, permissions);
-    
-                let rolePermissionsToCreate = mappedRolePermissions;
-    
-                // Если количество валидных permissions не совпадает с переданными,
-                // либо список permissions пустой, добавляем оставшиеся с дефолтным значением (false)
-                if (mappedRolePermissions.length !== permissions.length 
-                    || permissions.length === 0) {
-                    const excludePermissions = await this.permissionRepository.txFindManyByIdsExclude(incomingPermissionIds, tx);
-                    const mappedExcludePermissions = excludePermissions.map(ex_perm => ({
-                        roleId: newRole.id,
-                        permissionId: ex_perm.id,
-                        allowed: false
-                    }));
-                    rolePermissionsToCreate = [...mappedRolePermissions, ...mappedExcludePermissions];
-                }
-    
-                await this.rolePermissionRepository.txCreateMany(rolePermissionsToCreate, tx);
-                const newRolePermissions = await this.rolePermissionRepository.txFindManyWithKeysByRoleId(newRole.id, tx);
-                const { role } = plainToInstance(SingleRoleResponse, { role: newRole }, { excludeExtraneousValues: true });
-    
-                return {
-                    role,
-                    permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(newRolePermissions)
-                };
-            });
-        }catch(error:any){
-            throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+        if (avatarURL) {
+          role = await this.roleRepository.txUpdateAvatarById(role.id, avatarURL, tx);
         }
-    }
 
-    public async getRoles(){
-        const roles = await this.roleRepository.findMany()
-        return plainToInstance(RolesResponse, { roles }, { excludeExtraneousValues: true });
-    }
-
-    public async getRoleByPublicId(publicId: string){
-        const singleRole = await this.roleRepository.findOneByPublicId(publicId);
-        
-        return plainToInstance(SingleRoleResponse, {role: singleRole},  {excludeExtraneousValues: true});
-    }
-
-    public async getRolesWithPermissions(){
-        const RolesAndPermissions = await this.roleRepository.findManyWithRolePermissions();
-        
-        return RolesUtil.mapRolesWithRolePermissions(RolesAndPermissions);
-    }
-
-    public async getRoleByPublicIdWithPermissions(publicId: string){
-        const singleRoleWithPermissions = await this.roleRepository.findOneByPublicIdWithPermissions(publicId);
-        if(!singleRoleWithPermissions) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
-        
-        const { role } = plainToInstance(SingleRoleResponse, { role: singleRoleWithPermissions }, { excludeExtraneousValues: true });
-        
         return {
-                role,
-                permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(singleRoleWithPermissions!.RolePermission)
-            };
+          role,
+          permissions,
+        };
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async getRoles(page: number, limit: number): Promise<ClientRole[]> {
+    const roles: Role[] = await this.roleRepository.findMany(page, limit);
+    return roles.map((role) => {
+      return RolesUtil.mapRoleToClientRole(role);
+    });
+  }
+
+  //#REFACTORED - упростил логику
+  // почистил ненужные методы
+  // изменил везде exceptions, по статус кодам (new NotFound, new Forbidden)
+
+  public async getFullRole(publicId: string): Promise<FullRole> {
+    const response = await this.roleRepository.findOneFull(publicId);
+    if (!response) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
     }
 
-    public async updateRoleByPublicId(publicId: string, data:UpdateRole ) {
-        const role = await this.roleRepository.findOneByPublicId(publicId);
-        
-        if(!role) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
-        if(!role.isMutable || !role.isVisible) throw new InternalServerErrorException(`${ERROR_MESSAGES.DONT_HAVE_RIGHTS}`);
-        
-        const updatedRole = await this.roleRepository.updateOneByPublicId(data, publicId);
-        return plainToInstance(SingleRoleResponse, {role: updatedRole},  {excludeExtraneousValues: true});
+    const { role, permissions } = response;
+
+    const clientRole = RolesUtil.mapRoleToClientRole(role);
+    const permissionsTable = PermissionsUtil.mapPrismaPermissionsToPermissionTable(permissions);
+
+    return {
+      role: clientRole,
+      permissions: permissionsTable,
+    };
+  }
+
+  public async updateRoleByPublicId(
+    publicId: string,
+    data: UpdateRole,
+    updateMediaParams: UpdateMediaParams,
+  ): Promise<FullRole> {
+    const role: Role | null = await this.roleRepository.findOneByPublicId(publicId);
+
+    if (!role) throw new NotFoundException();
+
+    if (!role.isMutable || !role.isVisible)
+      throw new ForbiddenException(`${ERROR_MESSAGES.DONT_HAVE_RIGHTS}`);
+
+    let avatarURL: string | null = null;
+
+    if (updateMediaParams.isAvatarRemoved) {
+      await this.mediaService.remove(publicId, 'avatar', MediaPrefix.PICTURES, MediaDir.ROLES);
+      avatarURL = null;
+    } else {
+      avatarURL = await this.mediaService.save({
+        name: 'avatar',
+        publicId,
+        file: updateMediaParams.file,
+        prefix: MediaPrefix.PICTURES,
+        dir: MediaDir.ROLES,
+      });
     }
 
-    public async deleteRoleByPublicId(publicId: string, deep: boolean) {
-        const role = await this.roleRepository.findOneByPublicId(publicId);
-        if(!role) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
-        if(!role.isMutable || !role.isVisible) throw new InternalServerErrorException(`${ERROR_MESSAGES.DONT_HAVE_RIGHTS}`);
-        
-        await this.prisma.$transaction(async (tx) => {
-            const tempRole: Role | null = await this.roleRepository.txfindOneByPublicId(getNoAccessAgentSeedRole().publicId, tx);
-            if(!tempRole) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
-            const agents: Agent[] = await tx.agent.findMany({where: {roleId: role.id}});
-            await tx.agent.updateMany({where: {roleId: role.id}, data: {roleId: tempRole.id}});
+    const updatedRole: Role = await this.roleRepository.updateOneByPublicId(
+      publicId,
+      data,
+      avatarURL,
+    );
+    const permissions: PermissionsTable =
+      await this.rolePermissionsService.findManyWithDetailByRoleId(updatedRole.id);
 
-            await this.rolePermissionRepository.txDeleteManyByRoleId(role.id, tx);
-            await this.roleRepository.txDeleteOneByPublicId(publicId, tx);
+    return {
+      role: RolesUtil.mapRoleToClientRole(updatedRole),
+      permissions,
+    };
+  }
 
-            if(deep){
-                await this.deepDeleteRoleByPublicId(tx, agents, tempRole);
-            }
-        })
-        
-    }
+  public async deleteRoleByPublicId(publicId: string, deep: boolean) {
+    const role = await this.roleRepository.findOneByPublicId(publicId);
+    if (!role) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
+    if (!role.isMutable || !role.isVisible)
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DONT_HAVE_RIGHTS}`);
 
-    private async deepDeleteRoleByPublicId(tx: Prisma.TransactionClient, agents: Agent[], tempRole: Role){ 
-        const agentIds = agents.map(a => a.id);
-        await this.agentPermissionRepository.txDeleteManyByAgentsIds(agentIds, tx);  
+    await this.prisma.$transaction(async (tx) => {
+      const tempRole: Role | null = await this.roleRepository.txFindOneByPublicId(
+        getNoAccessAgentSeedRole().publicId,
+        tx,
+      );
+      if (!tempRole) throw new InternalServerErrorException(`${ERROR_MESSAGES.DATA_IS_NOT_EXISTS}`);
+      const agents: Agent[] = await tx.agent.findMany({ where: { roleId: role.id } });
+      await tx.agent.updateMany({ where: { roleId: role.id }, data: { roleId: tempRole.id } });
 
-        const rolePerms = await this.rolePermissionRepository.txFindManyByRoleId(tempRole.id, tx)
-        
-        const agentsPermissions: AllowedPermission[] = [];
-        agentIds.forEach(agentId => {
-                const agentPerms = PermissionsUtil.mapRolePermissionsToAgentPermissions(rolePerms, agentId);
-                agentsPermissions.push(...agentPerms);
-        })
-        
-        await this.agentPermissionRepository.txCreateMany(agentsPermissions, tx);
+      await this.rolePermissionRepository.txDeleteManyByRoleId(role.id, tx);
+      await this.roleRepository.txDeleteOneByPublicId(publicId, tx);
 
-    }
+      if (deep) {
+        await this.deepDeleteRoleByPublicId(tx, agents, tempRole);
+      }
+    });
+  }
 
-    
+  private async deepDeleteRoleByPublicId(
+    tx: Prisma.TransactionClient,
+    agents: Agent[],
+    tempRole: Role,
+  ) {
+    const agentIds = agents.map((a) => a.id);
+    await this.agentPermissionRepository.txDeleteManyByAgentsIds(agentIds, tx);
 
+    const rolePerms = await this.rolePermissionRepository.txFindManyByRoleId(tempRole.id, tx);
+
+    const agentsPermissions: AllowedPermission[] = [];
+    agentIds.forEach((agentId) => {
+      const agentPerms = PermissionsUtil.mapRolePermissionsToAgentPermissions(rolePerms, agentId);
+      agentsPermissions.push(...agentPerms);
+    });
+
+    await this.agentPermissionRepository.txCreateMany(agentsPermissions, tx);
+  }
 }

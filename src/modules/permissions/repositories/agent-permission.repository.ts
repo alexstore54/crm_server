@@ -83,7 +83,7 @@ export class AgentPermissionRepository {
           return tx.agentPermission.create({
             data: {
               agentId,
-              permissionId: permission.permissionId,
+              permissionId: permission.id,
             },
           });
         });
@@ -110,7 +110,7 @@ export class AgentPermissionRepository {
           return tx.agentPermission.create({
             data: {
               agentId,
-              permissionId: permission.permissionId,
+              permissionId: permission.id,
             },
           });
         });

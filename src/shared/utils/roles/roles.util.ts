@@ -1,25 +1,13 @@
-import { Prisma, Role, RolePermission } from "@prisma/client";
-import { PermissionsUtil } from "../permissions/permissions.util";
+import { Role } from '@prisma/client';
+import { ClientRole } from '@/shared/types/roles';
 
 export class RolesUtil {
-    public static mapRolesWithRolePermissions(
-        roles: Prisma.RoleGetPayload<{
-            include: {
-              RolePermission: {
-                include: {
-                  Permission: true;
-                };
-              };
-            };
-          }
-        >[]){
-            
-        return roles.map(role => ({
-            role: {
-                publicId: role.publicId,
-                name: role.name,
-            },
-            permissions: PermissionsUtil.mapPrismaPermissionsToPermissionTable(role.RolePermission)
-        }));
-    }
+  public static mapRoleToClientRole(role: Role): ClientRole {
+    return {
+      id: role.id,
+      name: role.name,
+      publicId: role.publicId,
+      avatarURL: role.avatarURL ? role.avatarURL : null,
+    };
+  }
 }

@@ -2,51 +2,63 @@ import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { IncomingPermission } from '@/modules/permissions/dto';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { FullPermission, PrismaPermissionWithDetails } from '@/shared/types/permissions';
-import { Prisma } from '@prisma/client';
+import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
+import { Prisma, RolePermission } from '@prisma/client';
+import { CreatRolePermissions } from '@/modules/permissions/dto/role-permissions';
 
 @Injectable()
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async txCreateMany(permissions: FullPermission[], tx: Prisma.TransactionClient){
-       await tx.rolePermission.createMany({data: permissions});
-  }
+  public async createMany(data: CreatRolePermissions): Promise<RolePermission[]> {
+    const { permissions, roleId } = data;
 
-  public async txFindManyByRoleId(roleId: number, tx: Prisma.TransactionClient){
-      return tx.rolePermission.findMany({where: {roleId}});
-  }
-  
-  public async txFindManyWithKeysByRoleId(roleId: number, tx: Prisma.TransactionClient){
-      return tx.rolePermission.findMany({where: {roleId}, include: {Permission: true}});
-  }
-
-  public async updateManyByRoleId(
-    roleId: number,
-    permissions: IncomingPermission[],
-  ): Promise<PrismaPermissionWithDetails[]> {
     try {
       return this.prisma.$transaction(async (tx) => {
-        await tx.rolePermission.deleteMany({
-          where: {
-            permissionId: {
-              in: permissions.map((permission) => permission.permissionId),
-            },
-          },
-        });
-
-        await tx.rolePermission.createMany({
+        tx.rolePermission.createMany({
           data: permissions.map((permission) => ({
-              roleId,
-              permissionId: permission.permissionId,
-              allowed: permission.allowed,
+            roleId,
+            permissionId: permission.id,
+            allowed: permission.allowed,
           })),
         });
 
-        return tx.rolePermission.findMany({
-          where: { roleId },
-          include: { Permission: true },
-        });
+        return tx.rolePermission.findMany({ where: { roleId } });
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async txFindManyByRoleId(roleId: number, tx: Prisma.TransactionClient) {
+    return tx.rolePermission.findMany({ where: { roleId } });
+  }
+
+  public async txUpdateManyByRoleId(
+    roleId: number,
+    permissions: IncomingPermission[],
+    tx: Prisma.TransactionClient,
+  ): Promise<PrismaPermissionWithDetails[]> {
+    try {
+      await tx.rolePermission.deleteMany({
+        where: {
+          permissionId: {
+            in: permissions.map((permission) => permission.id),
+          },
+        },
+      });
+
+      await tx.rolePermission.createMany({
+        data: permissions.map((permission) => ({
+          roleId,
+          permissionId: permission.id,
+          allowed: permission.allowed,
+        })),
+      });
+
+      return tx.rolePermission.findMany({
+        where: { roleId },
+        include: { Permission: true },
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -65,7 +77,7 @@ export class RolePermissionRepository {
 
         const rolePermissionData = permissions.map((perm) => ({
           roleId,
-          permissionId: perm.permissionId,
+          permissionId: perm.id,
           allowed: perm.allowed,
         }));
         await tx.rolePermission.createMany({
@@ -79,7 +91,7 @@ export class RolePermissionRepository {
 
         if (agents.length > 0) {
           const agentIds = agents.map((agent) => agent.id);
-          const permissionIds = permissions.map((perm) => perm.permissionId);
+          const permissionIds = permissions.map((perm) => perm.id);
 
           await tx.agentPermission.deleteMany({
             where: {
@@ -91,7 +103,7 @@ export class RolePermissionRepository {
           const agentPermissionData = agentIds.flatMap((agentId) =>
             permissions.map((perm) => ({
               agentId,
-              permissionId: perm.permissionId,
+              permissionId: perm.id,
               allowed: perm.allowed,
             })),
           );
@@ -102,8 +114,8 @@ export class RolePermissionRepository {
         }
 
         return tx.rolePermission.findMany({
-            where: { roleId },
-            include: { Permission: true },
+          where: { roleId },
+          include: { Permission: true },
         });
       });
     } catch (error: any) {
@@ -113,7 +125,7 @@ export class RolePermissionRepository {
     }
   }
 
-  public async txDeleteManyByRoleId(roleId: number, tx: Prisma.TransactionClient){
-      return tx.rolePermission.deleteMany({where: {roleId}});
+  public async txDeleteManyByRoleId(roleId: number, tx: Prisma.TransactionClient) {
+    return tx.rolePermission.deleteMany({ where: { roleId } });
   }
 }

@@ -4,7 +4,6 @@ import { IncomingPermission } from "@/modules/permissions/dto";
 import { UseValidation } from "@/common/decorators/validation";
 
 export class CreateRole {
-    
     @IsString()
     @Transform(({ value }) => value.trim())
     @Length(2, 50)
@@ -19,4 +18,5 @@ export class UpdateRole {
     @Transform(({ value }) => value.trim())
     @Length(2, 50)
     name: string
+
 }
