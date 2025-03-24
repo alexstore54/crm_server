@@ -96,7 +96,7 @@ export type PrismaPermissionWithDetails =
 export type FullPermission = {
   roleId: number;
   permissionId: number;
-  allowed: boolean;
+  allowed?: boolean;
   key?: PermissionsKeys;
 };
 export type FullAgentPermission = {

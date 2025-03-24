@@ -73,10 +73,11 @@ class Seed {
   ): Promise<void> {
     try {
       const moderatorRole: Role = await this.seedRole(getModeratorSeedRole(), tx);
+      console.log(moderatorRole)
       const moderatorRolePermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
-        permissions,
-        moderatorRole.id,
-        true,
+            permissions,
+            moderatorRole.id,
+            true,
       );
       const moderatorAgentPermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
         permissions,
@@ -102,7 +103,8 @@ class Seed {
     try {
       const noAccessRole: Role = await this.seedRole(getNoAccessAgentSeedRole(), tx);
       const lowAccessRole: Role = await this.seedRole(getLowAccessAgentSeedRole(), tx);
-
+      console.log(noAccessRole)
+      console.log(lowAccessRole)
       const noAccessRolePermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
         permissions,
         noAccessRole.id,

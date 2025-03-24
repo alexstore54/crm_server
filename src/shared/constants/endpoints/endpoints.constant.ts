@@ -49,6 +49,8 @@ export const ENDPOINTS = {
     BASE: 'roles',
     GET_ONE: ':publicId',
     GET_ALL_ROLES: '/',
+    GET_ONE_WITH_PERMISSIONS: ':publicId/permissions',
+    GET_ALL_WITH_PERMISSIONS: 'permissions',
     CREATE_ROLE: 'create',
     UPDATE_ONE_ROLE: ':publicId/update',
     DELETE_ROLE: ':publicId',

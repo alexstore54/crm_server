@@ -4,6 +4,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AgentPermission, Prisma } from '@prisma/client';
 import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
 import { IncomingPermission } from '@/modules/permissions/dto';
+import { AllowedPermission } from '../types';
 
 @Injectable()
 export class AgentPermissionRepository {
@@ -26,6 +27,22 @@ export class AgentPermissionRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
+
+  public async txDeleteManyByAgentsIds(ids: number[], tx: Prisma.TransactionClient) {
+      return tx.agentPermission.deleteMany({
+        where: {
+            agentId: {
+              in: ids,
+            },
+        },
+      })
+  }
+
+  public async txCreateMany(data: AllowedPermission[], tx: Prisma.TransactionClient) {
+    return tx.agentPermission.createMany({data});
+  }
+
+  
 
   public async getManyByAgentId(agentId: number) {
     try {

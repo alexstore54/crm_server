@@ -11,7 +11,10 @@ export const getModeratorSeedRole = () => {
 
 export const getNoAccessAgentSeedRole = () => {
   return {
+    publicId: 'c6cb2cfb-3e0c-493e-bbf4-ca2ba3090a65',
     name: 'No access',
+    isVisible: true,
+    isMutable: false,
   };
 };
 
