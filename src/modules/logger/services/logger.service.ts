@@ -11,7 +11,7 @@ export class AppLoggerService {
     const logEntry = {
       message,
       level: data?.level || 'info',
-      userId: data?.userId || null,
+      userId: data?.agentId || null,
       context: data?.context ? JSON.stringify(data.context) : null,
     };
 
@@ -22,7 +22,7 @@ export class AppLoggerService {
     const logEntry = {
       message,
       level: data?.level || 'info',
-      userId: data?.userId || null,
+      userId: data?.agentId || null,
       context: data?.context ? JSON.stringify(data.context) : null,
     };
 
@@ -33,7 +33,7 @@ export class AppLoggerService {
     const logEntry = {
       message,
       level: data?.level || 'info',
-      userId: data?.userId || null,
+      userId: data?.agentId || null,
       context: data?.context ? JSON.stringify(data.context) : null,
     };
 

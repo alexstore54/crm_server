@@ -98,13 +98,12 @@ model LeadStatus {
 }
 
 model Log {
-  level     LogLevel     @default(INFO)
+  level     LogLevel @default(INFO)
   message   String
   context   Json?
-  createdAt DateTime     @default(now()) @db.Timestamptz(0)
-  userId    Int?
-  userType  LogUserType?
-  id        Int          @id @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+  agentId   Int?
+  id        Int      @id @default(autoincrement())
 }
 
 model Permission {
@@ -159,9 +158,4 @@ enum LogLevel {
   INFO
   WARN
   ERROR
-}
-
-enum LogUserType {
-  AGENT
-  CUSTOMER
 }

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MediaDirPath, SaveMediaArgs } from '@/shared/types/media';
+import { MediaDirPath } from '@/shared/types/media';
 import { configKeys } from '@/shared/schemas';
 import { NodeEnv } from '@/common/config/types';
 import { FS_ERRORS } from '@/shared/constants/errors';
@@ -19,22 +19,13 @@ export class FileSystemService {
     this.defaultErrorMessage = FS_ERRORS.DEFAULT_MESSAGE;
   }
 
-  public async save(args: SaveMediaArgs): Promise<string> {
-    const { filename, dirPath, buffer, mimetype, publicId } = args;
-    try {
-      const fullFilePath =
-        path.join(this.getFullPath(dirPath), path.basename(publicId), path.basename(filename)) +
-        mimetype;
-      await this.ensureDirectoryExists(path.dirname(fullFilePath));
-      await filestream.writeFile(fullFilePath, buffer);
-      return fullFilePath;
-    } catch (error) {
-      throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
-    }
-  }
   public async remove(publicId: string, filename: string, dirPath: MediaDirPath): Promise<void> {
     try {
-      const fullFilePath = path.join(this.getFullPath(dirPath), path.basename(publicId), path.basename(filename));
+      const fullFilePath = path.join(
+        this.getFullPath(dirPath),
+        path.basename(publicId),
+        path.basename(filename),
+      );
       const fileExists = await filestream.pathExists(fullFilePath);
 
       if (!fileExists) {
@@ -42,6 +33,24 @@ export class FileSystemService {
       }
 
       await filestream.remove(fullFilePath);
+    } catch (error) {
+      throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
+    }
+  }
+
+  public async isExists(path: string): Promise<boolean> {
+    return filestream.pathExists(path);
+  }
+
+  public async removeFile(filePath: string): Promise<void> {
+    try {
+      const fileExists = await filestream.pathExists(filePath);
+
+      if (!fileExists) {
+        throw this.handleError(FS_ERRORS.FILE_NOT_EXIST);
+      }
+
+      await filestream.remove(filePath);
     } catch (error) {
       throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
     }
@@ -55,12 +64,10 @@ export class FileSystemService {
       throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
     }
   }
-
   private getFullPath(dirPath: MediaDirPath): string {
     const { prefix, dir } = dirPath;
     return path.join(this.baseMediaDir, prefix, dir);
   }
-
   private async ensureDirectoryExists(directoryPath: string): Promise<void> {
     try {
       await filestream.ensureDir(directoryPath);

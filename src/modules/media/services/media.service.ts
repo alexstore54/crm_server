@@ -7,15 +7,14 @@ import { MediaUtils } from '@/shared/utils';
 export class MediaService {
   constructor(private readonly fileSystem: FileSystemService) {}
 
-  public async save(args: SaveInput): Promise<string | null> {
-    const { publicId, file, prefix, dir, name } = args;
-    if (!file) {
-      return null;
-    }
-    const filename = name || file.originalname;
-    const saveData = MediaUtils.getUploadMediaData(publicId, filename, file, prefix, dir);
-    const src = await this.fileSystem.save(saveData);
-    return MediaUtils.realPathToEndpointPath(src);
+
+  public async removeMany(paths: string[]): Promise<void> {
+    await Promise.all(paths.map((path) => this.fileSystem.removeFile(path)));
+  }
+
+
+  public async isFileExist(path: string): Promise<boolean> {
+    return this.fileSystem.isExists(path);
   }
 
   public async remove(

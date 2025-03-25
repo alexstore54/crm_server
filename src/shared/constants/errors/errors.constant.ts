@@ -11,6 +11,7 @@ export const ERROR_MESSAGES = {
   ACCESS_DENIED: 'Access Denied',
   USER_EXISTS: 'User already exists',
   USER_IS_NOT_EXISTS: 'User is not exists',
+  ENV_REQUIRED: 'Environment not found',
   DB_ERROR: 'Error by query to database',
   AGENT_NOT_FOUND: 'Agent not found',
   ONE_FIELD_REQUIRED: 'At least one property must be provided',

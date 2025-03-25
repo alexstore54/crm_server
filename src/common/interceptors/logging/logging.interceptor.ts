@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { CreateLog } from '@/modules/logger/dto';
-import { LogLevel, LogUserType } from '@prisma/client';
+import { LogLevel } from '@prisma/client';
 import { AppLoggerService } from '@/modules/logger/services';
 import { PrismaService } from '@/shared/db/prisma';
 import { AgentAuthPayload, CustomerAuthPayload } from '@/shared/types/auth';
@@ -34,7 +34,7 @@ export class AppLoggingInterceptor implements NestInterceptor {
     let userId: number | null = null;
 
     if (user) {
-      userId = await this.getUserIdFromCacheOrDb(user);
+      userId = await this.getAgentIdFromCacheOrDb(user);
     }
 
     return next.handle().pipe(
@@ -43,7 +43,7 @@ export class AppLoggingInterceptor implements NestInterceptor {
           message: `Request to ${method} ${url} took ${Date.now() - now}ms`,
           context: { path: url },
           level: LogLevel.INFO,
-          userId: userId ?? undefined,
+          agentId: userId ?? undefined,
           logUserType: userId ? this.getLogUserType(user) : undefined,
         };
         this.logger.log(logEntry.message, logEntry);
@@ -51,7 +51,7 @@ export class AppLoggingInterceptor implements NestInterceptor {
     );
   }
 
-  private async getUserIdFromCacheOrDb(
+  private async getAgentIdFromCacheOrDb(
     payload: AgentAuthPayload | CustomerAuthPayload,
   ): Promise<number | null> {
     const cacheKey = `${payload.sub}-${this.getLogUserType(payload)}`;
@@ -83,11 +83,8 @@ export class AppLoggingInterceptor implements NestInterceptor {
     if (!payload) {
       return null;
     }
-    const logUserType = this.getLogUserType(payload);
-    if (logUserType === LogUserType.AGENT) {
-      return this.getAgentIdByPublicId(payload.sub);
-    }
-    return this.getCustomerIdByPublicId(payload.sub);
+
+    return this.getAgentIdByPublicId(payload.sub);
   }
 
   private async getCustomerIdByPublicId(publicId: string): Promise<number | null> {
@@ -114,10 +111,4 @@ export class AppLoggingInterceptor implements NestInterceptor {
     }
   }
 
-  private getLogUserType(payload: AgentAuthPayload | CustomerAuthPayload): LogUserType {
-    if ('desksPublicId' in payload) {
-      return LogUserType.AGENT;
-    }
-    return LogUserType.CUSTOMER;
-  }
 }

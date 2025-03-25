@@ -1,5 +1,5 @@
 export enum MediaDir {
-  LEADS = 'leads',
+  CUSTOMERS = 'customers',
   AGENTS = 'agents',
   DESKS = 'desks',
   ROLES = 'roles',

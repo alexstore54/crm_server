@@ -1,4 +1,5 @@
 import { MediaDir, MediaPrefix, SaveMediaArgs } from '@/shared/types/media';
+import * as path from 'node:path';
 
 export class MediaUtils {
   private static readonly BASE_PATH = 'public/medias';
@@ -34,5 +35,9 @@ export class MediaUtils {
       throw new Error('Invalid endpoint path');
     }
     return endpointPath.replace('medias', this.BASE_PATH);
+  }
+
+  public static mapPath(publicId: string, filename: string, prefix: MediaPrefix, dir: MediaDir) {
+    return path.join(this.BASE_PATH, prefix, dir, publicId, filename);
   }
 }
