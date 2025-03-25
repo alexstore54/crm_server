@@ -9,11 +9,10 @@ export interface SaveMediaArgs {
 }
 
 
-export interface SaveInput {
+export interface TempImageInput {
   publicId: string;
-  name?: string;
-  file?: Express.Multer.File;
-  prefix: MediaPrefix;
+  name: string;
+  file?: Express.Multer.File | null;
   dir: MediaDir;
 }
 

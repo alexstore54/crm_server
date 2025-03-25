@@ -7,12 +7,12 @@ import { DeskRepository } from '@/modules/desk/repositories/desk.repository';
 import { LeadManagerService } from '@/modules/desk/services/lead-manager.service';
 import { LeadManagerRepository } from '@/modules/desk/repositories';
 import { MediaModule } from '@/modules/media';
-import { MediaService } from '@/modules/media/services/media.service';
+import { MediaImagesService } from '@/modules/media/services/media-images.service';
 
 @Module({
   imports: [AuthRedisModule, ValidationModule, MediaModule],
   controllers: [DesksController],
-  providers: [DeskService, LeadManagerService, DeskRepository, LeadManagerRepository, MediaService],
+  providers: [DeskService, LeadManagerService, DeskRepository, LeadManagerRepository, MediaImagesService],
   exports: [DeskRepository, LeadManagerRepository],
 })
 export class DeskModule {}

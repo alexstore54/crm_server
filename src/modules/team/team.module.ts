@@ -5,12 +5,12 @@ import { TeamService } from '@/modules/team/services/team.service';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
 import { MediaModule } from '@/modules/media';
-import { MediaService } from '@/modules/media/services/media.service';
+import { MediaImagesService } from '@/modules/media/services/media-images.service';
 
 @Module({
   imports: [AuthRedisModule, ValidationModule, MediaModule],
   controllers: [TeamsController],
-  providers: [TeamService, TeamRepository, AuthRedisService, ValidationService, MediaService],
+  providers: [TeamService, TeamRepository, AuthRedisService, ValidationService, MediaImagesService],
   exports: [TeamRepository],
 })
 export class TeamModule {}

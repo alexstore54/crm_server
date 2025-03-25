@@ -12,7 +12,7 @@ import {
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { MediaModule } from '@/modules/media';
-import { MediaService } from '@/modules/media/services/media.service';
+import { MediaImagesService } from '@/modules/media/services/media-images.service';
 
 @Module({
   imports: [ValidationModule, AuthRedisModule, MediaModule],
@@ -26,7 +26,7 @@ import { MediaService } from '@/modules/media/services/media.service';
     PrismaService,
     AuthRedisService,
     ValidationService,
-    MediaService,
+    MediaImagesService,
   ],
   exports: [CustomersRepository, LeadRepository],
 })

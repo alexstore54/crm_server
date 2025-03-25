@@ -21,6 +21,23 @@ export class RoleRepository {
     }
   }
 
+  public async txUpdateOneByPublicId(
+    publicId: string,
+    data: UpdateRole,
+    avatarURL: string | null,
+    tx: Prisma.TransactionClient,
+  ) {
+    return tx.role.update({
+      where: {
+        publicId,
+      },
+      data: {
+        ...data,
+        avatarURL,
+      }
+    });
+  }
+
   public async createOne(name: string): Promise<Role> {
     try {
       return this.prisma.role.create({

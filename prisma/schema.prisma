@@ -14,12 +14,12 @@ model Agent {
   email           String            @db.VarChar(100)
   password        String
   lastOnline      DateTime?         @db.Timestamptz(0)
+  avatarURL       String?
   Role            Role              @relation(fields: [roleId], references: [id])
   AgentPermission AgentPermission[]
   Lead            Lead[]
   Desk            Desk[]            @relation("AgentDesks")
   Team            Team[]            @relation("AgentTeams")
-  avatarURL       String?
 }
 
 model AgentPermission {
@@ -36,9 +36,9 @@ model Customer {
   publicId   String    @unique @default(uuid())
   id         Int       @id @default(autoincrement())
   leadId     Int       @unique
-  avatarURL  String?
   password   String
   lastOnline DateTime? @db.Timestamptz(0)
+  avatarURL  String?
   Lead       Lead      @relation(fields: [leadId], references: [id])
   Email      Email[]
 }
@@ -47,11 +47,11 @@ model Desk {
   publicId     String        @unique @default(uuid())
   id           Int           @id @default(autoincrement())
   name         String
-  LeadManagers LeadManager[]
   avatarURL    String?
   Lead         Lead[]
-  Agent        Agent[]       @relation("AgentDesks")
+  LeadManagers LeadManager[]
   Teams        Team[]
+  Agent        Agent[]       @relation("AgentDesks")
 }
 
 model LeadManager {
@@ -71,7 +71,6 @@ model Email {
 }
 
 model Lead {
-  publicId     String      @unique @default(uuid())
   id           Int         @id @default(autoincrement())
   statusId     Int?
   firstname    String?
@@ -83,12 +82,13 @@ model Lead {
   deskId       Int?
   teamId       Int?
   isVerified   Boolean     @default(false)
+  publicId     String      @unique @default(uuid())
   Customer     Customer?
   Agent        Agent?      @relation(fields: [agentId], references: [id])
-  LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
-  Phone        Phone[]
   Desk         Desk?       @relation(fields: [deskId], references: [id])
+  LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
   Team         Team?       @relation(fields: [teamId], references: [id])
+  Phone        Phone[]
 }
 
 model LeadStatus {
@@ -98,12 +98,13 @@ model LeadStatus {
 }
 
 model Log {
-  level     LogLevel @default(INFO)
+  level     LogLevel     @default(INFO)
   message   String
   context   Json?
-  createdAt DateTime @default(now()) @db.Timestamptz(0)
-  agentId   Int?
-  id        Int      @id @default(autoincrement())
+  createdAt DateTime     @default(now()) @db.Timestamptz(0)
+  userId    Int?
+  id        Int          @id @default(autoincrement())
+  userType  LogUserType?
 }
 
 model Permission {
@@ -118,10 +119,10 @@ model Team {
   id        Int     @id @default(autoincrement())
   name      String
   deskId    Int
-  desk      Desk    @relation(fields: [deskId], references: [id])
   avatarURL String?
-  Agents    Agent[] @relation("AgentTeams")
   Leads     Lead[]
+  desk      Desk    @relation(fields: [deskId], references: [id])
+  Agents    Agent[] @relation("AgentTeams")
 }
 
 model Phone {
@@ -134,13 +135,13 @@ model Phone {
 }
 
 model Role {
-  publicId       String           @unique @default(uuid())
   id             Int              @id @default(autoincrement())
-  isMutable      Boolean          @default(true)
-  isVisible      Boolean          @default(true)
   name           String
-  Agent          Agent[]
+  publicId       String           @unique @default(uuid())
+  isVisible      Boolean          @default(true)
+  isMutable      Boolean          @default(true)
   avatarURL      String?
+  Agent          Agent[]
   RolePermission RolePermission[]
 }
 
@@ -158,4 +159,9 @@ enum LogLevel {
   INFO
   WARN
   ERROR
+}
+
+enum LogUserType {
+  AGENT
+  CUSTOMER
 }

@@ -4,12 +4,11 @@ export enum MediaDir {
   DESKS = 'desks',
   ROLES = 'roles',
   TEAMS = 'teams',
-  DOCUMENTS = 'documents',
 }
 
 export enum MediaPrefix {
-  DEFAULT = 'documents',
-  PICTURES = 'pictures',
+  IMAGES = 'images',
+  DOCUMENTS = 'documents',
 }
 
 export interface MediaDirPath {

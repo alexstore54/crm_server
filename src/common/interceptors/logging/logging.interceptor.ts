@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { CreateLog } from '@/modules/logger/dto';
-import { LogLevel } from '@prisma/client';
+import { LogLevel, LogUserType } from '@prisma/client';
 import { AppLoggerService } from '@/modules/logger/services';
 import { PrismaService } from '@/shared/db/prisma';
 import { AgentAuthPayload, CustomerAuthPayload } from '@/shared/types/auth';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
+import { LogOperationType } from '@/shared/types/logger';
 
 @Injectable()
 export class AppLoggingInterceptor implements NestInterceptor {
@@ -34,24 +35,31 @@ export class AppLoggingInterceptor implements NestInterceptor {
     let userId: number | null = null;
 
     if (user) {
-      userId = await this.getAgentIdFromCacheOrDb(user);
+      userId = await this.getUserIdFromCacheOrDb(user);
+    }
+
+    const logUserType = user ? this.getLogUserType(user) : null;
+    const operationType = this.getOperationType(method);
+    let leadId: string | undefined = undefined;
+    if(logUserType === LogUserType.AGENT) {
+      leadId = this.getPublicId(url);
     }
 
     return next.handle().pipe(
       tap(() => {
         const logEntry: CreateLog = {
           message: `Request to ${method} ${url} took ${Date.now() - now}ms`,
-          context: { path: url },
+          context: { path: url, operationType, leadPublicId: leadId },
           level: LogLevel.INFO,
           agentId: userId ?? undefined,
-          logUserType: userId ? this.getLogUserType(user) : undefined,
+          logUserType: logUserType ?? undefined,
         };
         this.logger.log(logEntry.message, logEntry);
       }),
     );
   }
 
-  private async getAgentIdFromCacheOrDb(
+  private async getUserIdFromCacheOrDb(
     payload: AgentAuthPayload | CustomerAuthPayload,
   ): Promise<number | null> {
     const cacheKey = `${payload.sub}-${this.getLogUserType(payload)}`;
@@ -83,8 +91,11 @@ export class AppLoggingInterceptor implements NestInterceptor {
     if (!payload) {
       return null;
     }
-
-    return this.getAgentIdByPublicId(payload.sub);
+    const logUserType = this.getLogUserType(payload);
+    if (logUserType === LogUserType.AGENT) {
+      return this.getAgentIdByPublicId(payload.sub);
+    }
+    return this.getCustomerIdByPublicId(payload.sub);
   }
 
   private async getCustomerIdByPublicId(publicId: string): Promise<number | null> {
@@ -111,4 +122,30 @@ export class AppLoggingInterceptor implements NestInterceptor {
     }
   }
 
+  private getOperationType(method: string): LogOperationType {
+    switch (method.toUpperCase()) {
+      case 'POST':
+        return LogOperationType.CREATE;
+      case 'DELETE':
+        return LogOperationType.DELETE;
+      case 'PUT':
+      case 'PATCH':
+        return LogOperationType.DELETE;
+      case 'GET':
+      default:
+        return LogOperationType.READ;
+    }
+  }
+
+  private getPublicId = (url: string): string | undefined => {
+    const match = url.match(/\/(leads|customers)\/([^\/]+)/);
+    return match ? match[2] : undefined;
+  }
+
+  private getLogUserType(payload: AgentAuthPayload | CustomerAuthPayload): LogUserType {
+    if ('desksPublicId' in payload) {
+      return LogUserType.AGENT;
+    }
+    return LogUserType.CUSTOMER;
+  }
 }

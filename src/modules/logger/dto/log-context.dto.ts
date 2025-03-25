@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, IsUrl, IsUUID } from 'class-validator';
 import { LogOperationType } from '@/shared/types/logger';
 
 export class LogContext {
@@ -10,6 +10,7 @@ export class LogContext {
   operationType: LogOperationType;
 
   @IsOptional()
-  @IsNumber()
-  leadId?: number;
+  @IsString()
+  @IsUUID()
+  leadPublicId?: string;
 }

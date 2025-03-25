@@ -22,4 +22,5 @@ export const ERROR_MESSAGES = {
   DONT_HAVE_RIGHTS: 'You dont have rights for this action',
   BCRYPT: 'BCRYPT ERROR',
   INVALID_PERMISSIONS: 'Invalid permissions',
+  SAVED_MEDIA_NOT_FOUND: 'Saved media not found, please make a path first',
 };

@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { RolePermissionRepository } from '@/modules/permissions/repositories';
 import { IncomingPermission } from '@/modules/permissions/dto';
 import { PermissionsTable, PrismaPermissionWithDetails } from '@/shared/types/permissions';
 import { RoleRepository } from '@/modules/role/repositories/role.repository';
-import { PrismaClient, Role, RolePermission } from '@prisma/client';
+import { Prisma, PrismaClient, Role } from '@prisma/client';
 import { PermissionsUtil } from '@/shared/utils';
 import { CreatRolePermissions } from '@/modules/permissions/dto/role-permissions';
 import { PermissionsService } from '@/modules/permissions/service/permissions.service';
@@ -23,8 +28,11 @@ export class RolePermissionsService {
     permissions: IncomingPermission[],
   ): Promise<PermissionsTable> {
     try {
-      const result = this.prisma.$transaction(async (tx) => {
-        const isPermissionsValid = await this.permissionsService.txIsPermissionsValid(permissions, tx);
+      const prismaRolePermissions = await this.prisma.$transaction(async (tx) => {
+        const isPermissionsValid = await this.permissionsService.txIsPermissionsValid(
+          permissions,
+          tx,
+        );
         if (!isPermissionsValid) {
           throw new BadRequestException(ERROR_MESSAGES.INVALID_PERMISSIONS);
         }
@@ -35,33 +43,34 @@ export class RolePermissionsService {
           throw new NotFoundException();
         }
 
-        const updatedPermissions: PrismaPermissionWithDetails[] =
-          await this.rolePermissionsRepository.updateManyByRoleId(role.id, permissions, tx);
-
-      })
+        return await this.rolePermissionsRepository.txUpdateManyByRoleId(role.id, permissions, tx);
+      });
+      return PermissionsUtil.mapPrismaPermissionsToPermissionTable(prismaRolePermissions);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
     //TODO: Implement socket logic
 
-    return PermissionsUtil.mapPrismaPermissionsToPermissionTable(updatedPermissions);
   }
 
-  public async txCreateMany(data: CreatRolePermissions, tx: Prisma.TransactionClient): Promise<RolePermission[]> {
+  public async txCreateMany(
+    data: CreatRolePermissions,
+    tx: Prisma.TransactionClient,
+  ): Promise<PrismaPermissionWithDetails[]> {
     const { permissions, roleId } = data;
-    const isPermissionsValid = await this.permissionsService.isPermissionsValid(permissions);
+    const isPermissionsValid = await this.permissionsService.txIsPermissionsValid(permissions, tx);
     if (!isPermissionsValid) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_PERMISSIONS);
     }
 
-    return this.rolePermissionsRepository.createMany(data);
+    return this.rolePermissionsRepository.txCreateMany(data, tx);
   }
 
   public async deepUpdateRolePermissions(
     rolePublicId: string,
     permissions: IncomingPermission[],
   ): Promise<PermissionsTable> {
-    const isPermissionsValid = await this.permissionsService.txIsPermissionsValid(permissions);
+    const isPermissionsValid = await this.permissionsService.isPermissionsValid(permissions);
     if (!isPermissionsValid) {
       throw new BadRequestException(ERROR_MESSAGES.INVALID_PERMISSIONS);
     }

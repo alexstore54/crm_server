@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { MediaService } from '@/modules/media';
+import { MediaImagesService } from '@/modules/media';
 import { AppLoggerService } from '@/modules/logger/services';
 import { PrismaService } from '@/shared/db/prisma';
 import { MediaDir, MediaPrefix, RemoveMediaParams } from '@/shared/types/media';
@@ -13,7 +13,7 @@ import { LogOperationType } from '@/shared/types/logger';
 @Injectable()
 export class MediaTrashCleanerService {
   constructor(
-    private readonly mediaService: MediaService,
+    private readonly mediaService: MediaImagesService,
     private readonly logger: AppLoggerService,
     private readonly prisma: PrismaService,
   ) {}
@@ -41,7 +41,7 @@ export class MediaTrashCleanerService {
 
       if (pathsToRemove.length) {
         const filteredPaths = await this.filterExistingPaths(pathsToRemove);
-        await this.mediaService.removeMany(filteredPaths);
+        await this.mediaService.removeManyFiles(filteredPaths);
         this.logSuccess(filteredPaths.length);
       } else {
         this.logNothingToClear();
@@ -59,7 +59,7 @@ export class MediaTrashCleanerService {
         select: { publicId: true, avatarURL: true },
       });
 
-      return this.mapPaths(MediaPrefix.PICTURES, MediaDir.AGENTS, agentsMediaToRemove);
+      return this.mapPaths(MediaPrefix.IMAGES, MediaDir.AGENTS, agentsMediaToRemove);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -72,7 +72,7 @@ export class MediaTrashCleanerService {
         select: { publicId: true, avatarURL: true },
       });
 
-      return this.mapPaths(MediaPrefix.PICTURES, MediaDir.AGENTS, rolesMediaToRemove);
+      return this.mapPaths(MediaPrefix.IMAGES, MediaDir.AGENTS, rolesMediaToRemove);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -85,7 +85,7 @@ export class MediaTrashCleanerService {
         select: { publicId: true, avatarURL: true },
       });
 
-      return this.mapPaths(MediaPrefix.PICTURES, MediaDir.DESKS, deskMediaToRemove);
+      return this.mapPaths(MediaPrefix.IMAGES, MediaDir.DESKS, deskMediaToRemove);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -98,7 +98,7 @@ export class MediaTrashCleanerService {
         select: { publicId: true, avatarURL: true },
       });
 
-      return this.mapPaths(MediaPrefix.PICTURES, MediaDir.CUSTOMERS, customerMediaToRemove);
+      return this.mapPaths(MediaPrefix.IMAGES, MediaDir.CUSTOMERS, customerMediaToRemove);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -111,7 +111,7 @@ export class MediaTrashCleanerService {
         select: { publicId: true, avatarURL: true },
       });
 
-      return this.mapPaths(MediaPrefix.PICTURES, MediaDir.TEAMS, teamMediaToRemove);
+      return this.mapPaths(MediaPrefix.IMAGES, MediaDir.TEAMS, teamMediaToRemove);
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }

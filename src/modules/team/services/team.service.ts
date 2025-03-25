@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { CreateTeam, UpdateTeam } from '@/modules/team/dto';
 import { Team } from '@prisma/client';
-import { MediaService } from '@/modules/media/services/media.service';
+import { MediaImagesService } from '@/modules/media/services/media-images.service';
 import { MediaDir, MediaPrefix } from '@/shared/types/media';
 
 @Injectable()
 export class TeamService {
   constructor(
     private readonly teamRepository: TeamRepository,
-    private readonly mediaService: MediaService,
+    private readonly mediaService: MediaImagesService,
   ) {}
 
   public async createOne(data: CreateTeam, file?: Express.Multer.File): Promise<Team> {
@@ -18,7 +18,7 @@ export class TeamService {
       name: 'avatar',
       publicId: team.publicId,
       file,
-      prefix: MediaPrefix.PICTURES,
+      prefix: MediaPrefix.IMAGES,
       dir: MediaDir.TEAMS,
     });
 
@@ -38,7 +38,7 @@ export class TeamService {
       publicId: teamPublicId,
       file,
       dir: MediaDir.TEAMS,
-      prefix: MediaPrefix.PICTURES,
+      prefix: MediaPrefix.IMAGES,
     });
     return this.teamRepository.updateOneByPublicId(teamPublicId, data, avatarURL);
   }

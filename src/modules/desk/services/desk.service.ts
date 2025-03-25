@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Desk, Team } from '@prisma/client';
 import { CreateDesk, UpdateDesk } from '@/modules/desk/dto/desks';
 import { DeskRepository } from '@/modules/desk/repositories';
-import { MediaService } from '@/modules/media/services/media.service';
+import { MediaImagesService } from '@/modules/media/services/media-images.service';
 import { MediaDir, MediaPrefix } from '@/shared/types/media';
 
 @Injectable()
 export class DeskService {
   constructor(
     private readonly deskRepository: DeskRepository,
-    private readonly mediaService: MediaService,
+    private readonly mediaService: MediaImagesService,
   ) {}
 
   public async updateDesk(
@@ -22,7 +22,7 @@ export class DeskService {
       name: 'avatar',
       file,
       dir: MediaDir.DESKS,
-      prefix: MediaPrefix.PICTURES,
+      prefix: MediaPrefix.IMAGES,
     });
     return this.deskRepository.updateOne(publicId, body, avatarURL);
   }
@@ -39,7 +39,7 @@ export class DeskService {
       name: 'avatar',
       publicId: desk.publicId,
       file,
-      prefix: MediaPrefix.PICTURES,
+      prefix: MediaPrefix.IMAGES,
       dir: MediaDir.DESKS,
     });
     if (avatarURL) {

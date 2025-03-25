@@ -19,29 +19,6 @@ export class FileSystemService {
     this.defaultErrorMessage = FS_ERRORS.DEFAULT_MESSAGE;
   }
 
-  public async remove(publicId: string, filename: string, dirPath: MediaDirPath): Promise<void> {
-    try {
-      const fullFilePath = path.join(
-        this.getFullPath(dirPath),
-        path.basename(publicId),
-        path.basename(filename),
-      );
-      const fileExists = await filestream.pathExists(fullFilePath);
-
-      if (!fileExists) {
-        throw this.handleError(FS_ERRORS.FILE_NOT_EXIST);
-      }
-
-      await filestream.remove(fullFilePath);
-    } catch (error) {
-      throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
-    }
-  }
-
-  public async isExists(path: string): Promise<boolean> {
-    return filestream.pathExists(path);
-  }
-
   public async removeFile(filePath: string): Promise<void> {
     try {
       const fileExists = await filestream.pathExists(filePath);
@@ -55,6 +32,33 @@ export class FileSystemService {
       throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
     }
   }
+
+  public async saveFile(filePath: string): Promise<void> {
+    try {
+      const fileExists = await filestream.pathExists(filePath);
+
+      if (!fileExists) {
+        throw this.handleError(FS_ERRORS.FILE_NOT_EXIST);
+      }
+
+      const destinationPath = path.join(this.baseMediaDir, path.basename(filePath));
+      const destinationDir = path.dirname(destinationPath);
+
+      const dirExists = await filestream.pathExists(destinationDir);
+      if (!dirExists) {
+        throw this.handleError(FS_ERRORS.DIR_NOT_EXIST);
+      }
+
+      await filestream.copyFile(filePath, destinationPath, filestream.constants.COPYFILE_FICLONE_FORCE);
+    } catch (error) {
+      throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
+    }
+  }
+
+  public async isExists(path: string): Promise<boolean> {
+    return filestream.pathExists(path);
+  }
+
   public async getBuffer(filename: string, dirPath: MediaDirPath): Promise<Buffer> {
     try {
       const fullFilePath = path.join(this.getFullPath(dirPath), path.basename(filename));

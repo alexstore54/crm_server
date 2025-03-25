@@ -16,7 +16,7 @@ import { FullAgent } from '@/shared/types/agent';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { PermissionsTable } from '@/shared/types/permissions';
 import { DeskRepository } from '@/modules/desk/repositories';
-import { MediaService } from '@/modules/media/services/media.service';
+import { MediaImagesService } from '@/modules/media/services/media-images.service';
 import { MediaDir, MediaPrefix } from '@/shared/types/media';
 
 @Injectable()
@@ -28,7 +28,7 @@ export class AgentService {
     private readonly deskRepository: DeskRepository,
     private readonly agentPermissionsService: AgentPermissionsService,
     private readonly prisma: PrismaService,
-    private readonly mediaService: MediaService,
+    private readonly mediaService: MediaImagesService,
   ) {}
 
   public async getLeadsByPublicId(publicId: string): Promise<Lead[]> {
@@ -79,7 +79,7 @@ export class AgentService {
       const avatarURL = await this.mediaService.save({
         name: 'avatar',
         publicId: newAgent.publicId,
-        prefix: MediaPrefix.PICTURES,
+        prefix: MediaPrefix.IMAGES,
         dir: MediaDir.AGENTS,
       });
 
@@ -131,7 +131,7 @@ export class AgentService {
     const avatarURL = await this.mediaService.save({
       publicId: currentAgent.publicId,
       name: 'avatar',
-      prefix: MediaPrefix.PICTURES,
+      prefix: MediaPrefix.IMAGES,
       dir: MediaDir.AGENTS,
       file,
     });

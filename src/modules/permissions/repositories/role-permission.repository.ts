@@ -10,28 +10,47 @@ import { CreatRolePermissions } from '@/modules/permissions/dto/role-permissions
 export class RolePermissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async createMany(data: CreatRolePermissions): Promise<RolePermission[]> {
+  public async txCreateMany(
+    data: CreatRolePermissions,
+    tx: Prisma.TransactionClient,
+  ): Promise<PrismaPermissionWithDetails[]> {
     const { permissions, roleId } = data;
 
     try {
-      return this.prisma.$transaction(async (tx) => {
-        tx.rolePermission.createMany({
-          data: permissions.map((permission) => ({
-            roleId,
-            permissionId: permission.id,
-            allowed: permission.allowed,
-          })),
-        });
-
-        return tx.rolePermission.findMany({ where: { roleId } });
+      tx.rolePermission.createMany({
+        data: permissions.map((permission) => ({
+          roleId,
+          permissionId: permission.id,
+          allowed: permission.allowed,
+        })),
       });
+
+      return tx.rolePermission.findMany({ where: { roleId }, include: { Permission: true } });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
 
-  public async txFindManyByRoleId(roleId: number, tx: Prisma.TransactionClient) {
-    return tx.rolePermission.findMany({ where: { roleId } });
+  public async txFindManyByRoleId(
+    roleId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<RolePermission[]> {
+    try {
+      return tx.rolePermission.findMany({ where: { roleId } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async txFindFullManyByRoleId(
+    roleId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<PrismaPermissionWithDetails[]> {
+    try {
+      return tx.rolePermission.findMany({ where: { roleId }, include: { Permission: true } });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
 
   public async txUpdateManyByRoleId(

@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { LogContext } from '@/modules/logger/dto/log-context.dto';
-import { LogLevel } from '@prisma/client';
+import { LogLevel, LogUserType } from '@prisma/client';
 
 export class CreateLog {
   @IsString()
@@ -19,4 +19,8 @@ export class CreateLog {
   @IsOptional()
   @Type(() => LogContext)
   readonly context?: LogContext;
+
+  @IsOptional()
+  @IsEnum(LogLevel)
+  logUserType?: LogUserType
 }
