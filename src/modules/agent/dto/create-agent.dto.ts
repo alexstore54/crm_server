@@ -4,9 +4,9 @@ import { IncomingPermission } from '@/modules/permissions/dto';
 
 export class CreateAgent {
   @IsNumber()
+  @IsOptional()
   roleId: number;
 
-  @IsOptional()
   @IsEmail()
   email: string;
 
@@ -14,8 +14,13 @@ export class CreateAgent {
   password: string;
 
   @IsOptional()
-  @UseValidation.validateDesksIdArray()
+  @UseValidation.validateNumberArray()
   deskIds?: number[];
+
+  @IsOptional()
+  @UseValidation.validateNumberArray()
+  teamsIds?: number[];
+
 
   @UseValidation.validatePermissionsArray()
   permissions: IncomingPermission[];

@@ -3,7 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
+  Param, ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -21,6 +21,7 @@ import { TeamService } from '@/modules/team/services/team.service';
 import { Team } from '@prisma/client';
 import { TeamPermissionsGuard } from '@/common/guards/permissions/team-operation-permissions.guard';
 import { UploadPicture } from '@/common/decorators/media';
+import { UpdateMediaParams } from '@/shared/types/media';
 
 @Controller(ENDPOINTS.TEAMS.BASE)
 export class TeamsController {
@@ -43,8 +44,12 @@ export class TeamsController {
     @Body() body: UpdateTeam,
     @Param('publicId', UUIDValidationPipe) publicId: string,
     @UploadedFile() file?: Express.Multer.File,
+    @Query('isAvatarRemoved', ParseBoolPipe) isAvatarRemoved?: boolean,
   ): Promise<Team> {
-    return this.teamService.updateOne(publicId, body, file);
+
+    const updateImageParams: UpdateMediaParams = { isAvatarRemoved, file };
+
+    return this.teamService.updateOne(publicId, body, updateImageParams);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.TEAMS.GET_ALL_TEAMS)

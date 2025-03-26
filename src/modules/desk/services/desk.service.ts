@@ -3,7 +3,7 @@ import { Desk, Team } from '@prisma/client';
 import { CreateDesk, UpdateDesk } from '@/modules/desk/dto/desks';
 import { DeskRepository } from '@/modules/desk/repositories';
 import { MediaImagesService } from '@/modules/media/services/media-images.service';
-import { MediaDir, MediaPrefix } from '@/shared/types/media';
+import { MediaDir, UpdateMediaParams } from '@/shared/types/media';
 
 @Injectable()
 export class DeskService {
@@ -15,16 +15,26 @@ export class DeskService {
   public async updateDesk(
     publicId: string,
     body: UpdateDesk,
-    file?: Express.Multer.File,
+    updateAvatarParams: UpdateMediaParams,
   ): Promise<Desk> {
-    const avatarURL = await this.mediaService.save({
-      publicId,
+    const { isAvatarRemoved, file } = updateAvatarParams;
+    const operatedFile = isAvatarRemoved ? null : file;
+
+    const avatarURL = this.mediaService.setOperationImage({
       name: 'avatar',
-      file,
+      file: operatedFile,
+      publicId,
       dir: MediaDir.DESKS,
-      prefix: MediaPrefix.IMAGES,
     });
-    return this.deskRepository.updateOne(publicId, body, avatarURL);
+
+    const desk = await this.deskRepository.updateOne(publicId, body, avatarURL);
+
+    if (avatarURL) {
+      await this.mediaService.saveImage();
+    } else if (!avatarURL && isAvatarRemoved) {
+      await this.mediaService.removeImage();
+    }
+    return desk;
   }
 
   public async getOne(publicId: string): Promise<Desk> {
@@ -34,16 +44,17 @@ export class DeskService {
   }
 
   public async createOne(data: CreateDesk, file?: Express.Multer.File): Promise<Desk> {
-    const desk = await this.deskRepository.createOne(data);
-    const avatarURL = await this.mediaService.save({
+    let desk: Desk = await this.deskRepository.createOne(data);
+    const avatarURL = this.mediaService.setOperationImage({
       name: 'avatar',
-      publicId: desk.publicId,
       file,
-      prefix: MediaPrefix.IMAGES,
+      publicId: desk.publicId,
       dir: MediaDir.DESKS,
     });
+
     if (avatarURL) {
-      return this.deskRepository.updateOne(desk.publicId, {}, avatarURL);
+      desk = await this.deskRepository.updateOne(desk.publicId, {}, avatarURL);
+      await this.mediaService.saveImage();
     }
     return desk;
   }

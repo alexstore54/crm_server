@@ -3,7 +3,8 @@ import { TeamRepository } from '@/modules/team/repositories/team.repository';
 import { CreateTeam, UpdateTeam } from '@/modules/team/dto';
 import { Team } from '@prisma/client';
 import { MediaImagesService } from '@/modules/media/services/media-images.service';
-import { MediaDir, MediaPrefix } from '@/shared/types/media';
+import { MediaDir, UpdateMediaParams } from '@/shared/types/media';
+import { FullTeam } from '@/shared/types/team';
 
 @Injectable()
 export class TeamService {
@@ -13,17 +14,17 @@ export class TeamService {
   ) {}
 
   public async createOne(data: CreateTeam, file?: Express.Multer.File): Promise<Team> {
-    const team = await this.teamRepository.createOne(data);
-    const avatarURL = await this.mediaService.save({
+    let team: Team = await this.teamRepository.createOne(data);
+    const avatarURL = this.mediaService.setOperationImage({
       name: 'avatar',
       publicId: team.publicId,
       file,
-      prefix: MediaPrefix.IMAGES,
       dir: MediaDir.TEAMS,
     });
 
     if (avatarURL) {
-      return this.teamRepository.updateOneByPublicId(team.publicId, {}, avatarURL);
+      team = await this.teamRepository.updateOneByPublicId(team.publicId, {}, avatarURL);
+      await this.mediaService.saveImage();
     }
     return team;
   }
@@ -31,16 +32,28 @@ export class TeamService {
   public async updateOne(
     teamPublicId: string,
     data: UpdateTeam,
-    file?: Express.Multer.File,
+    updateAvatarParams: UpdateMediaParams,
   ): Promise<Team> {
-    const avatarURL = await this.mediaService.save({
+    const { isAvatarRemoved, file } = updateAvatarParams;
+
+    const operatedFile = isAvatarRemoved ? null : file;
+
+    const avatarURL = this.mediaService.setOperationImage({
       name: 'avatar',
+      file: operatedFile,
       publicId: teamPublicId,
-      file,
       dir: MediaDir.TEAMS,
-      prefix: MediaPrefix.IMAGES,
     });
-    return this.teamRepository.updateOneByPublicId(teamPublicId, data, avatarURL);
+
+    const team = await this.teamRepository.updateOneByPublicId(teamPublicId, data, avatarURL);
+    if (team) {
+      if (avatarURL) {
+        await this.mediaService.saveImage();
+      } else if (avatarURL === null && isAvatarRemoved) {
+        await this.mediaService.removeImage();
+      }
+    }
+    return team;
   }
 
   public async getManyTeams(page: number, limit: number) {
@@ -51,11 +64,7 @@ export class TeamService {
     return this.teamRepository.deleteOneByPublicId(teamPublicId);
   }
 
-  public async getTeamByPublicId(teamPublicId: string): Promise<Team> {
-    const team: Team | null = await this.teamRepository.findOneByPublicId(teamPublicId);
-    if (!team) {
-      throw new NotFoundException();
-    }
-    return team;
+  public async getTeamByPublicId(teamPublicId: string): Promise<FullTeam> {
+    return  this.teamRepository.findOneFullByPublicId(teamPublicId);
   }
 }

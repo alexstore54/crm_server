@@ -23,7 +23,7 @@ export class MediaImagesService {
 
     const path = MediaUtils.mapPath(publicId, name, MediaPrefix.IMAGES, dir);
     this.operatedImagePath = path;
-    return path;
+    return MediaUtils.realPathToEndpointPath(path);
   }
 
   public async saveImage() {

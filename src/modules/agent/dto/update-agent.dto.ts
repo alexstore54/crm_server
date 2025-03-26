@@ -18,7 +18,7 @@ import { UseValidation } from '@/common/decorators/validation';
 export class UpdateAgent {
   @IsOptional()
   @IsNumber()
-  roleId?: number;
+  roleId?: number | null;
 
   @IsOptional()
   @IsEmail()
@@ -29,6 +29,10 @@ export class UpdateAgent {
   password?: string;
 
   @IsOptional()
-  @UseValidation.validateDesksIdArray()
+  @UseValidation.validateNumberArray()
   deskIds?: number[];
+
+  @IsOptional()
+  @UseValidation.validateNumberArray()
+  teamsIds?: number[];
 }

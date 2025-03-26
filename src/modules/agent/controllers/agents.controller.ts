@@ -6,7 +6,7 @@ import { AgentPermissionGuard, PermissionsGuard } from '@/common/guards/permissi
 import { UsePermissions } from '@/common/decorators/validation';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 import { UUIDValidationPipe } from '@/common/pipes';
-import { ENDPOINTS } from '@/shared/constants/endpoints';
+import { ENDPOINTS, RESPONSE_STATUS } from '@/shared/constants/endpoints';
 import { UploadPicture } from '@/common/decorators/media';
 
 @Controller(ENDPOINTS.AGENTS.BASE)
@@ -24,8 +24,12 @@ export class AgentsController {
   @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.CREATE_AGENT)
   @UseGuards(AgentAccessGuard, PermissionsGuard)
   @Post(ENDPOINTS.AGENTS.CREATE_AGENT)
-  async createAgent(@Body() body: CreateAgent, @UploadedFile() file?: Express.Multer.File) {
-    return this.agentService.createAgent(body, file);
+  async createAgent(
+    @Body() body: CreateAgent,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<string> {
+    await this.agentService.createAgent(body, file);
+    return RESPONSE_STATUS.SUCCESS;
   }
 
   @UploadPicture()

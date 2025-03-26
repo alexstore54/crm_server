@@ -3,6 +3,7 @@ import { PrismaService } from '@/shared/db/prisma';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { Prisma, Team } from '@prisma/client';
 import { CreateTeam, UpdateTeam } from '@/modules/team/dto';
+import { FullTeam } from '@/shared/types/team';
 
 @Injectable()
 export class TeamRepository {
@@ -24,12 +25,36 @@ export class TeamRepository {
     }
   }
 
-  public async findOneByPublicId(teamPublicId: string): Promise<Team | null> {
+  public async txFindManyByIds(ids: number[], tx: Prisma.TransactionClient): Promise<Team[]> {
     try {
-      return this.prisma.team.findUnique({
+      return await this.prisma.team.findMany({
         where: {
-          publicId: teamPublicId,
+          id: {
+            in: ids,
+          },
         },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
+  public async findOneFullByPublicId(teamPublicId: string): Promise<FullTeam> {
+    try {
+      return this.prisma.$transaction(async (tx) => {
+        const team = await tx.team.findUnique({
+          where: { publicId: teamPublicId },
+        });
+        if (!team) {
+          throw new NotFoundException();
+        }
+        const desk = await tx.desk.findUnique({
+          where: { id: team?.deskId },
+        });
+        return {
+          team,
+          desk,
+        };
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -63,7 +88,11 @@ export class TeamRepository {
     }
   }
 
-  public async updateOneByPublicId(teamPublicId: string, data: UpdateTeam, avatarURL?: string): Promise<Team> {
+  public async updateOneByPublicId(
+    teamPublicId: string,
+    data: UpdateTeam,
+    avatarURL: string | null,
+  ): Promise<Team> {
     try {
       return this.prisma.team.update({
         where: {
@@ -72,7 +101,7 @@ export class TeamRepository {
         data: {
           ...data,
           avatarURL,
-        }
+        },
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
@@ -107,6 +136,8 @@ export class TeamRepository {
             publicId: teamPublicId,
           },
         });
+
+        //#TODO - implement add default team to all agents
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

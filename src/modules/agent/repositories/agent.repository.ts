@@ -102,12 +102,12 @@ export class AgentRepository {
     }
   }
 
-  public async txUpdateOne(
+  public async txUpdateOneById(
     id: number,
     data: UpdateAgent,
-    tx: Prisma.TransactionClient,
     desks: number[] | null,
     avatarURL: string | null,
+    tx: Prisma.TransactionClient,
   ) {
     try {
       return tx.agent.update({

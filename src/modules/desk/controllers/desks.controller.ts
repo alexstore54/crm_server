@@ -3,7 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
+  Param, ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -60,8 +60,10 @@ export class DesksController {
     @Param('publicId', UUIDValidationPipe) publicId: string,
     @Body() body: UpdateDesk,
     @UploadedFile() file?: Express.Multer.File,
+    @Query('isAvatarRemoved', ParseBoolPipe) isAvatarRemoved?: boolean,
   ): Promise<Desk> {
-    return this.deskService.updateDesk(publicId, body, file);
+    const updateMediaParams = { isAvatarRemoved, file };
+    return this.deskService.updateDesk(publicId, body, updateMediaParams);
   }
 
   @UploadPicture()

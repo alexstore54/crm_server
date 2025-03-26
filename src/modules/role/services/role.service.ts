@@ -9,9 +9,8 @@ import { RoleRepository } from '@/modules/role/repositories/role.repository';
 import { CreateRole, UpdateRole } from '../dto';
 import { PermissionsUtil, RolesUtil } from '@/shared/utils';
 import { Agent, Prisma, PrismaClient, Role } from '@prisma/client';
-import { AllowedPermission } from '@/modules/permissions/types';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { RoleForClient, FullRole } from '@/shared/types/roles';
+import { FullRole, RoleForClient } from '@/shared/types/roles';
 import { MediaDir, UpdateMediaParams } from '@/shared/types/media';
 import { MediaImagesService } from '@/modules/media';
 import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
@@ -197,12 +196,20 @@ export class RoleService {
 
     const rolePerms = await this.rolePermissionsRepository.txFindManyByRoleId(tempRole.id, tx);
 
-    const agentsPermissions: AllowedPermission[] = [];
-    agentIds.forEach((agentId) => {
-      const agentPerms = PermissionsUtil.mapRolePermissionsToAgentPermissions(rolePerms, agentId);
-      agentsPermissions.push(...agentPerms);
-    });
+    //#TODO - update many agents, implement defaultDeskId
 
-    await this.agentPermissionRepository.txCreateMany(agentsPermissions, tx);
+    for (const agentId of agentIds) {
+      const agentPerms = PermissionsUtil.mapRolePermissionsToIncomingPermissions(
+        rolePerms,
+        agentId,
+      );
+      await this.agentPermissionRepository.txCreateMany(
+        {
+          agentId,
+          permissions: agentPerms,
+        },
+        tx,
+      );
+    }
   }
 }

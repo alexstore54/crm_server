@@ -121,7 +121,7 @@ export class DeskRepository {
     }
   }
 
-  public async updateOne(publicId: string, data: UpdateDesk, avatarURL?: string): Promise<Desk> {
+  public async updateOne(publicId: string, data: UpdateDesk, avatarURL: string | null): Promise<Desk> {
     try {
       return this.prisma.desk.update({
         where: {
@@ -196,6 +196,7 @@ export class DeskRepository {
           }
         }
 
+        //#TODO: implement default deskId to teams
         await tx.team.deleteMany({
           where: {
             deskId,
@@ -207,6 +208,9 @@ export class DeskRepository {
             publicId: publicId,
           },
         });
+
+        //#TODO: implement default deskId to agents!
+
       });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);

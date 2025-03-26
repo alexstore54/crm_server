@@ -34,7 +34,7 @@ export class UseValidation {
     );
   }
 
-  public static validateDesksIdArray() {
+  public static validateNumberArray() {
     return applyDecorators(
       ValidateIf((o) => o.deskIds !== null),
       IsArray(),

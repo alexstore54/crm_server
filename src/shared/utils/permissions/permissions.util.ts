@@ -11,7 +11,6 @@ export class PermissionsUtil {
   public static mapPrismaPermissionsToPermissionTable(
     prismaPermissions: PrismaPermissionWithDetails[],
   ): PermissionsTable {
-    
     const permissionsTable: PermissionsTable = {};
     prismaPermissions.forEach((permission) => {
       permissionsTable[permission.Permission.key as PermissionsKeys] = {
@@ -38,36 +37,36 @@ export class PermissionsUtil {
   }
 
   public static mapAndFilterPermissionsToRolePermissions(
-      DBpermissions: Permission[],
-      roleId: number,
-      incomingPermissions: IncomingPermission[]
-  ){
-    return DBpermissions.map(db_perm => {
-      const incomePermisson = incomingPermissions.find(in_perm => in_perm.id === db_perm.id);
-      if(incomePermisson){
-          return {
-              roleId,
-              permissionId: incomePermisson.id,
-              allowed: incomePermisson.allowed
-          }
+    DBpermissions: Permission[],
+    roleId: number,
+    incomingPermissions: IncomingPermission[],
+  ) {
+    return DBpermissions.map((db_perm) => {
+      const incomePermisson = incomingPermissions.find((in_perm) => in_perm.id === db_perm.id);
+      if (incomePermisson) {
+        return {
+          roleId,
+          permissionId: incomePermisson.id,
+          allowed: incomePermisson.allowed,
+        };
       }
       return null;
-    }).filter(item => item !== null);
+    }).filter((item) => item !== null);
   }
-  public static mapRolePermissionsToAgentPermissions(
+
+  public static mapRolePermissionsToIncomingPermissions(
     rolePermissions: RolePermission[],
     agentId: number,
-){
-    return rolePermissions.map(rp => {
-        return {
-            permissionId: rp.permissionId,
-            allowed: rp.allowed,
-            agentId
-        }
-    })
-}
+  ): IncomingPermission[] {
+    return rolePermissions.map((rolePermission) => {
+      return {
+        allowed: rolePermission.allowed,
+        id: rolePermission.roleId,
+      };
+    });
+  }
 
   public static filterPermissionsDetail(permissions: FullPermission[]): FullPermission[] {
-      return permissions.filter(perm => perm.allowed);
+    return permissions.filter((perm) => perm.allowed);
   }
 }
