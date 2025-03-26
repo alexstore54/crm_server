@@ -21,7 +21,7 @@ import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { PermissionsGuard } from '@/common/guards/permissions';
 import { UploadPicture } from '@/common/decorators/media';
 import { UpdateMediaParams } from '@/shared/types/media';
-import { ClientRole, FullRole } from '@/shared/types/roles';
+import { RoleForClient, FullRole } from '@/shared/types/roles';
 
 //#REFACTORED - добавил гуарды, убрал лишние эндпоинты
 //ENDPOINTS.ROLE -> ENDPOINTS.ROLES (доеб, но так правильнее)
@@ -47,7 +47,7 @@ export class RoleController {
   async getRoles(
     @Query('page') page: number,
     @Query('limit') limit: number,
-  ): Promise<ClientRole[]> {
+  ): Promise<RoleForClient[]> {
     return this.roleService.getRoles(page, limit);
   }
 

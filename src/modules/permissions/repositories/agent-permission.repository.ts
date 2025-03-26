@@ -4,7 +4,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AgentPermission, Prisma } from '@prisma/client';
 import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
 import { IncomingPermission } from '@/modules/permissions/dto';
-import { AllowedPermission } from '../types';
+import { CreateAgentPermissions } from '@/modules/permissions/dto/agent-permissions';
 
 @Injectable()
 export class AgentPermissionRepository {
@@ -29,20 +29,39 @@ export class AgentPermissionRepository {
   }
 
   public async txDeleteManyByAgentsIds(ids: number[], tx: Prisma.TransactionClient) {
+    try {
       return tx.agentPermission.deleteMany({
         where: {
-            agentId: {
-              in: ids,
-            },
+          agentId: {
+            in: ids,
+          },
         },
-      })
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+
   }
 
-  public async txCreateMany(data: AllowedPermission[], tx: Prisma.TransactionClient) {
-    return tx.agentPermission.createMany({data});
+  public async txCreateMany(
+    data: CreateAgentPermissions,
+    tx: Prisma.TransactionClient,
+  ): Promise<PrismaPermissionWithDetails[]> {
+    try {
+      await tx.agentPermission.createMany({
+        data: data.permissions.map((permission) => ({
+          agentId: data.agentId,
+          permissionId: permission.id,
+        })),
+      });
+      return tx.agentPermission.findMany({
+        where: { agentId: data.agentId },
+        include: { Permission: true },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
   }
-
-  
 
   public async getManyByAgentId(agentId: number) {
     try {

@@ -3,11 +3,11 @@ import { PermissionsTable } from '@/shared/types/permissions';
 //#REFACTORED - добавил тип для возвращения роли, убрал лишние дтошки
 
 export type FullRole = {
-  role: ClientRole,
+  role: RoleForClient,
   permissions: PermissionsTable
 }
 
-export type ClientRole = {
+export type RoleForClient = {
   id: number;
   name: string;
   publicId: string;

@@ -1,8 +1,8 @@
 import { Role } from '@prisma/client';
-import { ClientRole } from '@/shared/types/roles';
+import { RoleForClient } from '@/shared/types/roles';
 
 export class RolesUtil {
-  public static mapRoleToClientRole(role: Role): ClientRole {
+  public static mapRoleToClientRole(role: Role): RoleForClient {
     return {
       id: role.id,
       name: role.name,

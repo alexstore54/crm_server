@@ -17,7 +17,6 @@ export class CreateAgent {
   @UseValidation.validateDesksIdArray()
   deskIds?: number[];
 
-  @IsOptional()
   @UseValidation.validatePermissionsArray()
-  permissions?: IncomingPermission[];
+  permissions: IncomingPermission[];
 }

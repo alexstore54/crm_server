@@ -1,7 +1,7 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { UpdateAgent } from '@/modules/agent/dto';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Agent, Prisma } from '@prisma/client';
+import { Agent, Prisma, Role } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { CreateAgentInput } from '@/modules/agent/types/repositories.type';
 
@@ -71,6 +71,18 @@ export class AgentRepository {
     }
   }
 
+  public async txFindRoleByAgentId(agentId: number, tx: Prisma.TransactionClient): Promise<Role | null> {
+    try {
+      const agentWithRole = await tx.agent.findFirst({
+        where: { id: agentId },
+        include: { Role: true },
+      });
+      return agentWithRole?.Role || null;
+    } catch (error: any) {
+      throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
+    }
+  }
+
   public async txCreateOne(data: CreateAgentInput, tx: Prisma.TransactionClient) {
     const { input, desks } = data;
     try {
@@ -95,14 +107,14 @@ export class AgentRepository {
     data: UpdateAgent,
     tx: Prisma.TransactionClient,
     desks: number[] | null,
-    src?: string
+    avatarURL: string | null,
   ) {
     try {
       return tx.agent.update({
         where: { id },
         data: {
           ...data,
-          avatarURL: src ? src : undefined,
+          avatarURL,
           Desk: desks
             ? {
                 set: desks.map((id) => ({ id })),

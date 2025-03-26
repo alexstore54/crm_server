@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Req, UploadedFile, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Query, Req, UploadedFile, UseGuards } from '@nestjs/common';
 import { AgentService } from '@/modules/agent/services/agent.service';
 import { AgentRequest } from '@/shared/types/auth';
 import { Agent, Lead } from '@prisma/client';
@@ -30,9 +30,11 @@ export class AgentController {
     @Req() req: AgentRequest,
     @Body() body: UpdateAgent,
     @UploadedFile() file?: Express.Multer.File,
+    @Query('isAvatarRemoved') isAvatarRemoved?: boolean,
   ): Promise<Agent> {
     const user = req.user;
-    return this.agentService.updateByPublicId(user.sub, body, file);
+    const updateMediaParams = { isAvatarRemoved, file };
+    return this.agentService.updateByPublicId(user.sub, body, updateMediaParams);
   }
 
   @UseGuards(AgentAccessGuard)

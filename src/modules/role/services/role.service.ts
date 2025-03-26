@@ -11,7 +11,7 @@ import { PermissionsUtil, RolesUtil } from '@/shared/utils';
 import { Agent, Prisma, PrismaClient, Role } from '@prisma/client';
 import { AllowedPermission } from '@/modules/permissions/types';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
-import { ClientRole, FullRole } from '@/shared/types/roles';
+import { RoleForClient, FullRole } from '@/shared/types/roles';
 import { MediaDir, UpdateMediaParams } from '@/shared/types/media';
 import { MediaImagesService } from '@/modules/media';
 import { PrismaPermissionWithDetails } from '@/shared/types/permissions';
@@ -78,7 +78,7 @@ export class RoleService {
     }
   }
 
-  public async getRoles(page: number, limit: number): Promise<ClientRole[]> {
+  public async getRoles(page: number, limit: number): Promise<RoleForClient[]> {
     const roles: Role[] = await this.roleRepository.findMany(page, limit);
     return roles.map((role) => {
       return RolesUtil.mapRoleToClientRole(role);
