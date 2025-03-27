@@ -1,19 +1,25 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { configKeys } from '@/shared/schemas';
 import {
+  getCanadaDesk,
+  getItalyDesk,
   getLowAccessAgentSeedRole,
   getModeratorSeedRole,
   getNoAccessAgentSeedRole,
   getPermissions,
+  getUnsignedDesk,
   lowAccessPermissions,
 } from '@/seeds/seed.data';
 import { SEEDS_MESSAGES } from '@/shared/constants/errors';
-import { Agent, AgentPermission, Permission, Prisma, Role, RolePermission } from '@prisma/client';
+import { Agent, AgentPermission, Desk, Permission, Prisma, Role, RolePermission } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { LOW_ACCESS_USER, NO_ACCESS_USER } from '@/shared/constants/tests/agents.constant';
 import { FullAgentPermission, FullPermission, PermissionsKeys } from '@/shared/types/permissions';
 import { PermissionsUtil } from '@/shared/utils';
 import { NodeEnv } from '@/common/config/types';
+
+type nameDesk = "ItalyDesk" | "UnsignedDesk" | "CanadaDesk"
+type Desks = Record<nameDesk, Desk>;
 
 class Seed {
   private static readonly prisma: PrismaService = new PrismaService();
@@ -35,12 +41,27 @@ class Seed {
         );
 
         if (envoriment && envoriment !== NodeEnv.production) {
-          await this.seedTestUsers(permissions, tx);
+            const desks = await this.seedDesks(tx)
+            await this.seedTestUsers(permissions, desks, tx);
         }
 
         console.log(SEEDS_MESSAGES.SEEDS_SUCCESS);
       });
     } catch (error: any) {
+      console.log(error)
+      throw new Error(error);
+    }
+  }
+
+  private static async seedDesks(tx: Prisma.TransactionClient){
+    try{
+       return {
+            ItalyDesk: await tx.desk.create({data: {...getItalyDesk()}}),
+            UnsignedDesk: await tx.desk.create({data: {...getUnsignedDesk()}}),
+            CanadaDesk: await tx.desk.create({data: {...getCanadaDesk()}})
+       }
+
+    }catch(error: any){
       throw new Error(error);
     }
   }
@@ -60,7 +81,7 @@ class Seed {
   private static async seedAgent(data: any, tx: Prisma.TransactionClient): Promise<Agent> {
     try {
       return await tx.agent.create({
-        data,
+        data
       });
     } catch (error: any) {
       throw new Error(error);
@@ -98,13 +119,13 @@ class Seed {
 
   private static async seedTestUsers(
     permissions: Permission[],
+    desks: Desks,
     tx: Prisma.TransactionClient,
   ): Promise<void> {
     try {
       const noAccessRole: Role = await this.seedRole(getNoAccessAgentSeedRole(), tx);
       const lowAccessRole: Role = await this.seedRole(getLowAccessAgentSeedRole(), tx);
-      console.log(noAccessRole)
-      console.log(lowAccessRole)
+      
       const noAccessRolePermissionsInput = PermissionsUtil.mapPermissionsToFullPermissions(
         permissions,
         noAccessRole.id,
@@ -120,8 +141,8 @@ class Seed {
       const noAccessRolePermissions = await this.seedRolePermissions(noAccessRolePermissionsInput, tx);
       const lowAccessRolePermissions = await this.seedRolePermissions(lowAccessPermissionsInput, tx);
 
-      const noAccessAgent = await this.seedAgent(this.getNoAccessUserInput(noAccessRole.id), tx);
-      const lowAccessAgent = await this.seedAgent(this.getLowAccessUserInput(lowAccessRole.id), tx);
+      const noAccessAgent = await this.seedAgent(this.getNoAccessUserInput(noAccessRole.id, desks.UnsignedDesk.id), tx);
+      const lowAccessAgent = await this.seedAgent(this.getLowAccessUserInput(lowAccessRole.id, [desks.ItalyDesk, desks.CanadaDesk]), tx);
 
       await this.seedAgentPermissions(this.getAgentPermissionsList(noAccessRolePermissions, noAccessAgent.id), tx)
       await this.seedAgentPermissions(this.getAgentPermissionsList(lowAccessRolePermissions, lowAccessAgent.id), tx)
@@ -227,21 +248,27 @@ class Seed {
     };
   }
 
-  private static getNoAccessUserInput(roleId: number) {
+  private static getNoAccessUserInput(roleId: number, deskId: number) {
     return {
       email: NO_ACCESS_USER.email,
       password: NO_ACCESS_USER.password,
       lastOnline: null,
       roleId,
+      Desk: {
+        connect: {id: deskId}
+      }
     };
   }
 
-  private static getLowAccessUserInput(roleId: number) {
+  private static getLowAccessUserInput(roleId: number, desks: Desk[]) {
     return {
       email: LOW_ACCESS_USER.email,
       password: LOW_ACCESS_USER.password,
       lastOnline: null,
       roleId,
+      Desk : {
+        connect: desks.map(desk => ({id: desk.id}))
+      }
     };
   }
 }

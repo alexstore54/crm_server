@@ -1,28 +1,72 @@
 import { permissionsTableSchema } from '@/shared/schemas';
 import { PermissionsKeys } from '@/shared/types/permissions';
+import { SEEDS } from '@/shared/constants/seeds';
+
+const { ROLE, DESK, AGENT } = SEEDS;
 
 export const getModeratorSeedRole = () => {
   return {
-    name: 'Moderator',
-    isVisible: false,
-    isMutable: false,
+    publicId: ROLE.MODERATOR.PUBLIC_ID,
+    name: ROLE.MODERATOR.NAME,
+    isVisible: ROLE.MODERATOR.IS_VISIBLE,
+    isMutable: ROLE.MODERATOR.IS_MUTABLE,
   };
 };
 
 export const getNoAccessAgentSeedRole = () => {
   return {
-    publicId: 'c6cb2cfb-3e0c-493e-bbf4-ca2ba3090a65',
-    name: 'No access',
-    isVisible: true,
-    isMutable: false,
+    publicId: ROLE.UNSIGNED.PUBLIC_ID,
+    name: ROLE.UNSIGNED.NAME,
+    isVisible: ROLE.UNSIGNED.IS_VISIBLE,
+    isMutable: ROLE.UNSIGNED.IS_MUTABLE,
   };
 };
 
 export const getLowAccessAgentSeedRole = () => {
   return {
-    name: 'Minimum access',
+    name: ROLE.LOW_ACCESS.NAME,
   };
 };
+
+// export const UnsignedAgent = () => {
+//   return {
+//     email: AGENT.UNSIGNED.EMAIL,
+//     password: AGENT.UNSIGNED.PASSWORD
+//   }
+// }
+
+// export const LowAccessAgent = () => {
+//   return {
+//     email: AGENT.LOW_ACCESS.EMAIL,
+//     password: AGENT.LOW_ACCESS.EMAIL
+//   }
+// }
+
+export const getUnsignedDesk = () => {
+  return {
+    publicId: DESK.UNSIGNED.PUBLIC_ID,
+    name: DESK.UNSIGNED.NAME,
+    avatarURL: DESK.UNSIGNED.AVATART_URL
+  }
+}
+
+export const getCanadaDesk = () => {
+  return {
+    publicId: DESK.CA.PUBLIC_ID,
+    name: DESK.CA.NAME,
+    avatarURL: DESK.CA.AVATART_URL
+  }
+}
+
+export const getItalyDesk = () => {
+  return {
+    publicId: DESK.IT.PUBLIC_ID,
+    name: DESK.IT.NAME,
+    avatarURL: DESK.IT.AVATART_URL
+
+  }
+}
+
 
 export const getPermissions = (): string[] => {
   return Object.keys(permissionsTableSchema.describe().keys);
