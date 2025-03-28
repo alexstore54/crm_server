@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SignInCustomer } from '@/modules/auth/dto/customer/sign-in.dto';
-import { FullCustomer } from '@/shared/types/user';
-import { CustomersRepository, EmailRepository, LeadRepository } from '@/modules/user/repositories';
+import { FullLead } from 'shared/types/user';
+import { CustomersRepository, EmailRepository, LeadRepository } from '@/modules/lead/repositories';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { SignUpCustomer } from '@/modules/auth/dto/customer';
 import { Lead, Prisma } from '@prisma/client';
@@ -16,7 +16,7 @@ export class AuthCustomerService {
     private readonly prisma: PrismaService,
   ) {}
 
-  public async validate(data: SignInCustomer): Promise<FullCustomer> {
+  public async validate(data: SignInCustomer): Promise<FullLead> {
     const { email, password } = data;
     const customer = await this.customerRepository.findOneByEmail(email);
     if (!customer) {
@@ -32,7 +32,7 @@ export class AuthCustomerService {
     return customer;
   }
 
-  public async signUp(data: SignUpCustomer): Promise<FullCustomer> {
+  public async signUp(data: SignUpCustomer): Promise<FullLead> {
     const { email, password, phone, firstname, lastname } = data;
     // Проверяем наличие пользователя с таким email
     const customer = await this.customerRepository.findOneByEmail(email);
@@ -73,7 +73,7 @@ export class AuthCustomerService {
     lead: Lead,
     password: string,
     tx?: Prisma.TransactionClient,
-  ): Promise<FullCustomer> {
+  ): Promise<FullLead> {
     if (tx) {
       return this.customerRepository.createOneWithTx(
         {
@@ -92,7 +92,7 @@ export class AuthCustomerService {
     }
   }
 
-  private async makeLeadAndCustomer(data: SignUpCustomer): Promise<FullCustomer> {
+  private async makeLeadAndCustomer(data: SignUpCustomer): Promise<FullLead> {
     const { password, firstname, lastname, phone, email } = data;
 
     //return getMockedFullCustomer();

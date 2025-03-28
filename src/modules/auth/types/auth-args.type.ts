@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { Agent } from '@prisma/client';
-import { FullCustomer } from '@/shared/types/user';
+import { FullLead } from 'shared/types/user';
 import { PayloadUUID } from '@/shared/types/redis';
 import { PermissionsTable } from '@/shared/types/permissions';
 
@@ -19,7 +19,7 @@ export interface AuthenticateAgentArgs {
 }
 
 export interface AuthenticateCustomerArgs {
-  customer: FullCustomer;
+  customer: FullLead;
   fingerprint: string;
   userAgent: string;
 }

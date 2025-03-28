@@ -1,6 +1,6 @@
 import { UsersUtil } from './users.util';
 import { Customer, Email, Lead, Phone } from '@prisma/client';
-import { FullCustomer, UserEmail, UserPhone } from '@/shared/types/user';
+import { FullLead, CustomerEmail, UserPhone } from 'shared/types/user';
 import { getMockedCustomer, getMockedFullCustomer } from '@/shared/mocks/customer';
 import { getMockedLead } from '@/shared/mocks/lead';
 import { getMockedMainPhone, getMockedPhone } from '@/shared/mocks/phone';
@@ -14,7 +14,7 @@ describe(UsersUtil.name, () => {
       const phones: Phone[] = [getMockedPhone(), getMockedMainPhone()];
       const emails: Email[] = [getMockedEmail(), getMockedMainEmail()];
 
-      const result: FullCustomer = UsersUtil.mapCustomerToFullCustomer(
+      const result: FullLead = UsersUtil.mapCustomerToFullCustomer(
         customer,
         lead,
         phones,
@@ -42,7 +42,7 @@ describe(UsersUtil.name, () => {
       const phones: Phone[] = [];
       const emails: Email[] = [];
 
-      const result: FullCustomer = UsersUtil.mapCustomerToFullCustomer(
+      const result: FullLead = UsersUtil.mapCustomerToFullCustomer(
         customer,
         lead,
         phones,
@@ -64,7 +64,7 @@ describe(UsersUtil.name, () => {
     it('should map emails to UserEmail array', () => {
       const emails: Email[] = [getMockedEmail(), getMockedMainEmail()];
 
-      const result: UserEmail[] = UsersUtil.mapEmailsToCustomerEmails(emails);
+      const result: CustomerEmail[] = UsersUtil.mapEmailsToCustomerEmails(emails);
 
       expect(result).toEqual([
         { email: getMockedEmail().email, isMain: getMockedEmail().isMain, id: getMockedEmail().id },

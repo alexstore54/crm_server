@@ -1,8 +1,8 @@
 import { PrismaService } from '@/shared/db/prisma';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { UpdateCustomer } from '@/modules/user/dto/customer';
-import { CreateCustomer } from '@/modules/user/types';
-import { FullCustomer } from '@/shared/types/user';
+import { UpdateCustomer } from '@/modules/lead/dto/customer';
+import { CreateCustomer } from '@/modules/lead/types';
+import { FullLead } from 'shared/types/user';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { UsersUtil } from '@/shared/utils';
 import { Prisma } from '@prisma/client';
@@ -11,7 +11,7 @@ import { Prisma } from '@prisma/client';
 export class CustomersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAll(): Promise<FullCustomer[]> {
+  async getAll(): Promise<FullLead[]> {
     try {
       const customers = await this.prisma.customer.findMany({
         include: {
@@ -36,7 +36,7 @@ export class CustomersRepository {
     }
   }
 
-  async findOneById(id: number): Promise<FullCustomer | null> {
+  async findOneById(id: number): Promise<FullLead | null> {
     try {
       const customer = await this.prisma.customer.findFirst({
         where: { id },
@@ -73,7 +73,7 @@ export class CustomersRepository {
     }
   }
 
-  async findOneByPublicId(publicId: string): Promise<FullCustomer | null> {
+  async findOneByPublicId(publicId: string): Promise<FullLead | null> {
     try {
       const customer = await this.prisma.customer.findFirst({
         where: { publicId },
@@ -100,7 +100,7 @@ export class CustomersRepository {
     }
   }
 
-  async findOneByEmail(email: string): Promise<FullCustomer | null> {
+  async findOneByEmail(email: string): Promise<FullLead | null> {
     try {
       const customer = await this.prisma.customer.findFirst({
         where: {
@@ -130,7 +130,7 @@ export class CustomersRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-  async createOneWithTx(data: CreateCustomer, tx: Prisma.TransactionClient): Promise<FullCustomer> {
+  async createOneWithTx(data: CreateCustomer, tx: Prisma.TransactionClient): Promise<FullLead> {
     const { leadId, ...rest } = data;
     try {
       const customer = await tx.customer.create({
@@ -158,7 +158,7 @@ export class CustomersRepository {
     }
   }
 
-  async createOne(data: CreateCustomer): Promise<FullCustomer> {
+  async createOne(data: CreateCustomer): Promise<FullLead> {
     const { leadId, ...rest } = data;
     try {
       const customer = await this.prisma.customer.create({
@@ -185,7 +185,7 @@ export class CustomersRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-  async deleteOneById(id: number): Promise<FullCustomer | null> {
+  async deleteOneById(id: number): Promise<FullLead | null> {
     try {
       const customer = await this.prisma.customer.delete({
         where: { id },
@@ -209,7 +209,7 @@ export class CustomersRepository {
     }
   }
 
-  async updateOneById(id: number, data: UpdateCustomer): Promise<FullCustomer> {
+  async updateOneById(id: number, data: UpdateCustomer): Promise<FullLead> {
     const { agent_id, lead_id, ...rest } = data;
     try {
       const customer = await this.prisma.customer.update({
@@ -239,7 +239,7 @@ export class CustomersRepository {
     }
   }
 
-  async updateOneByPublicId(publicId: string, data: UpdateCustomer): Promise<FullCustomer> {
+  async updateOneByPublicId(publicId: string, data: UpdateCustomer): Promise<FullLead> {
     const { agent_id, lead_id, ...rest } = data;
     try {
       const customer = await this.prisma.customer.update({

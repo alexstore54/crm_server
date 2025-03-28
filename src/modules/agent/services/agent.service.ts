@@ -1,4 +1,4 @@
-import { LeadRepository } from '@/modules/user/repositories';
+import { LeadRepository } from '@/modules/lead/repositories';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Agent, Desk, Lead, Prisma, Role, Team } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';

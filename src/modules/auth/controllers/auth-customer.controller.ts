@@ -4,7 +4,7 @@ import { AuthTokens, RequestWithCustomerPayload } from '@/shared/types/auth';
 import { CookiesUtil } from '@/shared/utils';
 import { AuthService } from '@/modules/auth/services';
 import { AuthCustomerService } from '@/modules/auth/services/auth-customer.service';
-import { FullCustomer } from '@/shared/types/user';
+import { FullLead } from 'shared/types/user';
 import { ENDPOINTS, RESPONSE_STATUS } from 'shared/constants/endpoints';
 import { SignInCustomer, SignUpCustomer } from '@/modules/auth/dto/customer';
 import { CustomerRefreshGuard } from '@/common/guards/tokens/customer';
@@ -23,7 +23,7 @@ export class AuthCustomerController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const customer: FullCustomer = await this.authCustomerService.validate(body);
+    const customer: FullLead = await this.authCustomerService.validate(body);
 
     const tokens: AuthTokens = await this.authService.authenticateCustomer({
       customer,
@@ -43,7 +43,7 @@ export class AuthCustomerController {
     @Headers('fingerprint') fingerprint: string,
     @Res() res: Response,
   ) {
-    const customer: FullCustomer = await this.authCustomerService.signUp(body);
+    const customer: FullLead = await this.authCustomerService.signUp(body);
     const tokens: AuthTokens = await this.authService.authenticateCustomer({
       customer,
       userAgent,

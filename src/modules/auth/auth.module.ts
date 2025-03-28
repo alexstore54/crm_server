@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsGateway, GatewayModule, GatewayService } from '@/shared/gateway';
 import { AgentModule } from '@/modules/agent/agent.module';
-import { UserModule } from '@/modules/user/user.module';
+import { LeadModule } from '@/modules/lead/lead.module';
 import {
   AuthAgentController,
   AuthController,
@@ -16,7 +16,7 @@ import {
   TokensService,
 } from '@/modules/auth/services';
 import { AuthGateway } from 'modules/auth/gateways';
-import { CustomersRepository, EmailRepository } from '@/modules/user/repositories';
+import { CustomersRepository, EmailRepository } from '@/modules/lead/repositories';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { JwtService } from '@nestjs/jwt';
 import { AgentRefreshGuard } from '@/common/guards/tokens/agent';
@@ -27,7 +27,7 @@ import { AgentPermissionRepository } from '@/modules/permissions/repositories';
 import { AgentRefreshTokenStrategy } from '@/common/strategies/jwt';
 
 @Module({
-  imports: [GatewayModule, AuthRedisModule, AgentModule, UserModule, PermissionModule],
+  imports: [GatewayModule, AuthRedisModule, AgentModule, LeadModule, PermissionModule],
   controllers: [AuthController, AuthCustomerController, AuthAgentController, AuthGoogleController],
   providers: [
     //Services

@@ -3,7 +3,7 @@ import { AppConfigModule } from '@/common/config';
 import { PrismaModule } from '@/shared/db/prisma';
 import { HealthModule } from '@/modules/health/health.module';
 import { CsrfMiddleware, FileLockerMiddleware } from '@/common/middleware';
-import { UserModule } from '@/modules/user/user.module';
+import { LeadModule } from '@/modules/lead/lead.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { GatewayModule } from '@/shared/gateway';
 import { validationSchema } from '@/shared/schemas';
@@ -23,7 +23,7 @@ import { DeskModule } from '@/modules/desk/desk.module';
     HealthModule,
     GatewayModule,
     AuthModule,
-    UserModule,
+    LeadModule,
     AgentModule,
     PermissionModule,
     TeamModule,

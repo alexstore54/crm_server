@@ -108,6 +108,11 @@ export const ENDPOINTS = {
   LEADS_CALLBACK: {
     BASE: 'leads/callback',
   },
+  CUSTOMER: {
+    BASE: 'customer',
+    GET_ME: 'me',
+    UPDATE_ME: 'update-me',
+  },
   MEDIA: {
     BASE: 'media',
     GET_DOCUMENT: 'documents/:publicId',

@@ -11,12 +11,13 @@ import {
 } from '@nestjs/common';
 import { ENDPOINTS_PERMISSIONS } from '@/shared/constants/permissions';
 import { ENDPOINTS } from '@/shared/constants/endpoints';
-import { LeadsService } from '@/modules/user/services';
+import { LeadsService } from '@/modules/lead/services';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { LeadPermissionGuard, PermissionsGuard } from '@/common/guards/permissions';
 import { UsePermissions } from '@/common/decorators/validation';
 import { UUIDValidationPipe } from '@/common/pipes';
-import { UpdateLead } from '@/modules/user/dto/lead';
+import { UpdateLead } from '@/modules/lead/dto/lead';
+import { FullLead } from '@/shared/types/user';
 
 @Controller(ENDPOINTS.LEADS.BASE)
 export class LeadsController {
@@ -25,8 +26,8 @@ export class LeadsController {
   @UsePermissions(ENDPOINTS_PERMISSIONS.LEADS.GET_LEAD)
   @UseGuards(AgentAccessGuard, PermissionsGuard, LeadPermissionGuard)
   @Get(ENDPOINTS.LEADS.GET_LEAD)
-  async getLeads(@Param('publicId', UUIDValidationPipe) publicId: string) {
-    return;
+  async getLeads(@Param('publicId', UUIDValidationPipe) publicId: string): Promise<FullLead> {
+    return this.leadsService.getOneByPublicId(publicId);
   }
 
   @UsePermissions(ENDPOINTS_PERMISSIONS.LEADS.GET_ALL_LEADS)

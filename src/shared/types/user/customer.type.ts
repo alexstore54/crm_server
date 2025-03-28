@@ -1,15 +1,12 @@
-import { UserEmail } from '@/shared/types/user/email.type';
-import { UserPhone } from '@/shared/types/user/phone.type';
+import { CustomerEmail } from '@/shared/types/user/email.type';
+import { FullLead } from '@/shared/types/user/lead.type';
 
-export type FullCustomer = {
+export type FullCustomer = FullLead & {
+  customerInfo: CustomerInfo;
+}
+
+export type CustomerInfo = {
   id: number;
-  publicId: string;
-  firstname: string;
-  lastname: string;
-  country?: string;
   password?: string;
-  emails: UserEmail[];
-  phones: UserPhone[];
-  lastTimeOnline?: Date;
-  createdAt?: Date;
-};
+  emails: CustomerEmail[]
+}

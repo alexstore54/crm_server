@@ -1,10 +1,10 @@
-import { FullCustomer } from '@/shared/types/user';
+import { FullLead } from 'shared/types/user';
 import { getMockedEmail, getMockedMainEmail } from '@/shared/mocks/email/email.mock';
 import { getMockedMainPhone, getMockedPhone } from '@/shared/mocks/phone';
 import { Customer } from '@prisma/client';
 import { getMockedLead } from '@/shared/mocks/lead';
 
-export const getMockedFullCustomer = (): FullCustomer => ({
+export const getMockedFullCustomer = (): FullLead => ({
   country: getMockedLead().country as string,
   emails: [getMockedMainEmail(), getMockedEmail()],
   firstname: getMockedLead().firstname as string,

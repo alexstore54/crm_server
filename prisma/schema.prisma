@@ -20,6 +20,8 @@ model Agent {
   Lead            Lead[]
   Desk            Desk[]            @relation("AgentDesks")
   Team            Team[]            @relation("AgentTeams")
+  updatedAt       DateTime          @updatedAt @db.Timestamptz(0)
+  createdAt       DateTime          @default(now()) @db.Timestamptz(0)
 }
 
 model AgentPermission {
@@ -33,7 +35,6 @@ model AgentPermission {
 }
 
 model Customer {
-  publicId   String    @unique @default(uuid())
   id         Int       @id @default(autoincrement())
   leadId     Int       @unique
   password   String
@@ -77,6 +78,7 @@ model Lead {
   lastname     String?
   country      String?
   createdAt    DateTime    @default(now()) @db.Timestamptz(0)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(0)
   defaultEmail String
   agentId      Int?
   deskId       Int?

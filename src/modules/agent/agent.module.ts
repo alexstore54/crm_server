@@ -3,7 +3,7 @@ import { AgentService } from '@/modules/agent/services/agent.service';
 import { AgentsController } from '@/modules/agent/controllers/agents.controller';
 import { AgentRepository } from '@/modules/agent/repositories/agent.repository';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
-import { UserModule } from '@/modules/user/user.module';
+import { LeadModule } from '@/modules/lead/lead.module';
 import { PermissionModule } from '@/modules/permissions/permission.module';
 import { AuthRedisModule, AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { ValidationModule, ValidationService } from '@/shared/services/validation';
@@ -16,7 +16,7 @@ import { MediaModule } from '@/modules/media';
 
 @Module({
   imports: [
-    UserModule,
+    LeadModule,
     forwardRef(() => PermissionModule),
     AuthRedisModule,
     ValidationModule,

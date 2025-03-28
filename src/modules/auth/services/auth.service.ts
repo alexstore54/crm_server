@@ -14,7 +14,7 @@ import { AuthGateway } from 'modules/auth/gateways';
 import { CreateSessionInput, PayloadUUID } from '@/shared/types/redis';
 import { AuthRedisService } from '@/shared/services/redis/auth-redis';
 import { Agent } from '@prisma/client';
-import { FullCustomer } from '@/shared/types/user';
+import { FullLead } from 'shared/types/user';
 
 @Injectable()
 export class AuthService {
@@ -149,7 +149,7 @@ export class AuthService {
   }
 
   private mapCustomerPayload(
-    customer: FullCustomer,
+    customer: FullLead,
     payloadUUID: PayloadUUID,
   ): CustomerAuthPayload {
     return {
