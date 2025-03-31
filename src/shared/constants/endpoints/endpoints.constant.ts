@@ -34,6 +34,8 @@ export const ENDPOINTS = {
     GET_AGENT_LEADS: ':publicId/leads',
     CREATE_AGENT: 'create',
     UPDATE_AGENT: ':publicId/update',
+    GET_MANY: '/',
+    GET_ONE: ':publicId',
   },
   AGENT_PERMISSIONS: {
     BASE: 'permissions/agents',
@@ -117,7 +119,10 @@ export const ENDPOINTS = {
     BASE: 'media',
     GET_DOCUMENT: 'documents/:publicId',
     GET_MANY_DOCUMENTS: 'documents',
-    GET_PICTURES: 'pictures/:publicId',
-    GET_MANY_PICTURES: 'pictures',
+    GET_ROLE_IMAGE: 'images/roles/:publicId',
+    GET_AGENT_IMAGE: 'images/agents/:publicId',
+    GET_DESK_IMAGE: 'images/desks/:publicId',
+    GET_TEAM_IMAGE: 'images/teams/:publicId',
+    GET_CUSTOMER_IMAGE: 'images/customers/:publicId',
   }
 };

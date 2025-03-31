@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, UploadedFile, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseBoolPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
 import { AgentAccessGuard } from '@/common/guards/tokens/agent';
 import { AgentService } from '../services/agent.service';
 import { CreateAgent, UpdateAgent } from '../dto';
@@ -18,6 +29,20 @@ export class AgentsController {
   @Get(ENDPOINTS.AGENTS.GET_AGENT_LEADS)
   async getLeadsByAgentId(@Param('publicId', UUIDValidationPipe) publicId: string) {
     return this.agentService.getLeadsByPublicId(publicId);
+  }
+
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_MANY)
+  @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
+  @Get(ENDPOINTS.AGENTS.GET_MANY)
+  async getAgents(@Query('page') page: number, @Query('limit') limit: number) {
+    return this.agentService.getMany(page, limit);
+  }
+
+  @UsePermissions(ENDPOINTS_PERMISSIONS.AGENTS.GET_ONE)
+  @UseGuards(AgentAccessGuard, PermissionsGuard, AgentPermissionGuard)
+  @Get(ENDPOINTS.AGENTS.GET_ONE)
+  async getAgentByPublicId(@Param('publicId', UUIDValidationPipe) publicId: string) {
+    return this.agentService.getOneByPublicId(publicId);
   }
 
   @UploadPicture()
@@ -40,7 +65,11 @@ export class AgentsController {
     @Param('publicId') publicId: string,
     @Body() body: UpdateAgent,
     @UploadedFile() file?: Express.Multer.File,
+    @Query('isAvatarRemoved', ParseBoolPipe) isAvatarRemoved?: boolean,
   ) {
-    return this.agentService.updateByPublicId(publicId, body, file);
+    return this.agentService.updateByPublicId(publicId, body, {
+      isAvatarRemoved,
+      file,
+    });
   }
 }

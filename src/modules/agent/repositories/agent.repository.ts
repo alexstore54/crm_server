@@ -9,9 +9,12 @@ import { CreateAgentInput } from '@/modules/agent/types/repositories.type';
 export class AgentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async getAll(): Promise<Agent[]> {
+  public async getAll(page: number, limit: number): Promise<Agent[]> {
     try {
-      return this.prisma.agent.findMany();
+      return this.prisma.agent.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
@@ -71,7 +74,10 @@ export class AgentRepository {
     }
   }
 
-  public async txFindRoleByAgentId(agentId: number, tx: Prisma.TransactionClient): Promise<Role | null> {
+  public async txFindRoleByAgentId(
+    agentId: number,
+    tx: Prisma.TransactionClient,
+  ): Promise<Role | null> {
     try {
       const agentWithRole = await tx.agent.findFirst({
         where: { id: agentId },
@@ -142,5 +148,4 @@ export class AgentRepository {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}: ${error.message}`);
     }
   }
-
 }

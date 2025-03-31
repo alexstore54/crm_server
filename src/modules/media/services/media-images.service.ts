@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Scope } from '@nestjs/common';
 import { FileSystemService } from '@/modules/media/services/file-system.service';
-import { MediaPrefix, TempImageInput } from '@/shared/types/media';
+import { MediaDir, MediaPrefix, TempImageInput } from '@/shared/types/media';
 import { MediaUtils } from '@/shared/utils';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 
@@ -36,6 +36,15 @@ export class MediaImagesService {
 
   public async isFileExist(path: string): Promise<boolean> {
     return this.fileSystem.isExists(path);
+  }
+
+  public async getImageForEndpointBASE64(
+    name: string,
+    publicId: string,
+    dir: MediaDir,
+  ): Promise<string> {
+    const path = MediaUtils.mapPath(publicId, name, MediaPrefix.IMAGES, dir);
+    return this.fileSystem.getBase64File(path);
   }
 
   public async removeImage(): Promise<void> {

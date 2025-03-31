@@ -1,5 +1,10 @@
 import { LeadRepository } from '@/modules/lead/repositories';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Agent, Desk, Lead, Prisma, Role, Team } from '@prisma/client';
 import { ERROR_MESSAGES } from '@/shared/constants/errors';
 import { PrismaService } from '@/shared/db/prisma';
@@ -7,7 +12,7 @@ import { AgentRepository } from '@/modules/agent/repositories';
 import { CreateAgent, UpdateAgent } from '@/modules/agent/dto';
 import { AgentUtil, ArrayUtil, PermissionsUtil, RolesUtil } from '@/shared/utils';
 import { TeamRepository } from '@/modules/team/repositories/team.repository';
-import { FullAgent } from '@/shared/types/agent';
+import { AgentForClient, FullAgent } from '@/shared/types/agent';
 import { AgentPermissionsService } from '@/modules/permissions/service';
 import { PermissionsTable } from '@/shared/types/permissions';
 import { DeskRepository } from '@/modules/desk/repositories';
@@ -16,7 +21,6 @@ import { MediaDir, UpdateMediaParams } from '@/shared/types/media';
 import { getMockedRole } from '@/shared/mocks/role/role.mock';
 import { BcryptHelper } from '@/shared/helpers';
 import { RoleRepository } from '@/modules/role/repositories/role.repository';
-
 
 //#TODO - refactoring service
 @Injectable()
@@ -43,6 +47,11 @@ export class AgentService {
     } catch (error: any) {
       throw new InternalServerErrorException(`${ERROR_MESSAGES.DB_ERROR}` + error.message);
     }
+  }
+
+  public async getMany(page: number, limit: number): Promise<AgentForClient[]> {
+    const agents: Agent[] = await this.agentRepository.getAll(page, limit);
+    return agents.map((agent) => AgentUtil.mapAgentToAgentForClient(agent));
   }
 
   public async createAgent(data: CreateAgent, file?: Express.Multer.File): Promise<void> {
@@ -172,16 +181,16 @@ export class AgentService {
         if (!!teamsIds?.length) {
           //#TODO: Implement get default team if teamIds is empty
         }
-        if(roleId === null) {
+        if (roleId === null) {
           //#TODO: Implement unassign role
         }
 
-          return await this.agentRepository.txUpdateOneById(
+        return await this.agentRepository.txUpdateOneById(
           currentAgent.id,
           { ...data },
           newDeskIds,
           avatarURL,
-            tx,
+          tx,
         );
       });
       if (result.avatarURL) {

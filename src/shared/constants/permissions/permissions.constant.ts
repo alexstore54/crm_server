@@ -14,6 +14,17 @@ export const CREATE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.CREATE_DESK_AGENTS,
 ];
 
+export const READ_ROLE_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.READ_ROLES,
+]
+
+export const READ_DESK_PERMISSIONS: PermissionsKeys[] = [PermissionsKeys.READ_DESKS];
+
+export const READ_TEAMS_PERMISSIONS: PermissionsKeys[] = [
+  PermissionsKeys.READ_TEAMS,
+  PermissionsKeys.READ_DESK_TEAMS,
+];
+
 export const DELETE_AGENTS_PERMISSIONS: PermissionsKeys[] = [
   PermissionsKeys.DELETE_TEAM_AGENTS,
   PermissionsKeys.DELETE_DESK_AGENTS,

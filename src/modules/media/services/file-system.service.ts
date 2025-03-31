@@ -33,6 +33,21 @@ export class FileSystemService {
     }
   }
 
+  public async getBase64File(filePath: string): Promise<string> {
+    try {
+      const fileExists = await filestream.pathExists(filePath);
+
+      if (!fileExists) {
+        throw this.handleError(FS_ERRORS.FILE_NOT_EXIST);
+      }
+
+      const file = await filestream.readFile(filePath);
+      return file.toString('base64');
+    } catch (error) {
+      throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
+    }
+  }
+
   public async saveFile(filePath: string): Promise<void> {
     try {
       const fileExists = await filestream.pathExists(filePath);
@@ -49,7 +64,11 @@ export class FileSystemService {
         throw this.handleError(FS_ERRORS.DIR_NOT_EXIST);
       }
 
-      await filestream.copyFile(filePath, destinationPath, filestream.constants.COPYFILE_FICLONE_FORCE);
+      await filestream.copyFile(
+        filePath,
+        destinationPath,
+        filestream.constants.COPYFILE_FICLONE_FORCE,
+      );
     } catch (error) {
       throw this.handleError(FS_ERRORS.DEFAULT_MESSAGE);
     }
