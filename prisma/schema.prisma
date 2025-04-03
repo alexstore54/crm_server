@@ -8,20 +8,95 @@ datasource db {
 }
 
 model Agent {
-  publicId        String            @unique @default(uuid())
-  id              Int               @id @default(autoincrement())
-  roleId          Int
-  email           String            @db.VarChar(100)
-  password        String
-  lastOnline      DateTime?         @db.Timestamptz(0)
-  avatarURL       String?
-  Role            Role              @relation(fields: [roleId], references: [id])
-  AgentPermission AgentPermission[]
-  Lead            Lead[]
-  Desk            Desk[]            @relation("AgentDesks")
-  Team            Team[]            @relation("AgentTeams")
-  updatedAt       DateTime          @updatedAt @db.Timestamptz(0)
-  createdAt       DateTime          @default(now()) @db.Timestamptz(0)
+  publicId              String              @unique @default(uuid())
+  id                    Int                 @id @default(autoincrement())
+  roleId                Int
+  email                 String              @db.VarChar(100)
+  password              String
+  lastOnline            DateTime?           @db.Timestamptz(0)
+  avatarURL             String?
+  Role                  Role                @relation(fields: [roleId], references: [id])
+  AgentPermission       AgentPermission[]
+  Lead                  Lead[]
+  Desk                  Desk[]              @relation("AgentDesks")
+  Team                  Team[]              @relation("AgentTeams")
+  updatedAt             DateTime            @updatedAt @db.Timestamptz(0)
+  createdAt             DateTime            @default(now()) @db.Timestamptz(0)
+  settings              AgentSettings?
+  notes                 AgentNote[]
+  LeadComment           LeadComment[]
+  LeadNote              LeadNote[]
+  sentNotifications     AgentNotification[] @relation("CreatedNotifications")
+  receivedNotifications AgentNotification[] @relation("ReceivedNotifications")
+}
+
+model AgentSettings {
+  id           Int            @id @default(autoincrement())
+  agentId      Int            @unique
+  languagesId  Int
+  Agent        Agent          @relation(fields: [agentId], references: [id])
+  language     Language       @relation(fields: [languagesId], references: [id])
+  SearchFilter SearchFilter[]
+}
+
+model AgentNote {
+  id        Int      @id @default(autoincrement())
+  agentId   Int
+  note      String
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt DateTime @updatedAt @db.Timestamptz(0)
+  Agent     Agent    @relation(fields: [agentId], references: [id])
+}
+
+model AgentNotification {
+  id           Int              @id @default(autoincrement())
+  createdById  Int
+  receivedById Int
+  type         NotificationType @default(INFO)
+  isRead       Boolean          @default(false)
+  createdAt    DateTime         @default(now()) @db.Timestamptz(0)
+  readAt       DateTime?        @db.Timestamptz(0)
+  creator      Agent            @relation("CreatedNotifications", fields: [createdById], references: [id])
+  receiver     Agent            @relation("ReceivedNotifications", fields: [receivedById], references: [id])
+}
+
+model SearchFilter {
+  id              Int           @id @default(autoincrement())
+  name            String
+  filter          Json
+  agentSettingsId Int
+  agentSettings   AgentSettings @relation(fields: [agentSettingsId], references: [id])
+}
+
+model AppSettings {
+  id                 Int       @id @default(1)
+  name               String?
+  email              String?
+  phone              String?
+  defaultLanguage    Language? @relation(fields: [languageId], references: [id])
+  isWhiteListEnabled Boolean   @default(false)
+  languageId         Int?
+  lightLogoURL       String?
+  darkLogoURL        String?
+  faviconURL         String?
+  lendURL            String?
+
+  @@unique([id])
+}
+
+model WhitListItem {
+  id        Int      @id @default(autoincrement())
+  ip        String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt DateTime @updatedAt @db.Timestamptz(0)
+}
+
+model Language {
+  id            Int             @id @default(autoincrement())
+  code          String          @unique
+  name          String          @unique
+  AppSettings   AppSettings[]
+  AgentSettings AgentSettings[]
 }
 
 model AgentPermission {
@@ -72,25 +147,28 @@ model Email {
 }
 
 model Lead {
-  id           Int         @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
+  publicId     String        @unique @default(uuid())
   statusId     Int?
   firstname    String?
   lastname     String?
   country      String?
-  createdAt    DateTime    @default(now()) @db.Timestamptz(0)
-  updatedAt    DateTime    @updatedAt @db.Timestamptz(0)
+  createdAt    DateTime      @default(now()) @db.Timestamptz(0)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(0)
   defaultEmail String
   agentId      Int?
   deskId       Int?
   teamId       Int?
-  isVerified   Boolean     @default(false)
-  publicId     String      @unique @default(uuid())
+  isVerified   Boolean       @default(false)
   Customer     Customer?
-  Agent        Agent?      @relation(fields: [agentId], references: [id])
-  Desk         Desk?       @relation(fields: [deskId], references: [id])
-  LeadStatus   LeadStatus? @relation(fields: [statusId], references: [id])
-  Team         Team?       @relation(fields: [teamId], references: [id])
   Phone        Phone[]
+  LeadComment  LeadComment[]
+  leadNoteId   Int?
+  LeadNote     LeadNote?     @relation(fields: [leadNoteId], references: [id])
+  Agent        Agent?        @relation(fields: [agentId], references: [id])
+  Desk         Desk?         @relation(fields: [deskId], references: [id])
+  LeadStatus   LeadStatus?   @relation(fields: [statusId], references: [id])
+  Team         Team?         @relation(fields: [teamId], references: [id])
 }
 
 model LeadStatus {
@@ -99,13 +177,35 @@ model LeadStatus {
   Lead Lead[]
 }
 
+model LeadComment {
+  id        Int      @id @default(autoincrement())
+  leadId    Int
+  comment   String
+  createdBy Int
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt DateTime @updatedAt @db.Timestamptz(0)
+  Agent     Agent    @relation(fields: [createdBy], references: [id])
+  Lead      Lead     @relation(fields: [leadId], references: [id])
+}
+
+model LeadNote {
+  id        Int      @id @default(autoincrement())
+  leadId    Int
+  note      String
+  createdBy Int
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt DateTime @updatedAt @db.Timestamptz(0)
+  Lead      Lead[]
+  Agent     Agent    @relation(fields: [createdBy], references: [id])
+}
+
 model Log {
+  id        Int          @id @default(autoincrement())
   level     LogLevel     @default(INFO)
   message   String
   context   Json?
   createdAt DateTime     @default(now()) @db.Timestamptz(0)
   userId    Int?
-  id        Int          @id @default(autoincrement())
   userType  LogUserType?
 }
 
@@ -166,4 +266,10 @@ enum LogLevel {
 enum LogUserType {
   AGENT
   CUSTOMER
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  URGENT
 }

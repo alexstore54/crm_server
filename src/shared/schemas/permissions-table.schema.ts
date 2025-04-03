@@ -2,6 +2,7 @@ import Joi, { ObjectSchema } from 'joi';
 import { PermissionsTable } from '@/shared/types/permissions';
 
 export const permissionsTableSchema: ObjectSchema<PermissionsTable> = Joi.object({
+  UPDATE_APP_SETTINGS: Joi.boolean().optional(),
   READ_ALL_AGENTS: Joi.boolean().optional(),
   CREATE_AGENTS: Joi.boolean().optional(),
   UPDATE_ALL_AGENTS: Joi.boolean().optional(),

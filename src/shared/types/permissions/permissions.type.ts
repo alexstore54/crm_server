@@ -11,6 +11,8 @@ export type TablePermission = {
 
 export enum PermissionsKeys {
   // Moderator | Admin permissions
+  //app
+  UPDATE_APP_SETTINGS= 'UPDATE_APP_SETTINGS',
   //agents
   READ_ALL_AGENTS = 'READ_ALL_AGENTS',
   CREATE_AGENTS = 'CREATE_ALL_AGENTS',
